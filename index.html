@@ -111,6 +111,12 @@ const firebaseConfig = {
 const TZ = 'Africa/Cairo';   // لازم تكون زي TZ في Code.gs
 const CAP_MULT = 2;          // لازم يكون زي CAPTAIN_MULT في Code.gs
 const POS = { 1: 'حارس', 2: 'مدافع', 3: 'وسط', 4: 'مهاجم' };
+const CHIPS = {
+  free_team: { n: 'عبيلو', d: 'ممكن ٤ لاعبين من نفس الفريق (أو ٣ و١)، بس لاعب واحد من كل مركز.' },
+  free_pos: { n: 'أهو كيفي كده', d: 'ممكن أي مراكز تحبها، بس ٢ لاعبين من كل فريق بحد أقصى.' },
+  steal: { n: 'هلقط رزقي', d: 'اختار فريق، وبعد نهاية الماتش بتاخد نقط أعلى لاعب فيه كبونص فوق اختياراتك.' }
+};
+const MAX_CHIPS = 2;   // لازم يكون زي MAX_CHIPS_PER_GW في Code.gs
 const AR = { 'Arsenal':'أرسنال','Aston Villa':'أستون فيلا','Bournemouth':'بورنموث','Brentford':'برينتفورد','Brighton':'برايتون','Burnley':'بيرنلي','Chelsea':'تشيلسي','Crystal Palace':'كريستال بالاس','Everton':'إيفرتون','Fulham':'فولهام','Leeds':'ليدز','Liverpool':'ليفربول','Man City':'مان سيتي','Man Utd':'مان يونايتد','Newcastle':'نيوكاسل',"Nott'm Forest":'نوتنجهام فورست','Sunderland':'سندرلاند','Spurs':'توتنهام','West Ham':'وست هام','Wolves':'وولفرهامبتون','Leicester':'ليستر','Ipswich':'إبسويتش','Southampton':'ساوثهامبتون','Coventry':'كوفنتري','Hull':'هال سيتي' };
 
 const app = initializeApp(firebaseConfig);
@@ -168,12 +174,23 @@ const S = {
 
 /* ───────── مكونات صغيرة ───────── */
 const SHIRT = c => `<svg viewBox="0 0 24 24"><path fill="${c}" d="M8 3l-5 3 2 4 2-1v11h10V9l2 1 2-4-5-3c-1 2-5 2-6 0z"/></svg>`;
+/* صور اللاعبين والشعارات: بنجرّب مجلد الموسم الأحدث الأول ثم اللي قبله، ولو مفيش بنسيب الشارة/القميص */
+const PH = ['premierleague26', 'premierleague25'];
+const BD = ['premierleague26/badges/70/t', 'premierleague25/badges/70/t', 'premierleague/badges/70/t'];
+const IMG_URL = {
+  p: (i, c) => PH[i] ? `https://resources.premierleague.com/${PH[i]}/photos/players/110x140/${c}.png` : null,
+  b: (i, c) => BD[i] ? `https://resources.premierleague.com/${BD[i]}${c}.png` : null
+};
+window.imgNext = img => {
+  const i = Number(img.dataset.i) + 1, u = IMG_URL[img.dataset.k](i, img.dataset.c);
+  if (u) { img.dataset.i = i; img.src = u; } else img.remove();
+};
 function crest(t, w = 38) {
   const h = Math.round(w * 1.1);
-  return `<span class="crw" style="width:${w}px;height:${h}px"><span class="cr" style="--c:hsl(${hue(t.code)} 55% 38%)">${esc(t.sn)}</span><img src="https://resources.premierleague.com/premierleague/badges/70/t${esc(t.code)}.png" alt="" referrerpolicy="no-referrer" loading="lazy" onload="this.previousElementSibling.style.display='none'" onerror="this.remove()"></span>`;
+  return `<span class="crw" style="width:${w}px;height:${h}px"><span class="cr" style="--c:hsl(${hue(t.code)} 55% 38%)">${esc(t.sn)}</span><img src="${IMG_URL.b(0, esc(t.code))}" data-k="b" data-i="0" data-c="${esc(t.code)}" alt="" referrerpolicy="no-referrer" loading="lazy" onload="this.previousElementSibling.style.display='none'" onerror="imgNext(this)"></span>`;
 }
 function photo(p) {
-  return `<span class="ph">${SHIRT(`hsl(${hue(p.t * 3)} 60% 50%)`)}<img src="https://resources.premierleague.com/premierleague/photos/players/110x140/p${esc(p.c)}.png" alt="" referrerpolicy="no-referrer" loading="lazy" onload="this.previousElementSibling.style.display='none'" onerror="this.remove()"></span>`;
+  return `<span class="ph">${SHIRT(`hsl(${hue(p.t * 3)} 60% 50%)`)}<img src="${IMG_URL.p(0, esc(p.c))}" data-k="p" data-i="0" data-c="${esc(p.c)}" alt="" referrerpolicy="no-referrer" loading="lazy" onload="this.previousElementSibling.style.display='none'" onerror="imgNext(this)"></span>`;
 }
 const initial = s => esc((s || '?').trim().charAt(0).toUpperCase());
 
@@ -217,14 +234,14 @@ function chooseDay() {
   const open = days.find(d => d.list.some(f => koOf(f) && koOf(f) + END_AFTER > now));
   S.day = (open || days[days.length - 1]).key;
 }
-const pickOf = fid => (S.picks[fid] = S.picks[fid] || { ids: [], cap: null });
+const pickOf = fid => (S.picks[fid] = S.picks[fid] || { ids: [], cap: null, chip: null, team: null });
 
 /* ───────── تحميل البيانات ───────── */
 async function loadPicks() {
   await flushSaves();
   const s = await getDocs(query(collection(db, 'picks'), where('uid', '==', S.user.uid), where('gw', '==', S.gw)));
   S.picks = {};
-  s.docs.forEach(d => { const x = d.data(); S.picks[x.fid] = { ids: x.ids || [], cap: x.cap ?? null }; });
+  s.docs.forEach(d => { const x = d.data(); S.picks[x.fid] = { ids: x.ids || [], cap: x.cap ?? null, chip: x.chip ?? null, team: x.team ?? null }; });
 }
 async function loadMyPts() {
   try {
@@ -235,8 +252,10 @@ async function loadMyPts() {
 }
 async function loadRound() {
   const snap = await getDocs(collection(db, 'gw'));
+  let start = 0;
+  try { const c = await getDoc(doc(db, 'config', 'app')); if (c.exists() && c.data().startGw) start = c.data().startGw; } catch (e) { /* مفيش إعداد: اعرض الكل */ }
   S.gws = {};
-  snap.docs.forEach(d => { S.gws[Number(d.id)] = d.data(); });
+  snap.docs.forEach(d => { if (Number(d.id) >= start) S.gws[Number(d.id)] = d.data(); });
   if (!gwNums().length) { S.gw = null; return; }
   if (S.gw == null || !S.gws[S.gw]) S.gw = defaultGw();
   await Promise.all([loadPicks(), loadMyPts()]);
@@ -270,11 +289,45 @@ async function loadBoard(id) {
 
 /* ───────── الاختيارات ───────── */
 function canPick(fx, p, pl) {
-  if (p.ids.some(id => { const o = fx.players.find(x => x.i === id); return o && o.p === pl.p; })) return 'مركز ' + POS[pl.p] + ' مختار بالفعل، شيله الأول';
-  const same = p.ids.filter(id => { const o = fx.players.find(x => x.i === id); return o && o.t === pl.t; }).length;
-  if (same >= 2) return 'مينفعش أكتر من لاعبين من نفس الفريق';
   if (p.ids.length >= 4) return 'اخترت ٤ لاعبين بالفعل';
+  const of = id => fx.players.find(x => x.i === id);
+  if (p.chip !== 'free_pos' && p.ids.some(id => { const o = of(id); return o && o.p === pl.p; })) return 'مركز ' + POS[pl.p] + ' مختار بالفعل، شيله الأول';
+  const same = p.ids.filter(id => { const o = of(id); return o && o.t === pl.t; }).length;
+  if (p.chip !== 'free_team' && same >= 2) return 'مينفعش أكتر من لاعبين من نفس الفريق';
   return null;
+}
+/* الاختيار سليم بقواعد الخاصية دي؟ (chip = null يعني القواعد العادية) */
+function validIds(fx, ids, chip) {
+  const pos = {}, team = {};
+  for (const id of ids) {
+    const o = fx.players.find(x => x.i === id);
+    if (!o) return false;
+    pos[o.p] = (pos[o.p] || 0) + 1; team[o.t] = (team[o.t] || 0) + 1;
+    if (chip !== 'free_pos' && pos[o.p] > 1) return false;
+    if (chip !== 'free_team' && team[o.t] > 2) return false;
+  }
+  return ids.length <= 4;
+}
+const chipsUsedElsewhere = fid => { const u = {}; Object.keys(S.picks).forEach(k => { if (String(k) !== String(fid) && S.picks[k].chip) u[S.picks[k].chip] = k; }); return u; };
+const chipsLeft = () => MAX_CHIPS - new Set(Object.values(S.picks).map(p => p.chip).filter(Boolean)).size;
+function canUseChip(fid, c) {
+  const u = chipsUsedElsewhere(fid);
+  if (u[c]) return 'الخاصية دي مستخدمة في ماتش تاني في الجولة دي';
+  if (Object.keys(u).length >= MAX_CHIPS) return 'استخدمت خاصيتين في الجولة دي بالفعل';
+  return null;
+}
+function toggleChip(c) {
+  const fid = S.fx, p = pickOf(fid), d = S.fxdocs[fid];
+  if (isLocked(fid)) return toast('الماتش بدأ، الاختيار مقفول');
+  if (p.chip === c) {
+    if (!validIds(d, p.ids, null)) return toast('شيل اللاعبين الزيادة الأول، من غير الخاصية لازم تلتزم بالقواعد العادية');
+    p.chip = null; p.team = null;
+  } else {
+    if (p.chip) return toast('ألغِ الخاصية الحالية الأول');
+    const why = canUseChip(fid, c); if (why) return toast(why);
+    p.chip = c; p.team = null;
+  }
+  changed(fid);
 }
 function capTakenElsewhere(fid) {
   const day = dayOfFx(fid);
@@ -300,7 +353,7 @@ async function doSave(fid) {
   const p = S.picks[fid], fx = S.fxdocs[fid];
   if (!S.user || !p || !fx) return;
   try {
-    await setDoc(doc(db, 'picks', fid + '_' + S.user.uid), { uid: S.user.uid, gw: fx.gw, fid: String(fid), ids: p.ids, cap: p.cap, updatedAt: serverTimestamp() });
+    await setDoc(doc(db, 'picks', fid + '_' + S.user.uid), { uid: S.user.uid, gw: fx.gw, fid: String(fid), ids: p.ids, cap: p.cap, chip: p.chip || null, team: p.team ?? null, updatedAt: serverTimestamp() });
     if (S.fx === fid) setSave('saved');
   } catch (e) {
     console.error(e);
@@ -376,7 +429,7 @@ function vRound() {
   const cur = days.find(d => d.key === S.day) || days[0];
   const pts = S.myGwPts == null ? '—' : N(S.myGwPts);
   const fin = S.boards['gw_' + g] && S.boards['gw_' + g].final;
-  return `<div class="h"><div><div class="m">الفانتازي اليومي</div><b>الجولة ${N(g)}</b></div><div class="ctr"><div class="m">نقطك ${S.myGwPts == null ? '' : (fin ? '(نهائية)' : '(مؤقتة)')}</div><div class="d" style="font-size:24px">${pts}</div></div></div>
+  return `<div class="h"><div><div class="m">الفانتازي اليومي</div><b>الجولة ${N(g)}</b><div class="m">الخصائص المتبقية ${N(chipsLeft())} من ${N(MAX_CHIPS)}</div></div><div class="ctr"><div class="m">نقطك ${S.myGwPts == null ? '' : (fin ? '(نهائية)' : '(مؤقتة)')}</div><div class="d" style="font-size:24px">${pts}</div></div></div>
   ${nums.length > 1 ? `<div class="tg">${nums.map(n => `<button class="bt ${n === g ? 'on' : ''}" data-act="gw" data-g="${n}">الجولة ${N(n)}</button>`).join('')}</div>` : ''}
   <div class="tg">${days.map(d => `<button class="bt ${cur && d.key === cur.key ? 'on' : ''}" data-act="day" data-k="${d.key}">${esc(d.label)}</button>`).join('')}</div>
   <div class="f">${cur ? cur.list.map(card).join('') : ''}</div>`;
@@ -389,7 +442,7 @@ function card(f) {
     <div class="r j"><div class="t">${crest(f.h)}<span>${esc(teamName(f.h))}</span></div>
     <div class="ctr"><div class="tm">${k ? fmtTime(k) : '—'}</div>${status}</div>
     <div class="t">${crest(f.a)}<span>${esc(teamName(f.a))}</span></div></div>
-    <div class="r j m mt"><span>اختياراتك ${N(n)}/٤</span><span>${locked ? 'عرض اختياراتك' : 'اختار لاعبينك'} ‹</span></div>
+    <div class="r j m mt"><span>اختياراتك ${N(n)}/٤${S.picks[f.id] && S.picks[f.id].chip ? ' · <b class="warn">' + CHIPS[S.picks[f.id].chip].n + '</b>' : ''}</span><span>${locked ? 'عرض اختياراتك' : 'اختار لاعبينك'} ‹</span></div>
   </button>`;
 }
 
@@ -407,23 +460,47 @@ function renderMatchBody() {
   const fid = S.fx, d = S.fxdocs[fid]; if (!d) return;
   const p = pickOf(fid), locked = isLocked(fid), sc = S.scores[fid] || { pts: {}, st: {}, status: 'ns' };
   const byId = id => d.players.find(x => x.i === id);
-  const slot = pos => {
-    const pl = p.ids.map(byId).filter(Boolean).find(x => x.p === pos);
-    if (!pl) return `<button class="sl ${S.pos === pos && !locked ? 'act' : ''}" data-act="pos" data-p="${pos}"><span>${locked ? '—' : '+'}</span><span>${POS[pos]}</span></button>`;
-    return `<button class="sl fl ${S.pos === pos && !locked ? 'act' : ''}" data-act="pos" data-p="${pos}">${p.cap === pl.i ? '<span class="c">C</span>' : ''}${photo(pl)}<span class="nm">${esc(pl.n)}</span><span class="sub">${POS[pos]}${locked ? ' · ' + N(sc.pts[pl.i] || 0) : ''}</span></button>`;
-  };
-  let html = `<div class="pt">${[1, 2, 3, 4].map(slot).join('')}</div>`;
+  const chosen = p.ids.map(byId).filter(Boolean);
+  const btn = (pl, pos, label) => pl
+    ? `<button class="sl fl ${S.pos === pl.p && !locked ? 'act' : ''}" data-act="pos" data-p="${pl.p}">${p.cap === pl.i ? '<span class="c">C</span>' : ''}${photo(pl)}<span class="nm">${esc(pl.n)}</span><span class="sub">${POS[pl.p]}${locked ? ' · ' + N(sc.pts[pl.i] || 0) : ''}</span></button>`
+    : `<button class="sl" data-act="pos" data-p="${pos}"><span>${locked ? '—' : '+'}</span><span>${label}</span></button>`;
+  const slots = p.chip === 'free_pos'
+    ? [0, 1, 2, 3].map(i => btn(chosen[i], S.pos, 'لاعب ' + N(i + 1)))
+    : [1, 2, 3, 4].map(pos => btn(chosen.find(x => x.p === pos), pos, POS[pos]));
+  let html = `<div class="pt">${slots.join('')}</div>`;
+
+  /* الخاصية المستخدمة + بونص هلقط رزقي */
+  let stealBonus = 0, stealNote = '';
+  if (p.chip === 'steal' && p.team != null) {
+    if (sc.status === 'ft') stealBonus = Math.max(0, ...d.players.filter(x => x.t === p.team).map(x => sc.pts[x.i] || 0));
+    else stealNote = 'بتتحسب بعد نهاية الماتش';
+  }
+
   if (locked) {
     const base = p.ids.reduce((s, id) => s + (sc.pts[id] || 0), 0);
     const bonus = p.cap != null ? (sc.pts[p.cap] || 0) * (CAP_MULT - 1) : 0;
-    html += `<div class="f"><div class="k r j"><div><b>مجموع الماتش</b><div class="m">${p.cap != null ? 'شامل الكابتن ×' + N(CAP_MULT) + ' · ' : ''}${sc.status === 'ft' ? 'انتهى' : sc.status === 'live' ? 'مباشر (نقط مؤقتة)' : 'لسه مفيش نقط'}</div></div><span class="d" style="font-size:28px">${N(base + bonus)}</span></div>`;
-    html += p.ids.length ? p.ids.map(byId).filter(Boolean).map(pl => {
+    html += `<div class="f"><div class="k r j"><div><b>مجموع الماتش</b><div class="m">${p.cap != null ? 'شامل الكابتن ×' + N(CAP_MULT) + ' · ' : ''}${sc.status === 'ft' ? 'انتهى' : sc.status === 'live' ? 'مباشر (نقط مؤقتة)' : 'لسه مفيش نقط'}</div></div><span class="d" style="font-size:28px">${N(base + bonus + stealBonus)}</span></div>`;
+    if (p.chip) {
+      const tm = p.team != null ? (p.team === d.h.id ? d.h : d.a) : null;
+      html += `<div class="k r j"><div><b>الخاصية: ${CHIPS[p.chip].n}</b>${p.chip === 'steal' ? `<div class="m">${tm ? 'فريق ' + esc(teamName(tm)) : 'مختارتش فريق'}${stealNote ? ' · ' + stealNote : ''}</div>` : ''}</div>${p.chip === 'steal' && !stealNote ? `<span class="d" style="font-size:20px">+${N(stealBonus)}</span>` : ''}</div>`;
+    }
+    html += chosen.length ? chosen.map(pl => {
       const st = sc.st && sc.st[pl.i] === 1 ? 'أساسي' : (sc.status !== 'ns' ? 'دكة' : '');
       return `<div class="k r">${photo(pl)}<div class="g"><div class="nm">${esc(pl.n)} ${p.cap === pl.i ? '<span class="c" style="display:inline-flex">C</span>' : ''}</div><div class="sub">${POS[pl.p]} · ${esc(teamName(pl.t === d.h.id ? d.h : d.a))}</div></div>${st ? `<span class="pl ${st === 'أساسي' ? 'ok' : ''}">${st}</span>` : ''}<span class="d" style="font-size:20px">${N(sc.pts[pl.i] || 0)}</span></div>`;
     }).join('') : '<div class="k ctr">مختارتش لاعبين في الماتش ده.</div>';
     el.innerHTML = html + '</div>';
     return;
   }
+
+  /* صف الخصائص */
+  html += `<div class="r j" style="padding:0 16px 6px"><b>الخصائص</b><span class="m">متبقي ${N(chipsLeft())} من ${N(MAX_CHIPS)} في الجولة</span></div>
+  <div class="tg">${Object.keys(CHIPS).map(c => `<button class="bt ${p.chip === c ? 'on' : ''} ${p.chip !== c && canUseChip(fid, c) ? 'dz' : ''}" data-act="chip" data-c="${c}" style="font-size:13px">${CHIPS[c].n}</button>`).join('')}</div>`;
+  if (p.chip) html += `<div class="m" style="padding:0 16px 10px">${CHIPS[p.chip].d}</div>`;
+  if (p.chip === 'steal') {
+    html += `<div class="tg" style="gap:8px">${[d.h, d.a].map(t => `<button class="bt ${p.team === t.id ? 'on' : ''}" data-act="steam" data-t="${t.id}" style="display:flex;align-items:center;justify-content:center;gap:8px">${crest(t, 22)}<span>${esc(teamName(t))}</span></button>`).join('')}</div>`;
+    if (p.team == null) html += `<div class="m warn" style="padding:0 16px 10px">اختار الفريق علشان الخاصية تتحسب.</div>`;
+  }
+
   html += `<div class="tg">${[1, 2, 3, 4].map(x => `<button class="bt ${S.pos === x ? 'on' : ''}" data-act="pos" data-p="${x}">${POS[x]}</button>`).join('')}</div>
   <div style="padding:0 16px 10px"><input class="in" data-in="psearch" placeholder="ابحث عن لاعب" aria-label="ابحث عن لاعب" value="${esc(S.q)}"></div>
   <div class="f" id="plist"></div>`;
@@ -447,7 +524,7 @@ function renderList() {
       : '';
     return `<div class="k r pr ${sel ? 'sel' : ''} ${why ? 'dz' : ''}" data-act="tp" data-pid="${x.i}">${photo(x)}
       <div class="g"><div class="nm">${esc(x.n)} <span class="sub">${esc(team.sn)}</span> ${flag[x.s] ? `<span class="pl bad">${flag[x.s]}</span>` : ''}</div>
-      <div class="sub">${N(x.g)} أهداف · ${N(x.a)} أسيست · ${N(x.tp)} نقطة · فورم ${esc(x.f)}</div>${x.nw ? `<div class="sub warn">${esc(x.nw)}</div>` : ''}</div>${right}</div>`;
+      <div class="sub">${N(x.g)} أهداف · ${N(x.a)} أسيست · ${N(x.tp)} نقطة</div>${x.nw ? `<div class="sub warn">${esc(x.nw)}</div>` : ''}</div>${right}</div>`;
   }).join('') : '<div class="k ctr">مفيش لاعبين بالاسم ده.</div>';
 }
 
@@ -520,6 +597,13 @@ const ACTIONS = {
     render();
   },
   back() { flushSaves(); S.view = 'round'; render(); },
+  chip(el) { toggleChip(el.dataset.c); },
+  steam(el) {
+    const fid = S.fx, p = pickOf(fid);
+    if (isLocked(fid)) return toast('الماتش بدأ، الاختيار مقفول');
+    p.team = Number(el.dataset.t);
+    changed(fid);
+  },
   pos(el) { S.pos = Number(el.dataset.p); renderMatchBody(); },
   tp(el) {
     const fid = S.fx, d = S.fxdocs[fid], p = pickOf(fid), pid = Number(el.dataset.pid);
