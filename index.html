@@ -1,0 +1,619 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0c1415">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>الفانتازي اليومي</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700;800&display=swap">
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;min-height:100%}
+body{font-family:Rubik,Tahoma,sans-serif;color:#fff;font-size:14px;line-height:1.4;background:radial-gradient(circle at 88% 6%,rgba(47,208,107,.38),transparent 42%),radial-gradient(circle at 6% 82%,rgba(80,140,255,.38),transparent 48%),linear-gradient(165deg,#17607a,#0d3554 58%,#152a5c);background-attachment:fixed}
+body::before{content:"";position:fixed;left:50%;top:50%;width:230px;height:230px;margin:-115px;border:2px solid rgba(255,255,255,.14);border-radius:50%;pointer-events:none}
+body::after{content:"";position:fixed;left:0;right:0;top:50%;height:2px;background:rgba(255,255,255,.14);pointer-events:none}
+button,input{font:inherit;color:inherit}
+button{cursor:pointer}
+#app{position:relative;z-index:1;max-width:520px;margin:0 auto;min-height:100dvh;display:flex;flex-direction:column;padding-bottom:calc(76px + env(safe-area-inset-bottom))}
+#app.nonav{padding-bottom:env(safe-area-inset-bottom)}
+.h{padding:calc(18px + env(safe-area-inset-top)) 16px 12px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.h b,.d{font-weight:800}
+.h b{font-size:26px}
+.m{color:#d0dde8;font-size:12px}
+.f{flex:1;padding:0 16px 16px;display:flex;flex-direction:column;gap:8px}
+.k{background:rgba(255,255,255,.11);border:1px solid rgba(255,255,255,.24);border-radius:14px;padding:12px;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);box-shadow:0 8px 24px rgba(0,0,0,.16);color:#fff;text-align:start;width:100%}
+.r{display:flex;align-items:center;gap:10px}
+.j{justify-content:space-between}
+.g{flex:1;min-width:0}
+.cr{display:flex;justify-content:center;padding-top:7px;width:34px;height:38px;clip-path:polygon(0 0,100% 0,100% 62%,50% 100%,0 62%);background:var(--c,#334);font-weight:800;font-size:11px;color:#fff}
+.crw{position:relative;display:inline-block;width:38px;height:42px;flex:none}
+.crw .cr{width:100%;height:100%}
+.crw img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain}
+.t{display:flex;flex-direction:column;align-items:center;gap:6px;width:96px;font-weight:700;text-align:center}
+.bt{height:44px;border:1px solid rgba(255,255,255,.22);border-radius:10px;font-weight:700;background:rgba(255,255,255,.13);color:#fff;padding:0 16px;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.bt.on{background:#2fd06b;color:#04150a;border-color:#2fd06b}
+.bt.red{background:#d63a3f;border-color:#d63a3f}
+.bt:disabled{opacity:.5;cursor:not-allowed}
+.tg{display:flex;gap:6px;padding:0 16px 12px;overflow-x:auto;scrollbar-width:none}
+.tg::-webkit-scrollbar{display:none}
+.tg .bt{flex:1 0 auto;padding:0 14px;white-space:nowrap}
+.pl{font-weight:700;font-size:11px;padding:3px 9px;border-radius:6px;background:rgba(255,255,255,.16);color:#e6eef5;white-space:nowrap}
+.pl.lv{background:#d63a3f;color:#fff}
+.pl.ok{background:rgba(47,208,107,.26);color:#8bffb8}
+.pl.bad{background:#d63a3f;color:#fff}
+.nv{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:520px;height:calc(64px + env(safe-area-inset-bottom));padding-bottom:env(safe-area-inset-bottom);display:flex;background:rgba(8,28,48,.72);border-top:1px solid rgba(255,255,255,.2);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);z-index:5}
+.n{flex:1;border:0;background:none;color:#cfe0ec;font-weight:500;font-size:11px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px}
+.n svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2}
+.n.on{color:#59f29a}
+.c{width:22px;height:22px;border-radius:50%;background:#f5b301;color:#1a1300;font-weight:800;font-size:12px;display:flex;align-items:center;justify-content:center;flex:none}
+.cb{width:44px;height:44px;border-radius:12px;border:1px solid rgba(245,179,1,.7);background:rgba(245,179,1,.15);color:#ffd45c;font-weight:800;font-size:16px}
+.cb.on{background:#f5b301;color:#1a1300}
+.in{height:48px;width:100%;border-radius:10px;border:1px solid rgba(255,255,255,.28);background:rgba(255,255,255,.13);color:#fff;padding:0 14px}
+.in::placeholder{color:#c9d7e2}
+.dz{opacity:.4}
+.pt{margin:0 16px 12px;background:rgba(14,80,45,.5);border:1px solid rgba(255,255,255,.26);border-radius:14px;padding:10px;display:flex;gap:8px;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+.sl{flex:1;min-width:0;height:96px;border-radius:10px;border:1px dashed rgba(255,255,255,.5);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:11px;color:#e4f5ea;position:relative;padding:4px;background:none;text-align:center}
+.sl.fl{border:1px solid #2fd06b;background:rgba(4,36,20,.55);color:#fff}
+.sl.act{box-shadow:0 0 0 2px rgba(255,255,255,.7)}
+.sl .c{position:absolute;top:-8px;left:-6px}
+.sl .nm{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:700}
+.av{width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;color:#fff;flex:none;overflow:hidden}
+.bar{height:6px;border-radius:3px;background:rgba(255,255,255,.2)}
+.ph{position:relative;display:inline-block;width:38px;height:44px;flex:none}
+.ph svg{width:100%;height:100%}
+.ph img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:top}
+.pr{padding:10px 12px;cursor:pointer}
+.pr.sel{border-color:#2fd06b;background:rgba(47,208,107,.16)}
+.nm{font-weight:700}
+.sub{color:#d0dde8;font-size:11px}
+.warn{color:#ffd45c}
+.ctr{text-align:center}
+.mt{margin-top:8px}
+.mc{display:block;padding:14px;cursor:pointer}
+.tm{font-weight:800;font-size:22px;line-height:1.2}
+.sv{font-size:11px}
+#toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%) translateY(20px);background:#0b1f33;border:1px solid rgba(255,255,255,.3);color:#fff;padding:10px 16px;border-radius:12px;opacity:0;pointer-events:none;transition:.25s;z-index:20;max-width:90%;text-align:center}
+#toast.show{opacity:1;transform:translateX(-50%)}
+.login{justify-content:center;padding:calc(24px + env(safe-area-inset-top)) 24px 24px;gap:12px;flex:1;display:flex;flex-direction:column}
+.logo{width:64px;height:64px;border-radius:16px;background:#2fd06b;color:#04150a;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:34px}
+img.logo{background:none;object-fit:cover;width:72px;height:72px;border-radius:18px}
+.gbtn{height:50px;background:#fff;color:#1f1f1f;border:0}
+.err{color:#ffb4b6;font-size:13px}
+a.lnk,.lnk{color:#8bffb8;background:none;border:0;padding:6px 0;text-decoration:underline}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+import { getAuth, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail, signOut } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+import { getFirestore, doc, getDoc, getDocs, setDoc, updateDoc, collection, query, where, writeBatch, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+
+/* ───────── الإعدادات ───────── */
+const firebaseConfig = {
+  apiKey: "AIzaSyC0RGeDSrze6LYWg3evAB1HYgLVT0_iPx8",
+  authDomain: "daily-fantasy-4e288.firebaseapp.com",
+  projectId: "daily-fantasy-4e288",
+  storageBucket: "daily-fantasy-4e288.firebasestorage.app",
+  messagingSenderId: "856010520496",
+  appId: "1:856010520496:web:526a9ee316e7b4b5f24875"
+};
+const TZ = 'Africa/Cairo';   // لازم تكون زي TZ في Code.gs
+const CAP_MULT = 2;          // لازم يكون زي CAPTAIN_MULT في Code.gs
+const POS = { 1: 'حارس', 2: 'مدافع', 3: 'وسط', 4: 'مهاجم' };
+const AR = { 'Arsenal':'أرسنال','Aston Villa':'أستون فيلا','Bournemouth':'بورنموث','Brentford':'برينتفورد','Brighton':'برايتون','Burnley':'بيرنلي','Chelsea':'تشيلسي','Crystal Palace':'كريستال بالاس','Everton':'إيفرتون','Fulham':'فولهام','Leeds':'ليدز','Liverpool':'ليفربول','Man City':'مان سيتي','Man Utd':'مان يونايتد','Newcastle':'نيوكاسل',"Nott'm Forest":'نوتنجهام فورست','Sunderland':'سندرلاند','Spurs':'توتنهام','West Ham':'وست هام','Wolves':'وولفرهامبتون','Leicester':'ليستر','Ipswich':'إبسويتش','Southampton':'ساوثهامبتون','Coventry':'كوفنتري','Hull':'هال سيتي' };
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+/* ───────── أدوات ───────── */
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+const nf = new Intl.NumberFormat('ar-EG');
+const N = v => nf.format(v);
+const fmtTime = ms => new Intl.DateTimeFormat('ar-EG', { hour: 'numeric', minute: '2-digit', hour12: true, timeZone: TZ }).format(ms);
+const fmtDay = ms => new Intl.DateTimeFormat('ar-EG', { weekday: 'long', day: 'numeric', month: 'long', timeZone: TZ }).format(ms);
+const dayKey = ms => new Intl.DateTimeFormat('en-CA', { timeZone: TZ, year: 'numeric', month: '2-digit', day: '2-digit' }).format(ms);
+const tsMs = t => (t && t.toMillis) ? t.toMillis() : (t ? Date.parse(t) : null);
+const teamName = t => AR[t.name] || t.name;
+const hue = code => (Number(code) * 47) % 360;
+const END_AFTER = 3.5 * 3600 * 1000;
+
+let toastTimer;
+function toast(msg) {
+  const t = $('#toast');
+  t.textContent = msg;
+  t.className = 'show';
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { t.className = ''; }, 3800);
+}
+
+function authMsg(e) {
+  const m = {
+    'auth/invalid-credential': 'الإيميل أو كلمة السر غلط',
+    'auth/wrong-password': 'كلمة السر غلط',
+    'auth/user-not-found': 'مفيش حساب بالإيميل ده',
+    'auth/invalid-email': 'الإيميل مش مكتوب صح',
+    'auth/email-already-in-use': 'الإيميل ده مسجل قبل كده، جرّب تدخل',
+    'auth/weak-password': 'كلمة السر ضعيفة، لازم ٦ حروف أو أكتر',
+    'auth/missing-password': 'اكتب كلمة السر',
+    'auth/too-many-requests': 'محاولات كتير، استنى شوية وجرّب تاني',
+    'auth/network-request-failed': 'مفيش اتصال بالإنترنت',
+    'auth/popup-blocked': 'المتصفح منع نافذة الدخول، اسمح بالنوافذ المنبثقة',
+    'auth/unauthorized-domain': 'عنوان الموقع مش مضاف في Firebase (Authentication > Settings > Authorized domains)'
+  };
+  return m[e.code] || ('حصلت مشكلة: ' + (e.code || e.message));
+}
+
+/* ───────── الحالة ───────── */
+const S = {
+  view: 'loading', user: null, profile: null, admin: false,
+  mode: 'login', authErr: '', email: '',
+  gws: {}, gw: null, day: null, picks: {}, fxdocs: {}, scores: {},
+  boards: {}, bt: 'total', myGwPts: null,
+  fx: null, pos: 1, q: '', save: '',
+  users: [], uq: ''
+};
+
+/* ───────── مكونات صغيرة ───────── */
+const SHIRT = c => `<svg viewBox="0 0 24 24"><path fill="${c}" d="M8 3l-5 3 2 4 2-1v11h10V9l2 1 2-4-5-3c-1 2-5 2-6 0z"/></svg>`;
+function crest(t, w = 38) {
+  const h = Math.round(w * 1.1);
+  return `<span class="crw" style="width:${w}px;height:${h}px"><span class="cr" style="--c:hsl(${hue(t.code)} 55% 38%)">${esc(t.sn)}</span><img src="https://resources.premierleague.com/premierleague/badges/70/t${esc(t.code)}.png" alt="" referrerpolicy="no-referrer" loading="lazy" onload="this.previousElementSibling.style.display='none'" onerror="this.remove()"></span>`;
+}
+function photo(p) {
+  return `<span class="ph">${SHIRT(`hsl(${hue(p.t * 3)} 60% 50%)`)}<img src="https://resources.premierleague.com/premierleague/photos/players/110x140/p${esc(p.c)}.png" alt="" referrerpolicy="no-referrer" loading="lazy" onload="this.previousElementSibling.style.display='none'" onerror="this.remove()"></span>`;
+}
+const initial = s => esc((s || '?').trim().charAt(0).toUpperCase());
+
+/* ───────── منطق الجولات ───────── */
+const gwNums = () => Object.keys(S.gws).map(Number).sort((a, b) => a - b);
+const koOf = f => f.ko ? Date.parse(f.ko) : null;
+function gwFixtures(g) { return (S.gws[g] && S.gws[g].fixtures) || []; }
+function fxInfo(fid) {
+  for (const g of gwNums()) { const f = gwFixtures(g).find(x => String(x.id) === String(fid)); if (f) return f; }
+  return null;
+}
+function kickoffOf(fid) {
+  const d = S.fxdocs[fid];
+  if (d && d.kickoff) return d.kickoff;
+  const f = fxInfo(fid);
+  return f ? koOf(f) : null;
+}
+const isLocked = fid => { const k = kickoffOf(fid); return !k || Date.now() >= k; };
+const dayOfFx = fid => { const k = kickoffOf(fid); return k ? dayKey(k) : 'tbd'; };
+
+function defaultGw() {
+  const nums = gwNums(), now = Date.now();
+  const live = nums.find(g => gwFixtures(g).some(f => koOf(f) && koOf(f) + END_AFTER > now));
+  return live ?? nums[nums.length - 1];
+}
+function daysOf(g) {
+  const map = {};
+  gwFixtures(g).forEach(f => {
+    const k = koOf(f);
+    const key = k ? dayKey(k) : 'tbd';
+    (map[key] = map[key] || { key, label: k ? fmtDay(k) : 'مواعيد لسه مش معروفة', list: [] }).list.push(f);
+  });
+  return Object.values(map).sort((a, b) => a.key.localeCompare(b.key)).map(d => {
+    d.list.sort((a, b) => (koOf(a) || 9e15) - (koOf(b) || 9e15));
+    return d;
+  });
+}
+function chooseDay() {
+  const days = daysOf(S.gw), now = Date.now();
+  if (!days.length) { S.day = null; return; }
+  const open = days.find(d => d.list.some(f => koOf(f) && koOf(f) + END_AFTER > now));
+  S.day = (open || days[days.length - 1]).key;
+}
+const pickOf = fid => (S.picks[fid] = S.picks[fid] || { ids: [], cap: null });
+
+/* ───────── تحميل البيانات ───────── */
+async function loadPicks() {
+  await flushSaves();
+  const s = await getDocs(query(collection(db, 'picks'), where('uid', '==', S.user.uid), where('gw', '==', S.gw)));
+  S.picks = {};
+  s.docs.forEach(d => { const x = d.data(); S.picks[x.fid] = { ids: x.ids || [], cap: x.cap ?? null }; });
+}
+async function loadMyPts() {
+  try {
+    const b = await getDoc(doc(db, 'board', 'gw_' + S.gw));
+    if (b.exists()) { S.boards['gw_' + S.gw] = b.data(); const r = b.data().rows.find(r => r.uid === S.user.uid); S.myGwPts = r ? r.pts : 0; }
+    else S.myGwPts = null;
+  } catch (e) { S.myGwPts = null; }
+}
+async function loadRound() {
+  const snap = await getDocs(collection(db, 'gw'));
+  S.gws = {};
+  snap.docs.forEach(d => { S.gws[Number(d.id)] = d.data(); });
+  if (!gwNums().length) { S.gw = null; return; }
+  if (S.gw == null || !S.gws[S.gw]) S.gw = defaultGw();
+  await Promise.all([loadPicks(), loadMyPts()]);
+  chooseDay();
+}
+async function bootUser() {
+  const ps = await getDoc(doc(db, 'users', S.user.uid));
+  if (!ps.exists()) { S.profile = null; S.view = 'setup'; return; }
+  S.profile = ps.data();
+  if (S.profile.banned) { S.view = 'banned'; return; }
+  try { const a = await getDoc(doc(db, 'admins', S.user.uid)); S.admin = a.exists(); } catch (e) { S.admin = false; }
+  await loadRound();
+  S.view = 'round';
+}
+async function loadFixture(fid) {
+  if (!S.fxdocs[fid]) {
+    const s = await getDoc(doc(db, 'fixtures', String(fid)));
+    if (!s.exists()) throw new Error('الماتش مش موجود');
+    const d = s.data();
+    S.fxdocs[fid] = { ...d, kickoff: tsMs(d.kickoff) };
+  }
+  if (isLocked(fid)) {
+    try { const sc = await getDoc(doc(db, 'scores', String(fid))); S.scores[fid] = sc.exists() ? sc.data() : { pts: {}, st: {}, status: 'ns' }; }
+    catch (e) { S.scores[fid] = { pts: {}, st: {}, status: 'ns' }; }
+  }
+}
+async function loadBoard(id) {
+  const s = await getDoc(doc(db, 'board', id));
+  S.boards[id] = s.exists() ? s.data() : null;
+}
+
+/* ───────── الاختيارات ───────── */
+function canPick(fx, p, pl) {
+  if (p.ids.some(id => { const o = fx.players.find(x => x.i === id); return o && o.p === pl.p; })) return 'مركز ' + POS[pl.p] + ' مختار بالفعل، شيله الأول';
+  const same = p.ids.filter(id => { const o = fx.players.find(x => x.i === id); return o && o.t === pl.t; }).length;
+  if (same >= 2) return 'مينفعش أكتر من لاعبين من نفس الفريق';
+  if (p.ids.length >= 4) return 'اخترت ٤ لاعبين بالفعل';
+  return null;
+}
+function capTakenElsewhere(fid) {
+  const day = dayOfFx(fid);
+  return Object.keys(S.picks).some(k => k !== String(fid) && S.picks[k].cap != null && dayOfFx(k) === day);
+}
+const saveTimers = {};
+function setSave(s) { S.save = s; const el = $('#sv'); if (el) { el.textContent = s === 'saving' ? 'جاري الحفظ…' : s === 'saved' ? 'تم الحفظ' : s === 'error' ? 'فشل الحفظ' : ''; el.className = 'pl sv ' + (s === 'saved' ? 'ok' : s === 'error' ? 'bad' : ''); } }
+const pending = new Set();
+function queueSave(fid) {
+  setSave('saving');
+  pending.add(fid);
+  clearTimeout(saveTimers[fid]);
+  saveTimers[fid] = setTimeout(() => doSave(fid), 500);
+}
+/* بيحفظ أي تعديل لسه مستني فوراً (قبل الخروج من الماتش أو إعادة تحميل الجولة أو تسجيل الخروج) */
+async function flushSaves() {
+  const ids = [...pending];
+  ids.forEach(f => clearTimeout(saveTimers[f]));
+  await Promise.all(ids.map(doSave));
+}
+async function doSave(fid) {
+  pending.delete(fid);
+  const p = S.picks[fid], fx = S.fxdocs[fid];
+  if (!S.user || !p || !fx) return;
+  try {
+    await setDoc(doc(db, 'picks', fid + '_' + S.user.uid), { uid: S.user.uid, gw: fx.gw, fid: String(fid), ids: p.ids, cap: p.cap, updatedAt: serverTimestamp() });
+    if (S.fx === fid) setSave('saved');
+  } catch (e) {
+    console.error(e);
+    if (S.fx === fid) setSave('error');
+    toast(e.code === 'permission-denied' ? 'الحفظ مرفوض: الماتش ممكن يكون بدأ أو حسابك محظور' : 'مقدرتش أحفظ، تأكد من النت');
+  }
+}
+function changed(fid) { queueSave(fid); renderMatchBody(); }
+
+/* ───────── العرض ───────── */
+function render() {
+  const root = $('#app');
+  const v = S.view;
+  const nonav = ['loading', 'login', 'setup', 'banned', 'error', 'match'].includes(v);
+  root.className = nonav ? 'nonav' : '';
+  const views = { loading: vLoading, login: vLogin, setup: vSetup, banned: vBanned, error: vError, round: vRound, match: vMatch, board: vBoard, account: vAccount, admin: vAdmin };
+  root.innerHTML = (views[v] || vLoading)() + (nonav ? '' : nav());
+  if (v === 'match') renderMatchBody();
+  lastSig = lockSig();
+}
+/* بصمة حالات القفل: بنعيد رسم شاشة الجولة لما ماتش يتقفل بس */
+let lastSig = '';
+function lockSig() {
+  if (S.view !== 'round' || S.gw == null) return '';
+  return gwFixtures(S.gw).map(f => (koOf(f) && Date.now() >= koOf(f)) ? 1 : 0).join('');
+}
+function nav() {
+  const t = S.view === 'admin' ? 'account' : S.view;
+  const b = (k, label, svg) => `<button class="n ${t === k ? 'on' : ''}" data-act="nav" data-v="${k}"><svg viewBox="0 0 24 24">${svg}</svg>${label}</button>`;
+  return `<nav class="nv">${b('round', 'الجولة', '<path d="M3 5h18v14H3zM3 10h18"/>')}${b('board', 'الترتيب', '<path d="M6 20v-9M12 20V4M18 20v-6"/>')}${b('account', 'حسابي', '<circle cx="12" cy="8" r="4"/><path d="M4 21c1-6 15-6 16 0"/>')}</nav>`;
+}
+const vLoading = () => `<div class="login ctr"><img class="logo" src="icon-192.png" alt="" style="margin:0 auto;display:block"><div class="m">جاري التحميل…</div></div>`;
+const vError = () => `<div class="login ctr"><div>حصلت مشكلة في تحميل البيانات</div><button class="bt on" data-act="retry">حاول تاني</button><button class="lnk" data-act="logout">تسجيل الخروج</button></div>`;
+const vBanned = () => `<div class="login ctr"><div class="logo" style="margin:0 auto;background:#d63a3f;color:#fff">!</div><b style="font-size:20px">حسابك محظور من اللعب</b><div class="m">تواصل مع الإدارة لو شايف إن ده غلط.</div><button class="bt" data-act="logout">تسجيل الخروج</button></div>`;
+
+function vLogin() {
+  const signup = S.mode === 'signup';
+  return `<div class="login">
+    <img class="logo" src="icon-192.png" alt="">
+    <div class="d" style="font-size:32px;line-height:1.1">الفانتازي اليومي</div>
+    <div class="m" style="font-size:15px;margin-bottom:8px">اختار ٤ لاعبين في كل ماتش وتنافس على الترتيب.</div>
+    <button class="bt gbtn" data-act="google">الدخول بحساب جوجل</button>
+    <button class="bt" disabled title="قريباً">الدخول بحساب فيسبوك (قريباً)</button>
+    <div class="m ctr">أو بالإيميل</div>
+    <form data-form="login" class="login" style="padding:0;gap:10px;flex:none">
+      <input class="in" type="email" name="email" placeholder="الإيميل" dir="ltr" autocomplete="email" value="${esc(S.email)}" required>
+      <input class="in" type="password" name="pw" placeholder="كلمة السر" dir="ltr" autocomplete="${signup ? 'new-password' : 'current-password'}" required>
+      ${S.authErr ? `<div class="err">${esc(S.authErr)}</div>` : ''}
+      <button class="bt on" type="submit">${signup ? 'إنشاء حساب' : 'دخول'}</button>
+    </form>
+    <div class="r j"><button class="lnk" data-act="mode">${signup ? 'عندي حساب، دخول' : 'مفيش عندي حساب، إنشاء حساب'}</button>${signup ? '' : '<button class="lnk" data-act="reset">نسيت كلمة السر</button>'}</div>
+  </div>`;
+}
+function vSetup() {
+  return `<div class="login">
+    <div class="d" style="font-size:28px">أكمل بروفايلك</div>
+    <div class="ctr"><div class="av" style="width:84px;height:84px;font-size:34px;margin:0 auto">${S.user && S.user.photoURL ? `<img src="${esc(S.user.photoURL)}" alt="" referrerpolicy="no-referrer" style="width:100%;height:100%;object-fit:cover">` : initial(S.user && (S.user.displayName || S.user.email))}</div></div>
+    <form data-form="setup" class="login" style="padding:0;gap:10px;flex:none">
+      <label class="m" for="u">اسم المستخدم</label>
+      <input id="u" class="in" name="u" dir="ltr" maxlength="20" autocomplete="off" autocapitalize="off" data-in="uname" placeholder="player_01" required>
+      <div id="uhint" class="m">حروف إنجليزي وأرقام و_ فقط، من ٣ لـ ٢٠. مبيتغيرش بعد كده إلا عن طريق الإدارة.</div>
+      <button class="bt on" type="submit" style="height:52px">ابدأ اللعب</button>
+    </form>
+    <button class="lnk" data-act="logout">تسجيل الخروج</button>
+  </div>`;
+}
+
+function vRound() {
+  const g = S.gw;
+  if (g == null) return `<div class="h"><b>الجولة</b></div><div class="f"><div class="k ctr">مفيش جولات متاحة لسه. استنى لحد ما الإدارة تفعّل الجولة الجاية.</div></div>`;
+  const nums = gwNums();
+  const days = daysOf(g);
+  const cur = days.find(d => d.key === S.day) || days[0];
+  const pts = S.myGwPts == null ? '—' : N(S.myGwPts);
+  const fin = S.boards['gw_' + g] && S.boards['gw_' + g].final;
+  return `<div class="h"><div><div class="m">الفانتازي اليومي</div><b>الجولة ${N(g)}</b></div><div class="ctr"><div class="m">نقطك ${S.myGwPts == null ? '' : (fin ? '(نهائية)' : '(مؤقتة)')}</div><div class="d" style="font-size:24px">${pts}</div></div></div>
+  ${nums.length > 1 ? `<div class="tg">${nums.map(n => `<button class="bt ${n === g ? 'on' : ''}" data-act="gw" data-g="${n}">الجولة ${N(n)}</button>`).join('')}</div>` : ''}
+  <div class="tg">${days.map(d => `<button class="bt ${cur && d.key === cur.key ? 'on' : ''}" data-act="day" data-k="${d.key}">${esc(d.label)}</button>`).join('')}</div>
+  <div class="f">${cur ? cur.list.map(card).join('') : ''}</div>`;
+}
+function card(f) {
+  const k = koOf(f), locked = !k || Date.now() >= k;
+  const n = (S.picks[f.id] ? S.picks[f.id].ids.length : 0);
+  const status = !k ? '<span class="pl">لسه مش محدد</span>' : locked ? '<span class="pl lv">بدأ</span>' : '<span class="pl ok">مفتوح</span>';
+  return `<button class="k mc" data-act="open" data-fid="${f.id}">
+    <div class="r j"><div class="t">${crest(f.h)}<span>${esc(teamName(f.h))}</span></div>
+    <div class="ctr"><div class="tm">${k ? fmtTime(k) : '—'}</div>${status}</div>
+    <div class="t">${crest(f.a)}<span>${esc(teamName(f.a))}</span></div></div>
+    <div class="r j m mt"><span>اختياراتك ${N(n)}/٤</span><span>${locked ? 'عرض اختياراتك' : 'اختار لاعبينك'} ‹</span></div>
+  </button>`;
+}
+
+function vMatch() {
+  const fid = S.fx, f = fxInfo(fid), d = S.fxdocs[fid];
+  if (!d) return vLoading();
+  const k = d.kickoff, locked = isLocked(fid);
+  return `<div class="h"><button class="bt" data-act="back" style="padding:0 14px" aria-label="رجوع">›</button>
+    <div class="g"><b style="font-size:20px">${esc(teamName(d.h))} ضد ${esc(teamName(d.a))}</b><div class="m">${locked ? 'الاختيار مقفول، الماتش بدأ' : 'يقفل الاختيار الساعة ' + fmtTime(k)}</div></div>
+    <span id="sv" class="pl sv"></span></div>
+    <div id="mbody"></div>`;
+}
+function renderMatchBody() {
+  const el = $('#mbody'); if (!el) return;
+  const fid = S.fx, d = S.fxdocs[fid]; if (!d) return;
+  const p = pickOf(fid), locked = isLocked(fid), sc = S.scores[fid] || { pts: {}, st: {}, status: 'ns' };
+  const byId = id => d.players.find(x => x.i === id);
+  const slot = pos => {
+    const pl = p.ids.map(byId).filter(Boolean).find(x => x.p === pos);
+    if (!pl) return `<button class="sl ${S.pos === pos && !locked ? 'act' : ''}" data-act="pos" data-p="${pos}"><span>${locked ? '—' : '+'}</span><span>${POS[pos]}</span></button>`;
+    return `<button class="sl fl ${S.pos === pos && !locked ? 'act' : ''}" data-act="pos" data-p="${pos}">${p.cap === pl.i ? '<span class="c">C</span>' : ''}${photo(pl)}<span class="nm">${esc(pl.n)}</span><span class="sub">${POS[pos]}${locked ? ' · ' + N(sc.pts[pl.i] || 0) : ''}</span></button>`;
+  };
+  let html = `<div class="pt">${[1, 2, 3, 4].map(slot).join('')}</div>`;
+  if (locked) {
+    const base = p.ids.reduce((s, id) => s + (sc.pts[id] || 0), 0);
+    const bonus = p.cap != null ? (sc.pts[p.cap] || 0) * (CAP_MULT - 1) : 0;
+    html += `<div class="f"><div class="k r j"><div><b>مجموع الماتش</b><div class="m">${p.cap != null ? 'شامل الكابتن ×' + N(CAP_MULT) + ' · ' : ''}${sc.status === 'ft' ? 'انتهى' : sc.status === 'live' ? 'مباشر (نقط مؤقتة)' : 'لسه مفيش نقط'}</div></div><span class="d" style="font-size:28px">${N(base + bonus)}</span></div>`;
+    html += p.ids.length ? p.ids.map(byId).filter(Boolean).map(pl => {
+      const st = sc.st && sc.st[pl.i] === 1 ? 'أساسي' : (sc.status !== 'ns' ? 'دكة' : '');
+      return `<div class="k r">${photo(pl)}<div class="g"><div class="nm">${esc(pl.n)} ${p.cap === pl.i ? '<span class="c" style="display:inline-flex">C</span>' : ''}</div><div class="sub">${POS[pl.p]} · ${esc(teamName(pl.t === d.h.id ? d.h : d.a))}</div></div>${st ? `<span class="pl ${st === 'أساسي' ? 'ok' : ''}">${st}</span>` : ''}<span class="d" style="font-size:20px">${N(sc.pts[pl.i] || 0)}</span></div>`;
+    }).join('') : '<div class="k ctr">مختارتش لاعبين في الماتش ده.</div>';
+    el.innerHTML = html + '</div>';
+    return;
+  }
+  html += `<div class="tg">${[1, 2, 3, 4].map(x => `<button class="bt ${S.pos === x ? 'on' : ''}" data-act="pos" data-p="${x}">${POS[x]}</button>`).join('')}</div>
+  <div style="padding:0 16px 10px"><input class="in" data-in="psearch" placeholder="ابحث عن لاعب" aria-label="ابحث عن لاعب" value="${esc(S.q)}"></div>
+  <div class="f" id="plist"></div>`;
+  el.innerHTML = html;
+  renderList();
+}
+function renderList() {
+  const el = $('#plist'); if (!el) return;
+  const fid = S.fx, d = S.fxdocs[fid], p = pickOf(fid);
+  const capLocked = capTakenElsewhere(fid);
+  const q = S.q.trim().toLowerCase();
+  const list = d.players.filter(x => x.p === S.pos && (!q || x.n.toLowerCase().includes(q))).sort((a, b) => b.tp - a.tp);
+  const flag = { d: 'مشكوك فيه', i: 'مصاب', s: 'موقوف', u: 'غير متاح', n: 'غير متاح' };
+  el.innerHTML = list.length ? list.map(x => {
+    const sel = p.ids.includes(x.i);
+    const why = sel ? null : canPick(d, p, x);
+    const team = x.t === d.h.id ? d.h : d.a;
+    const right = sel
+      ? (p.cap === x.i ? `<button class="cb on" data-act="cap" data-pid="${x.i}" aria-label="إلغاء الكابتن">C</button>`
+        : (capLocked ? '<span class="pl ok">مختار</span>' : `<button class="cb" data-act="cap" data-pid="${x.i}" aria-label="اجعله كابتن">C</button>`))
+      : '';
+    return `<div class="k r pr ${sel ? 'sel' : ''} ${why ? 'dz' : ''}" data-act="tp" data-pid="${x.i}">${photo(x)}
+      <div class="g"><div class="nm">${esc(x.n)} <span class="sub">${esc(team.sn)}</span> ${flag[x.s] ? `<span class="pl bad">${flag[x.s]}</span>` : ''}</div>
+      <div class="sub">${N(x.g)} أهداف · ${N(x.a)} أسيست · ${N(x.tp)} نقطة · فورم ${esc(x.f)}</div>${x.nw ? `<div class="sub warn">${esc(x.nw)}</div>` : ''}</div>${right}</div>`;
+  }).join('') : '<div class="k ctr">مفيش لاعبين بالاسم ده.</div>';
+}
+
+function ranked(rows) {
+  let prev = null, rank = 0;
+  return rows.map((r, i) => { if (!prev || r.pts !== prev.pts) rank = i + 1; prev = r; return { ...r, rank }; });
+}
+function vBoard() {
+  const id = S.bt === 'total' ? 'total' : 'gw_' + S.gw;
+  const b = S.boards[id];
+  const rows = b ? ranked(b.rows) : [];
+  const when = b && b.updatedAt ? 'آخر تحديث ' + fmtTime(tsMs(b.updatedAt)) : '';
+  const note = S.bt === 'gw' ? (b ? (b.final ? 'نقط نهائية' : 'نقط مؤقتة لحد ما الجولة تخلص') : '') : 'الإجمالي بيتثبت بعد نهاية كل جولة';
+  return `<div class="h"><b>الترتيب</b><span class="m">${when}</span></div>
+  <div class="tg"><button class="bt ${S.bt === 'total' ? 'on' : ''}" data-act="bt" data-k="total">الإجمالي</button>${S.gw != null ? `<button class="bt ${S.bt === 'gw' ? 'on' : ''}" data-act="bt" data-k="gw">الجولة ${N(S.gw)}</button>` : ''}</div>
+  <div class="f"><div class="m">${note}</div>
+  ${b ? rows.map(r => `<div class="k r" style="${r.uid === S.user.uid ? 'border-color:#2fd06b;background:rgba(47,208,107,.26)' : ''}"><span class="d" style="width:30px;font-size:18px;color:${r.rank <= 3 ? '#f5b301' : '#d0dde8'}">${N(r.rank)}</span><div class="av">${initial(r.name)}</div><div class="g nm">${esc(r.name)}${r.uid === S.user.uid ? ' (أنت)' : ''}</div><span class="d" style="font-size:20px">${N(r.pts)}</span></div>`).join('') || '<div class="k ctr">مفيش لاعبين لسه.</div>' : '<div class="k ctr">الترتيب لسه ما اتحسبش. بيظهر بعد أول ماتش.</div>'}</div>`;
+}
+function vAccount() {
+  const t = S.boards.total, rows = t ? ranked(t.rows) : [], me = rows.find(r => r.uid === S.user.uid);
+  return `<div class="h"><b>حسابي</b></div><div class="f" style="gap:10px">
+    <div class="k r"><div class="av" style="width:56px;height:56px;font-size:22px">${S.profile.photo ? `<img src="${esc(S.profile.photo)}" alt="" referrerpolicy="no-referrer" style="width:100%;height:100%;object-fit:cover">` : initial(S.profile.username)}</div>
+      <div class="g"><b style="font-size:18px">${esc(S.profile.username)}</b><div class="m" dir="ltr" style="text-align:start">${esc(S.user.email || '')}</div></div></div>
+    <div style="display:flex;gap:8px"><div class="k ctr g"><div class="d" style="font-size:26px">${me ? N(me.pts) : '—'}</div><div class="m">إجمالي النقط</div></div><div class="k ctr g"><div class="d" style="font-size:26px">${me ? N(me.rank) : '—'}</div><div class="m">المركز${rows.length ? ' من ' + N(rows.length) : ''}</div></div></div>
+    ${S.admin ? '<button class="bt" data-act="admin">لوحة الإدارة</button>' : ''}
+    <button class="bt red" data-act="logout" style="margin-top:auto">تسجيل الخروج</button></div>`;
+}
+function vAdmin() {
+  return `<div class="h"><div><b>الإدارة</b><div class="m">${N(S.users.length)} مسجل</div></div><button class="bt" data-act="nav" data-v="account">رجوع</button></div>
+  <div style="padding:0 16px 10px"><input class="in" data-in="usearch" placeholder="ابحث باسم المستخدم" aria-label="بحث" value="${esc(S.uq)}"></div>
+  <div class="f" id="ulist">${adminRows()}</div>`;
+}
+function adminRows() {
+  const q = S.uq.trim().toLowerCase();
+  const list = S.users.filter(u => !q || (u.username || '').toLowerCase().includes(q)).sort((a, b) => (a.username || '').localeCompare(b.username || ''));
+  return list.map(u => `<div class="k r ${u.banned ? 'dz' : ''}"><div class="av">${initial(u.username)}</div><div class="g"><div class="nm">${esc(u.username)}</div><div class="sub">${u.createdAt ? 'من ' + fmtDay(tsMs(u.createdAt)) : ''}</div></div><span class="pl ${u.banned ? 'bad' : 'ok'}">${u.banned ? 'محظور' : 'نشط'}</span><button class="bt ${u.banned ? '' : 'red'}" style="height:36px;padding:0 12px" data-act="ban" data-uid="${esc(u.id)}">${u.banned ? 'فك الحظر' : 'حظر'}</button></div>`).join('') || '<div class="k ctr">مفيش نتايج.</div>';
+}
+
+/* ───────── الأحداث ───────── */
+const ACTIONS = {
+  async google() {
+    try { await signInWithPopup(auth, new GoogleAuthProvider()); }
+    catch (e) { if (!['auth/popup-closed-by-user', 'auth/cancelled-popup-request'].includes(e.code)) toast(authMsg(e)); }
+  },
+  mode() { S.mode = S.mode === 'login' ? 'signup' : 'login'; S.authErr = ''; render(); },
+  async reset() {
+    const email = (document.querySelector('input[name=email]') || {}).value || '';
+    if (!email.trim()) return toast('اكتب الإيميل الأول');
+    try { await sendPasswordResetEmail(auth, email.trim()); toast('بعتنالك رابط تغيير كلمة السر على الإيميل'); }
+    catch (e) { toast(authMsg(e)); }
+  },
+  async logout() { await flushSaves(); await signOut(auth); },
+  retry() { S.view = 'loading'; render(); bootUser().then(render).catch(e => { console.error(e); S.view = 'error'; render(); }); },
+  async nav(el) {
+    const v = el.dataset.v;
+    S.view = v;
+    S.q = '';
+    if (v === 'board') { render(); await Promise.all([loadBoard('total'), S.gw != null ? loadBoard('gw_' + S.gw) : null]); }
+    else if (v === 'account') { render(); if (!S.boards.total) await loadBoard('total').catch(() => {}); }
+    else if (v === 'round') { await loadPicks().catch(() => {}); await loadMyPts(); }
+    render();
+  },
+  async gw(el) { S.gw = Number(el.dataset.g); await Promise.all([loadPicks(), loadMyPts()]); chooseDay(); render(); },
+  day(el) { S.day = el.dataset.k; render(); },
+  async open(el) {
+    const fid = el.dataset.fid;
+    S.fx = fid; S.pos = 1; S.q = ''; S.save = '';
+    S.view = 'loading'; render();
+    try { await loadFixture(fid); S.view = 'match'; } catch (e) { console.error(e); toast('مقدرتش أفتح الماتش: ' + (e.code || e.message)); S.view = 'round'; }
+    render();
+  },
+  back() { flushSaves(); S.view = 'round'; render(); },
+  pos(el) { S.pos = Number(el.dataset.p); renderMatchBody(); },
+  tp(el) {
+    const fid = S.fx, d = S.fxdocs[fid], p = pickOf(fid), pid = Number(el.dataset.pid);
+    if (isLocked(fid)) return toast('الماتش بدأ، الاختيار مقفول');
+    const pl = d.players.find(x => x.i === pid);
+    if (p.ids.includes(pid)) { p.ids = p.ids.filter(x => x !== pid); if (p.cap === pid) p.cap = null; }
+    else {
+      const why = canPick(d, p, pl); if (why) return toast(why);
+      p.ids.push(pid);
+      for (let i = 1; i <= 4; i++) {
+        const q = ((S.pos - 1 + i) % 4) + 1;
+        if (!p.ids.some(id => { const o = d.players.find(x => x.i === id); return o && o.p === q; })) { S.pos = q; break; }
+      }
+    }
+    changed(fid);
+  },
+  cap(el, e) {
+    e.stopPropagation();
+    const fid = S.fx, p = pickOf(fid), pid = Number(el.dataset.pid);
+    if (isLocked(fid)) return toast('الماتش بدأ، الاختيار مقفول');
+    if (p.cap === pid) p.cap = null;
+    else { if (capTakenElsewhere(fid)) return toast('اخترت كابتن في ماتش تاني النهاردة'); p.cap = pid; }
+    changed(fid);
+  },
+  async bt(el) { S.bt = el.dataset.k; render(); const id = S.bt === 'total' ? 'total' : 'gw_' + S.gw; await loadBoard(id); render(); },
+  async admin() {
+    S.view = 'admin'; S.uq = ''; render();
+    try { const s = await getDocs(collection(db, 'users')); S.users = s.docs.map(d => ({ id: d.id, ...d.data() })); }
+    catch (e) { toast('مقدرتش أحمّل المستخدمين'); }
+    render();
+  },
+  async ban(el) {
+    const u = S.users.find(x => x.id === el.dataset.uid); if (!u) return;
+    const to = !u.banned;
+    if (!confirm((to ? 'تحظر ' : 'تفك الحظر عن ') + u.username + '؟')) return;
+    try { await updateDoc(doc(db, 'users', u.id), { banned: to }); u.banned = to; const l = $('#ulist'); if (l) l.innerHTML = adminRows(); toast(to ? 'اتحظر' : 'اتفك الحظر'); }
+    catch (e) { toast('مقدرتش أعدّل: ' + (e.code || e.message)); }
+  }
+};
+const FORMS = {
+  async login(f) {
+    const email = f.elements.email.value.trim(), pw = f.elements.pw.value;
+    S.email = email; S.authErr = '';
+    try {
+      if (S.mode === 'signup') await createUserWithEmailAndPassword(auth, email, pw);
+      else await signInWithEmailAndPassword(auth, email, pw);
+    } catch (e) { S.authErr = authMsg(e); render(); }
+  },
+  async setup(f) {
+    const name = f.elements.u.value.trim(), low = name.toLowerCase();
+    if (!/^[A-Za-z0-9_]{3,20}$/.test(name)) return toast('الاسم لازم ٣ لـ ٢٠ حرف إنجليزي أو رقم أو _');
+    try {
+      const t = await getDoc(doc(db, 'usernames', low));
+      if (t.exists()) return toast('الاسم ده مستخدم، اختار غيره');
+      const b = writeBatch(db);
+      b.set(doc(db, 'usernames', low), { uid: S.user.uid });
+      b.set(doc(db, 'users', S.user.uid), { username: name, usernameLower: low, photo: S.user.photoURL || null, banned: false, createdAt: serverTimestamp() });
+      await b.commit();
+      S.view = 'loading'; render();
+      await bootUser();
+    } catch (e) { console.error(e); toast(e.code === 'permission-denied' ? 'الاسم ده مستخدم أو مش مسموح' : 'مقدرتش أحفظ البروفايل'); S.view = 'setup'; }
+    render();
+  }
+};
+let unameTimer;
+const INPUTS = {
+  psearch(t) { S.q = t.value; renderList(); },
+  usearch(t) { S.uq = t.value; const l = $('#ulist'); if (l) l.innerHTML = adminRows(); },
+  uname(t) {
+    const v = t.value.trim(), h = $('#uhint');
+    clearTimeout(unameTimer);
+    if (!/^[A-Za-z0-9_]{3,20}$/.test(v)) { h.className = 'm'; h.textContent = 'حروف إنجليزي وأرقام و_ فقط، من ٣ لـ ٢٠.'; return; }
+    h.textContent = 'بنشوف لو متاح…';
+    unameTimer = setTimeout(async () => {
+      try { const s = await getDoc(doc(db, 'usernames', v.toLowerCase())); h.className = s.exists() ? 'err' : 'm'; h.textContent = s.exists() ? 'الاسم ده مستخدم' : 'متاح ✓'; }
+      catch (e) { h.textContent = ''; }
+    }, 400);
+  }
+};
+document.addEventListener('click', e => { const el = e.target.closest('[data-act]'); if (el && ACTIONS[el.dataset.act]) ACTIONS[el.dataset.act](el, e); });
+document.addEventListener('submit', e => { const f = e.target.closest('[data-form]'); if (f) { e.preventDefault(); FORMS[f.dataset.form](f); } });
+document.addEventListener('input', e => { const t = e.target; if (t.dataset && t.dataset.in && INPUTS[t.dataset.in]) INPUTS[t.dataset.in](t); });
+
+/* ───────── البداية ───────── */
+onAuthStateChanged(auth, async u => {
+  S.user = u;
+  if (!u) { S.profile = null; S.admin = false; S.picks = {}; S.view = 'login'; render(); return; }
+  S.view = 'loading'; render();
+  try { await bootUser(); } catch (e) { console.error(e); S.view = 'error'; }
+  render();
+});
+setInterval(() => { if (S.view === 'round' && lockSig() !== lastSig) render(); }, 30000);
+render();
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
+</script>
+</body>
+</html>
