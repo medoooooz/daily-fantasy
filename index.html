@@ -169,8 +169,11 @@ const S = {
   gws: {}, gw: null, day: null, picks: {}, fxdocs: {}, scores: {},
   boards: {}, bt: 'total', myGwPts: null,
   fx: null, pos: 1, q: '', save: '',
-  users: [], uq: ''
+  users: [], uq: '',
+  stats: {}, st: null
 };
+const newSt = () => ({ kind: 'gw', fid: null, day: null, tab: 'caps', q: '', opp: null, oq: '', ex: {}, loading: false });
+S.st = newSt();
 
 /* ───────── مكونات صغيرة ───────── */
 const SHIRT = c => `<svg viewBox="0 0 24 24"><path fill="${c}" d="M8 3l-5 3 2 4 2-1v11h10V9l2 1 2-4-5-3c-1 2-5 2-6 0z"/></svg>`;
@@ -270,14 +273,14 @@ async function bootUser() {
   await loadRound();
   S.view = 'round';
 }
-async function loadFixture(fid) {
+async function loadFixture(fid, fresh = true) {
   if (!S.fxdocs[fid]) {
     const s = await getDoc(doc(db, 'fixtures', String(fid)));
     if (!s.exists()) throw new Error('الماتش مش موجود');
     const d = s.data();
     S.fxdocs[fid] = { ...d, kickoff: tsMs(d.kickoff) };
   }
-  if (isLocked(fid)) {
+  if (isLocked(fid) && (fresh || !S.scores[fid])) {
     try { const sc = await getDoc(doc(db, 'scores', String(fid))); S.scores[fid] = sc.exists() ? sc.data() : { pts: {}, st: {}, status: 'ns' }; }
     catch (e) { S.scores[fid] = { pts: {}, st: {}, status: 'ns' }; }
   }
@@ -369,9 +372,10 @@ function render() {
   const v = S.view;
   const nonav = ['loading', 'login', 'setup', 'banned', 'error', 'match'].includes(v);
   root.className = nonav ? 'nonav' : '';
-  const views = { loading: vLoading, login: vLogin, setup: vSetup, banned: vBanned, error: vError, round: vRound, match: vMatch, board: vBoard, account: vAccount, admin: vAdmin };
+  const views = { loading: vLoading, login: vLogin, setup: vSetup, banned: vBanned, error: vError, round: vRound, match: vMatch, board: vBoard, stats: vStats, account: vAccount, admin: vAdmin };
   root.innerHTML = (views[v] || vLoading)() + (nonav ? '' : nav());
   if (v === 'match') renderMatchBody();
+  if (v === 'stats') renderStatsBody();
   lastSig = lockSig();
 }
 /* بصمة حالات القفل: بنعيد رسم شاشة الجولة لما ماتش يتقفل بس */
@@ -383,7 +387,7 @@ function lockSig() {
 function nav() {
   const t = S.view === 'admin' ? 'account' : S.view;
   const b = (k, label, svg) => `<button class="n ${t === k ? 'on' : ''}" data-act="nav" data-v="${k}"><svg viewBox="0 0 24 24">${svg}</svg>${label}</button>`;
-  return `<nav class="nv">${b('round', 'الجولة', '<path d="M3 5h18v14H3zM3 10h18"/>')}${b('board', 'الترتيب', '<path d="M6 20v-9M12 20V4M18 20v-6"/>')}${b('account', 'حسابي', '<circle cx="12" cy="8" r="4"/><path d="M4 21c1-6 15-6 16 0"/>')}</nav>`;
+  return `<nav class="nv">${b('round', 'الجولة', '<path d="M3 5h18v14H3zM3 10h18"/>')}${b('board', 'الترتيب', '<path d="M6 20v-9M12 20V4M18 20v-6"/>')}${b('stats', 'الإحصائيات', '<path d="M12 3v9h9M20 15a9 9 0 11-11-11"/>')}${b('account', 'حسابي', '<circle cx="12" cy="8" r="4"/><path d="M4 21c1-6 15-6 16 0"/>')}</nav>`;
 }
 const vLoading = () => `<div class="login ctr"><img class="logo" src="icon-192.png" alt="" style="margin:0 auto;display:block"><div class="m">جاري التحميل…</div></div>`;
 const vError = () => `<div class="login ctr"><div>حصلت مشكلة في تحميل البيانات</div><button class="bt on" data-act="retry">حاول تاني</button><button class="lnk" data-act="logout">تسجيل الخروج</button></div>`;
@@ -528,6 +532,169 @@ function renderList() {
   }).join('') : '<div class="k ctr">مفيش لاعبين بالاسم ده.</div>';
 }
 
+/* ───────── الإحصائيات والمقارنة ───────── */
+const startedFx = g => gwFixtures(g).filter(f => koOf(f) && Date.now() >= koOf(f) + 120000).sort((a, b) => koOf(a) - koOf(b));
+function scopeFx() {
+  const st = S.st, all = S.gw != null ? startedFx(S.gw) : [];
+  if (st.kind === 'match') return all.filter(f => String(f.id) === String(st.fid));
+  if (st.kind === 'day') return all.filter(f => dayKey(koOf(f)) === st.day);
+  return all;
+}
+function initStats() {
+  const all = S.gw != null ? startedFx(S.gw) : [], last = all[all.length - 1];
+  if (!last) return;
+  if (!S.st.fid || !all.some(f => String(f.id) === String(S.st.fid))) S.st.fid = last.id;
+  if (!S.st.day || !all.some(f => dayKey(koOf(f)) === S.st.day)) S.st.day = dayKey(koOf(last));
+}
+async function loadStatsScope() {
+  await Promise.all(scopeFx().map(async f => {
+    try {
+      await loadFixture(f.id, false);
+      if (!S.stats[f.id]) { const r = await getDoc(doc(db, 'stats', String(f.id))); if (r.exists()) S.stats[f.id] = r.data(); }
+    } catch (e) { console.error(e); }
+  }));
+}
+async function refreshStats() { initStats(); S.st.loading = true; render(); await loadStatsScope(); S.st.loading = false; render(); }
+const ppl = (fid, id) => { const d = S.fxdocs[fid]; return d ? d.players.find(x => x.i === id) : null; };
+const tsn = (fid, p) => { const d = S.fxdocs[fid]; return d && p ? (p.t === d.h.id ? d.h : d.a).sn : ''; };
+function nameList(users) {
+  const me = S.profile.username;
+  return `<div style="display:flex;flex-direction:column;margin-top:8px">${[...users].sort().map(u => `<div class="r" style="padding:8px 0;border-top:1px solid rgba(255,255,255,.18)"><div class="av" style="width:28px;height:28px;font-size:12px">${initial(u)}</div><span>${esc(u)}${u === me ? ' (أنت)' : ''}</span></div>`).join('')}</div>`;
+}
+function aggStats() {
+  const A = { n: 0, picks: {}, caps: {}, chips: [], pairs: {}, combos: [], users: new Set() };
+  scopeFx().forEach(f => {
+    const sd = S.stats[f.id]; if (!sd) return;
+    Object.keys(sd.byUser).forEach(u => {
+      const p = sd.byUser[u]; A.n++; A.users.add(u);
+      p.ids.forEach(id => { const k = f.id + ':' + id; (A.picks[k] = A.picks[k] || { fid: f.id, id, users: [] }).users.push(u); });
+      if (p.cap != null) { const k = f.id + ':' + p.cap; (A.caps[k] = A.caps[k] || { fid: f.id, id: p.cap, users: [] }).users.push(u); }
+      if (p.chip) A.chips.push({ u, chip: p.chip, fid: f.id, team: p.team });
+      const ids = [...p.ids].sort((a, b) => a - b);
+      for (let i = 0; i < ids.length; i++) for (let j = i + 1; j < ids.length; j++) {
+        const k = f.id + ':' + ids[i] + '_' + ids[j];
+        (A.pairs[k] = A.pairs[k] || { fid: f.id, a: ids[i], b: ids[j], users: [] }).users.push(u);
+      }
+      if (ids.length) { const k = f.id + ':' + ids.join('_'); let c = A.combos.find(x => x.k === k); if (!c) A.combos.push(c = { k, fid: f.id, ids, users: [] }); c.users.push(u); }
+    });
+  });
+  return A;
+}
+function vStats() {
+  const st = S.st;
+  if (S.gw == null) return `<div class="h"><b>الإحصائيات</b></div><div class="f"><div class="k ctr">مفيش جولات لسه.</div></div>`;
+  const all = startedFx(S.gw), days = [...new Set(all.map(f => dayKey(koOf(f))))];
+  const tabs = [['caps', 'الكباتن'], ['chips', 'الخصائص'], ['combo', 'الكومبو'], ['cmp', 'مقارنة']];
+  const sub = st.kind === 'match'
+    ? `<div class="tg">${all.map(f => `<button class="bt ${String(st.fid) === String(f.id) ? 'on' : ''}" data-act="sfx" data-fid="${f.id}" style="font-size:13px">${esc(f.h.sn)} ضد ${esc(f.a.sn)}</button>`).join('')}</div>`
+    : st.kind === 'day' ? `<div class="tg">${days.map(k => `<button class="bt ${st.day === k ? 'on' : ''}" data-act="sday" data-k="${k}" style="font-size:13px">${esc(fmtDay(Date.parse(k + 'T12:00:00Z')))}</button>`).join('')}</div>` : '';
+  return `<div class="h"><b>الإحصائيات</b><span class="m">بعد بداية الماتش</span></div>
+  <div class="tg"><button class="bt ${st.kind === 'match' ? 'on' : ''}" data-act="ssc" data-k="match">ماتش</button><button class="bt ${st.kind === 'day' ? 'on' : ''}" data-act="ssc" data-k="day">اليوم</button><button class="bt ${st.kind === 'gw' ? 'on' : ''}" data-act="ssc" data-k="gw">الجولة ${N(S.gw)}</button></div>
+  ${sub}
+  <div class="tg">${tabs.map(([k, l]) => `<button class="bt ${st.tab === k ? 'on' : ''}" data-act="stab" data-k="${k}">${l}</button>`).join('')}</div>
+  <div style="padding:0 16px 10px"><input class="in" data-in="ssearch" placeholder="ابحث عن لاعب" aria-label="ابحث عن لاعب" value="${esc(st.q)}"></div>
+  <div class="f" id="sbody"></div>`;
+}
+function renderStatsBody() {
+  const el = $('#sbody'); if (!el) return;
+  const st = S.st, fx = scopeFx();
+  if (st.loading) { el.innerHTML = '<div class="k ctr">جاري التحميل…</div>'; return; }
+  if (!fx.length) { el.innerHTML = '<div class="k ctr">لسه مفيش ماتشات بدأت في النطاق ده. الإحصائيات بتظهر بعد بداية الماتش بدقيقتين تقريباً.</div>'; return; }
+  if (!fx.some(f => S.stats[f.id])) { el.innerHTML = '<div class="k ctr">الإحصائيات بتتجهز دلوقتي، حدّث بعد دقيقة.</div>'; return; }
+  const A = aggStats();
+  if (!A.n) { el.innerHTML = '<div class="k ctr">محدش اختار لاعبين في النطاق ده.</div>'; return; }
+  el.innerHTML = searchHtml(A) + (st.tab === 'caps' ? capsHtml(A) : st.tab === 'chips' ? chipsHtml(A) : st.tab === 'combo' ? comboHtml(A) : cmpHtml(A));
+}
+function capsHtml(A) {
+  const rows = Object.values(A.caps).sort((a, b) => b.users.length - a.users.length);
+  if (!rows.length) return '<div class="k ctr">محدش اختار كابتن.</div>';
+  const max = rows[0].users.length;
+  return rows.map(r => {
+    const pl = ppl(r.fid, r.id); if (!pl) return '';
+    const key = 'c' + r.fid + ':' + r.id, open = S.st.ex[key];
+    return `<div class="k" data-act="sx" data-k="${key}" style="cursor:pointer"><div class="r">${photo(pl)}<div class="g"><div class="nm">${esc(pl.n)} <span class="sub">${esc(tsn(r.fid, pl))}</span></div><div class="sub">${N(r.users.length)} كابتن</div></div><span class="m">${open ? 'إخفاء' : 'الأسماء'}</span></div><div class="bar mt"><i style="width:${Math.round(r.users.length / max * 100)}%"></i></div>${open ? nameList(r.users) : ''}</div>`;
+  }).join('');
+}
+function chipsHtml(A) {
+  const me = S.profile.username;
+  return Object.keys(CHIPS).map(c => {
+    const list = A.chips.filter(x => x.chip === c).sort((a, b) => a.u.localeCompare(b.u));
+    return `<div class="k"><div class="r j"><b>${CHIPS[c].n}</b><span class="pl ${list.length ? 'ok' : ''}">${N(list.length)} استخدام</span></div>${list.length ? list.map(x => {
+      const d = S.fxdocs[x.fid]; if (!d) return '';
+      const t = c === 'steal' && x.team != null ? (x.team === d.h.id ? d.h : d.a) : null;
+      return `<div class="r j" style="padding:8px 0;border-top:1px solid rgba(255,255,255,.18)"><span class="r" style="gap:8px"><span class="av" style="width:28px;height:28px;font-size:12px">${initial(x.u)}</span>${esc(x.u)}${x.u === me ? ' (أنت)' : ''}</span><span class="sub">${esc(d.h.sn)} ضد ${esc(d.a.sn)}${t ? ' · فريق ' + esc(t.sn) : ''}</span></div>`;
+    }).join('') : '<div class="m mt">محدش استخدمها.</div>'}</div>`;
+  }).join('');
+}
+function comboHtml(A) {
+  const lab = (fid, ids) => ids.map(id => { const p = ppl(fid, id); return p ? esc(p.n) : '؟'; }).join(' + ');
+  const row = (key, label, users) => `<div data-act="sx" data-k="${key}" style="cursor:pointer;padding:8px 0;border-top:1px solid rgba(255,255,255,.18)"><div class="r j"><span class="g nm" style="font-size:13px">${label}</span><span class="pl">${N(users.length)} لاعبين</span></div>${S.st.ex[key] ? nameList(users) : ''}</div>`;
+  const pairs = Object.values(A.pairs).filter(x => x.users.length >= 2).sort((a, b) => b.users.length - a.users.length).slice(0, 15);
+  const combos = A.combos.filter(x => x.users.length >= 2).sort((a, b) => b.users.length - a.users.length);
+  return `<div class="k"><b>أكتر لاعبين اتاخدوا مع بعض</b>${pairs.length ? pairs.map(x => row('p' + x.fid + ':' + x.a + '_' + x.b, lab(x.fid, [x.a, x.b]), x.users)).join('') : '<div class="m mt">مفيش ثنائي اتكرر عند أكتر من لاعب.</div>'}</div>
+  <div class="k"><b>نفس التشكيلة بالظبط</b>${combos.length ? combos.map(x => row('k' + x.k, lab(x.fid, x.ids), x.users)).join('') : '<div class="m mt">مفيش تشكيلتين متطابقتين.</div>'}</div>`;
+}
+function searchHtml(A) {
+  const q = S.st.q.trim().toLowerCase(); if (!q) return '';
+  const found = [];
+  scopeFx().forEach(f => { const d = S.fxdocs[f.id]; if (d) d.players.forEach(p => { if (p.n.toLowerCase().includes(q)) found.push({ fid: f.id, p, c: (A.picks[f.id + ':' + p.i] || { users: [] }).users.length }); }); });
+  found.sort((a, b) => b.c - a.c);
+  if (!found.length) return '<div class="k ctr">مفيش لاعب بالاسم ده في النطاق.</div>';
+  return found.slice(0, 5).map(({ fid, p }) => {
+    const pk = A.picks[fid + ':' + p.i], cp = A.caps[fid + ':' + p.i];
+    const partners = Object.values(A.pairs).filter(x => x.fid === fid && (x.a === p.i || x.b === p.i)).sort((a, b) => b.users.length - a.users.length).slice(0, 5);
+    const k1 = 'sp' + fid + ':' + p.i, k2 = 'sk' + fid + ':' + p.i;
+    const tog = (key, label, users) => `<div data-act="sx" data-k="${key}" style="cursor:pointer;padding:8px 0;border-top:1px solid rgba(255,255,255,.18)"><div class="r j"><span>${label}</span><span class="m">${S.st.ex[key] ? 'إخفاء' : 'الأسماء'}</span></div>${S.st.ex[key] ? nameList(users) : ''}</div>`;
+    return `<div class="k"><div class="r">${photo(p)}<div class="g"><div class="nm">${esc(p.n)} <span class="sub">${esc(tsn(fid, p))}</span></div><div class="sub">اختاره ${N(pk ? pk.users.length : 0)} · كبّنه ${N(cp ? cp.users.length : 0)}</div></div></div>
+      ${pk ? tog(k1, 'مين اختاره', pk.users) : ''}${cp ? tog(k2, 'مين كبّنه', cp.users) : ''}
+      ${partners.length ? `<div style="padding:8px 0;border-top:1px solid rgba(255,255,255,.18)"><div class="m">اتاخد معاه</div>${partners.map(x => { const o = ppl(fid, x.a === p.i ? x.b : x.a); return `<div class="r j" style="padding:4px 0"><span>${esc(o ? o.n : '؟')}</span><span class="pl">${N(x.users.length)}</span></div>`; }).join('')}</div>` : ''}</div>`;
+  }).join('');
+}
+function oppRows(others) {
+  const q = S.st.oq.trim().toLowerCase();
+  const list = others.filter(u => !q || u.toLowerCase().includes(q));
+  return list.map(u => `<button class="k r" data-act="sopp" data-u="${esc(u)}"><div class="av">${initial(u)}</div><span class="g nm">${esc(u)}</span><span class="m">قارن ‹</span></button>`).join('') || '<div class="k ctr">مفيش نتايج.</div>';
+}
+function cmpSide(f, u) {
+  const sd = S.stats[f.id], d = S.fxdocs[f.id], sc = S.scores[f.id] || { pts: {}, status: 'ns' };
+  const p = sd.byUser[u] || { ids: [], cap: null, chip: null, team: null };
+  const list = p.ids.map(id => d.players.find(x => x.i === id)).filter(Boolean).sort((a, b) => a.p - b.p);
+  const base = list.reduce((s, pl) => s + (sc.pts[pl.i] || 0), 0);
+  const cap = p.cap != null ? (sc.pts[p.cap] || 0) * (CAP_MULT - 1) : 0;
+  let steal = 0;
+  if (p.chip === 'steal' && p.team != null && sc.status === 'ft') steal = Math.max(0, ...d.players.filter(x => x.t === p.team).map(x => sc.pts[x.i] || 0));
+  return { p, list, sc, total: base + cap + steal };
+}
+function cmpBlock(f, me, opp) {
+  const d = S.fxdocs[f.id], a = cmpSide(f, me), b = cmpSide(f, opp), n = Math.max(a.list.length, b.list.length);
+  const shared = new Set(a.list.map(x => x.i).filter(i => b.list.some(y => y.i === i)));
+  const cell = (s, i) => {
+    const pl = s.list[i]; if (!pl) return '<div></div>';
+    const sh = shared.has(pl.i);
+    return `<div class="k r j" style="padding:8px${sh ? ';background:rgba(245,179,1,.2);border-color:rgba(245,179,1,.55)' : ''}"><span class="r" style="gap:6px;min-width:0">${s.p.cap === pl.i ? '<span class="c">C</span>' : ''}<span style="min-width:0"><span class="nm" style="font-size:13px;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(pl.n)}</span><span class="sub">${POS[pl.p]}</span></span></span><span class="d">${N(s.sc.pts[pl.i] || 0)}</span></div>`;
+  };
+  const chip = s => `<div class="ctr">${s.p.chip ? `<span class="pl ok">${CHIPS[s.p.chip].n}</span>` : ''}</div>`;
+  const win = (x, y) => x > y ? ';color:#8bffb8' : '';
+  const html = `<div class="r j" style="padding-top:6px"><b>${esc(teamName(d.h))} ضد ${esc(teamName(d.a))}</b><span class="m">${a.sc.status === 'ft' ? 'انتهى' : 'مباشر (مؤقت)'}</span></div>
+    ${[...Array(n).keys()].map(i => `<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">${cell(a, i)}${cell(b, i)}</div>`).join('')}
+    ${a.p.chip || b.p.chip ? `<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">${chip(a)}${chip(b)}</div>` : ''}
+    <div class="k r j"><span class="d" style="font-size:22px${win(a.total, b.total)}">${N(a.total)}</span><span class="m">مجموع الماتش</span><span class="d" style="font-size:22px${win(b.total, a.total)}">${N(b.total)}</span></div>`;
+  return { html, a: a.total, b: b.total };
+}
+function cmpHtml(A) {
+  const st = S.st, me = S.profile.username;
+  const others = [...A.users].filter(u => u !== me).sort();
+  if (!st.opp || !A.users.has(st.opp)) {
+    return `<div class="k"><b>اختار لاعب تقارن بيه</b><div style="margin-top:8px"><input class="in" data-in="sopp" placeholder="ابحث باسم المستخدم" aria-label="بحث" value="${esc(st.oq)}"></div></div><div id="ol" style="display:flex;flex-direction:column;gap:8px">${oppRows(others)}</div>`;
+  }
+  const blocks = scopeFx().filter(f => S.stats[f.id] && S.fxdocs[f.id]).map(f => cmpBlock(f, me, st.opp));
+  const ta = blocks.reduce((s, x) => s + x.a, 0), tb = blocks.reduce((s, x) => s + x.b, 0);
+  return `<div class="k r j"><div class="r"><div class="av">${initial(me)}</div><b>أنت</b></div><button class="lnk" data-act="sopp0">تغيير</button><div class="r"><b>${esc(st.opp)}</b><div class="av">${initial(st.opp)}</div></div></div>
+    <div class="r m"><span style="width:12px;height:12px;border-radius:3px;background:rgba(245,179,1,.45)"></span>لاعب مشترك بينكم</div>
+    ${blocks.map(x => x.html).join('')}
+    ${blocks.length > 1 ? `<div class="k r j"><span class="d" style="font-size:24px${ta > tb ? ';color:#8bffb8' : ''}">${N(ta)}</span><span class="m">إجمالي النطاق</span><span class="d" style="font-size:24px${tb > ta ? ';color:#8bffb8' : ''}">${N(tb)}</span></div>` : ''}`;
+}
+
 function ranked(rows) {
   let prev = null, rank = 0;
   return rows.map((r, i) => { if (!prev || r.pts !== prev.pts) rank = i + 1; prev = r; return { ...r, rank }; });
@@ -583,6 +750,7 @@ const ACTIONS = {
     S.view = v;
     S.q = '';
     if (v === 'board') { render(); await Promise.all([loadBoard('total'), S.gw != null ? loadBoard('gw_' + S.gw) : null]); }
+    else if (v === 'stats') { initStats(); S.st.loading = true; render(); await loadStatsScope(); S.st.loading = false; }
     else if (v === 'account') { render(); if (!S.boards.total) await loadBoard('total').catch(() => {}); }
     else if (v === 'round') { await loadPicks().catch(() => {}); await loadMyPts(); }
     render();
@@ -598,6 +766,13 @@ const ACTIONS = {
   },
   back() { flushSaves(); S.view = 'round'; render(); },
   chip(el) { toggleChip(el.dataset.c); },
+  ssc(el) { S.st.kind = el.dataset.k; refreshStats(); },
+  sfx(el) { S.st.kind = 'match'; S.st.fid = el.dataset.fid; refreshStats(); },
+  sday(el) { S.st.kind = 'day'; S.st.day = el.dataset.k; refreshStats(); },
+  stab(el) { S.st.tab = el.dataset.k; S.st.q = ''; render(); },
+  sx(el) { const k = el.dataset.k; S.st.ex[k] = !S.st.ex[k]; renderStatsBody(); },
+  sopp(el) { S.st.opp = el.dataset.u; renderStatsBody(); },
+  sopp0() { S.st.opp = null; S.st.oq = ''; renderStatsBody(); },
   steam(el) {
     const fid = S.fx, p = pickOf(fid);
     if (isLocked(fid)) return toast('الماتش بدأ، الاختيار مقفول');
@@ -671,6 +846,8 @@ const FORMS = {
 let unameTimer;
 const INPUTS = {
   psearch(t) { S.q = t.value; renderList(); },
+  ssearch(t) { S.st.q = t.value; renderStatsBody(); },
+  sopp(t) { S.st.oq = t.value; const l = $('#ol'); if (l) l.innerHTML = oppRows([...aggStats().users].filter(u => u !== S.profile.username).sort()); },
   usearch(t) { S.uq = t.value; const l = $('#ulist'); if (l) l.innerHTML = adminRows(); },
   uname(t) {
     const v = t.value.trim(), h = $('#uhint');
@@ -690,7 +867,7 @@ document.addEventListener('input', e => { const t = e.target; if (t.dataset && t
 /* ───────── البداية ───────── */
 onAuthStateChanged(auth, async u => {
   S.user = u;
-  if (!u) { S.profile = null; S.admin = false; S.picks = {}; S.view = 'login'; render(); return; }
+  if (!u) { S.profile = null; S.admin = false; S.picks = {}; S.stats = {}; S.scores = {}; S.st = newSt(); S.view = 'login'; render(); return; }
   S.view = 'loading'; render();
   try { await bootUser(); } catch (e) { console.error(e); S.view = 'error'; }
   render();
