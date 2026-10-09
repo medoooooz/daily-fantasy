@@ -7,7 +7,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<title>الفانتسي اليومي</title>
+<title>الفانتاسي اليومي</title>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" href="icon-192.png">
@@ -97,6 +97,7 @@ a.lnk,.lnk{color:#8bffb8;background:none;border:0;padding:6px 0;text-decoration:
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
 import { getAuth, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail, signOut } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+import { getMessaging, getToken, onMessage, isSupported } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-messaging.js";
 import { getFirestore, doc, getDoc, getDocs, setDoc, updateDoc, collection, query, where, writeBatch, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 
 /* ───────── الإعدادات ───────── */
@@ -108,6 +109,7 @@ const firebaseConfig = {
   messagingSenderId: "856010520496",
   appId: "1:856010520496:web:526a9ee316e7b4b5f24875"
 };
+const VAPID_KEY = 'PASTE_VAPID_KEY_HERE';   // المفتاح العام من Firebase > Project settings > Cloud Messaging > Web Push certificates
 const TZ = 'Africa/Cairo';   // لازم تكون زي TZ في Code.gs
 const CAP_MULT = 2;          // لازم يكون زي CAPTAIN_MULT في Code.gs
 const POS = { 1: 'حارس', 2: 'مدافع', 3: 'وسط', 4: 'مهاجم' };
@@ -170,7 +172,7 @@ const S = {
   boards: {}, bt: 'total', myGwPts: null,
   fx: null, pos: 1, q: '', save: '',
   users: [], uq: '',
-  stats: {}, st: null
+  stats: {}, st: null, fcm: null
 };
 const newSt = () => ({ kind: 'gw', fid: null, day: null, tab: 'caps', q: '', opp: null, oq: '', ex: {}, loading: false });
 S.st = newSt();
@@ -272,6 +274,7 @@ async function bootUser() {
   try { const a = await getDoc(doc(db, 'admins', S.user.uid)); S.admin = a.exists(); } catch (e) { S.admin = false; }
   await loadRound();
   S.view = 'round';
+  refreshPush();
 }
 async function loadFixture(fid, fresh = true) {
   if (!S.fxdocs[fid]) {
@@ -398,7 +401,7 @@ function vLogin() {
   return `<div class="login">
     <img class="logo" src="icon-192.png" alt="">
     <div class="d" style="font-size:32px;line-height:1.1">الفانتاسي اليومي</div>
-    <div class="m" style="font-size:15px;margin-bottom:8px">اختار ٤ لاعبين من كل ماتش وتافس واثبتلهم انك التوب.</div>
+    <div class="m" style="font-size:15px;margin-bottom:8px">اختار ٤ لاعبين من كل ماتش ونافس واثبتلهم انك التوب</div>
     <button class="bt gbtn" data-act="google">الدخول بحساب جوجل</button>
     <button class="bt" disabled title="قريباً">الدخول بحساب فيسبوك (قريباً)</button>
     <div class="m ctr">أو بالإيميل</div>
@@ -433,7 +436,7 @@ function vRound() {
   const cur = days.find(d => d.key === S.day) || days[0];
   const pts = S.myGwPts == null ? '—' : N(S.myGwPts);
   const fin = S.boards['gw_' + g] && S.boards['gw_' + g].final;
-  return `<div class="h"><div><div class="m">الفانتازي اليومي</div><b>الجولة ${N(g)}</b><div class="m">الخصائص المتبقية ${N(chipsLeft())} من ${N(MAX_CHIPS)}</div></div><div class="ctr"><div class="m">نقطك ${S.myGwPts == null ? '' : (fin ? '(نهائية)' : '(مؤقتة)')}</div><div class="d" style="font-size:24px">${pts}</div></div></div>
+  return `<div class="h"><div><div class="m">الفانتاسي اليومي</div><b>الجولة ${N(g)}</b><div class="m">الخصائص المتبقية ${N(chipsLeft())} من ${N(MAX_CHIPS)}</div></div><div class="ctr"><div class="m">نقطك ${S.myGwPts == null ? '' : (fin ? '(نهائية)' : '(مؤقتة)')}</div><div class="d" style="font-size:24px">${pts}</div></div></div>
   ${nums.length > 1 ? `<div class="tg">${nums.map(n => `<button class="bt ${n === g ? 'on' : ''}" data-act="gw" data-g="${n}">الجولة ${N(n)}</button>`).join('')}</div>` : ''}
   <div class="tg">${days.map(d => `<button class="bt ${cur && d.key === cur.key ? 'on' : ''}" data-act="day" data-k="${d.key}">${esc(d.label)}</button>`).join('')}</div>
   <div class="f">${cur ? cur.list.map(card).join('') : ''}</div>`;
@@ -530,6 +533,55 @@ function renderList() {
       <div class="g"><div class="nm">${esc(x.n)} <span class="sub">${esc(team.sn)}</span> ${flag[x.s] ? `<span class="pl bad">${flag[x.s]}</span>` : ''}</div>
       <div class="sub">${N(x.g)} أهداف · ${N(x.a)} أسيست · ${N(x.tp)} نقطة</div>${x.nw ? `<div class="sub warn">${esc(x.nw)}</div>` : ''}</div>${right}</div>`;
   }).join('') : '<div class="k ctr">مفيش لاعبين بالاسم ده.</div>';
+}
+
+/* ───────── تنبيهات الموبايل ───────── */
+const pushConfigured = () => VAPID_KEY && !VAPID_KEY.startsWith('PASTE');
+const isIOS = () => /iPad|iPhone|iPod/.test(navigator.userAgent);
+const isStandalone = () => (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true;
+let fgBound = false;
+async function pushToken() {
+  const reg = await navigator.serviceWorker.ready;
+  return getToken(getMessaging(app), { vapidKey: VAPID_KEY, serviceWorkerRegistration: reg });
+}
+function bindForeground() {
+  if (fgBound) return; fgBound = true;
+  try { onMessage(getMessaging(app), p => { const n = p.notification || {}; toast((n.title || '') + (n.body ? ': ' + n.body : '')); }); } catch (e) { /* مش مهم */ }
+}
+async function loadFcm() {
+  try { const r = await getDoc(doc(db, 'fcm', S.user.uid)); S.fcm = r.exists() ? r.data() : null; } catch (e) { S.fcm = null; }
+}
+/* لو التنبيهات مفعّلة، بنجدّد التوكن في الخلفية (بيتغير أحياناً) */
+async function refreshPush() {
+  try {
+    if (!pushConfigured() || !(await isSupported()) || typeof Notification === 'undefined' || Notification.permission !== 'granted') return;
+    await loadFcm();
+    if (!S.fcm || !S.fcm.on) return;
+    bindForeground();
+    const t = await pushToken();
+    if (t && t !== S.fcm.token) { await setDoc(doc(db, 'fcm', S.user.uid), { token: t, on: true, updatedAt: serverTimestamp() }); S.fcm = { token: t, on: true }; }
+  } catch (e) { console.error(e); }
+}
+async function enablePush() {
+  if (!pushConfigured()) return toast('التنبيهات لسه مش جاهزة، الإدارة محتاجة تضيف مفتاح التنبيهات');
+  if (isIOS() && !isStandalone()) return toast('على الآيفون ضيف التطبيق للشاشة الرئيسية الأول (مشاركة ثم Add to Home Screen) وافتحه منها');
+  try {
+    if (!(await isSupported())) return toast('المتصفح ده مش بيدعم التنبيهات');
+    const perm = await Notification.requestPermission();
+    if (perm !== 'granted') return toast('لازم توافق على الإشعارات من إعدادات المتصفح');
+    const token = await pushToken();
+    if (!token) return toast('مقدرتش أجيب توكن التنبيهات');
+    await setDoc(doc(db, 'fcm', S.user.uid), { token, on: true, updatedAt: serverTimestamp() });
+    S.fcm = { token, on: true };
+    bindForeground();
+    toast('اتفعّلت التنبيهات ✓');
+  } catch (e) { console.error(e); toast('مقدرتش أفعّل التنبيهات: ' + (e.code || e.message)); }
+  render();
+}
+async function disablePush() {
+  try { await setDoc(doc(db, 'fcm', S.user.uid), { token: (S.fcm && S.fcm.token) || '', on: false, updatedAt: serverTimestamp() }); S.fcm = { ...(S.fcm || {}), on: false }; toast('اتقفلت التنبيهات'); }
+  catch (e) { toast('مقدرتش أقفلها: ' + (e.code || e.message)); }
+  render();
 }
 
 /* ───────── الإحصائيات والمقارنة ───────── */
@@ -716,6 +768,7 @@ function vAccount() {
     <div class="k r"><div class="av" style="width:56px;height:56px;font-size:22px">${S.profile.photo ? `<img src="${esc(S.profile.photo)}" alt="" referrerpolicy="no-referrer" style="width:100%;height:100%;object-fit:cover">` : initial(S.profile.username)}</div>
       <div class="g"><b style="font-size:18px">${esc(S.profile.username)}</b><div class="m" dir="ltr" style="text-align:start">${esc(S.user.email || '')}</div></div></div>
     <div style="display:flex;gap:8px"><div class="k ctr g"><div class="d" style="font-size:26px">${me ? N(me.pts) : '—'}</div><div class="m">إجمالي النقط</div></div><div class="k ctr g"><div class="d" style="font-size:26px">${me ? N(me.rank) : '—'}</div><div class="m">المركز${rows.length ? ' من ' + N(rows.length) : ''}</div></div></div>
+    <div class="k"><div class="r j"><div class="g"><b>تنبيهات الماتشات</b><div class="m">${S.fcm && S.fcm.on ? 'مفعّلة: هنبعتلك قبل الماتش بحوالي ساعة لو تشكيلتك ناقصة.' : 'فعّلها علشان يوصلك تنبيه قبل الماتش بساعة لو تشكيلتك ناقصة.'}</div></div><button class="bt ${S.fcm && S.fcm.on ? '' : 'on'}" data-act="push">${S.fcm && S.fcm.on ? 'إيقاف' : 'تفعيل'}</button></div>${isIOS() && !isStandalone() ? '<div class="m warn mt">على الآيفون لازم تضيف التطبيق للشاشة الرئيسية الأول.</div>' : ''}</div>
     ${S.admin ? '<button class="bt" data-act="admin">لوحة الإدارة</button>' : ''}
     <button class="bt red" data-act="logout" style="margin-top:auto">تسجيل الخروج</button></div>`;
 }
@@ -751,7 +804,7 @@ const ACTIONS = {
     S.q = '';
     if (v === 'board') { render(); await Promise.all([loadBoard('total'), S.gw != null ? loadBoard('gw_' + S.gw) : null]); }
     else if (v === 'stats') { initStats(); S.st.loading = true; render(); await loadStatsScope(); S.st.loading = false; }
-    else if (v === 'account') { render(); if (!S.boards.total) await loadBoard('total').catch(() => {}); }
+    else if (v === 'account') { render(); await Promise.all([S.boards.total ? null : loadBoard('total').catch(() => {}), loadFcm()]); }
     else if (v === 'round') { await loadPicks().catch(() => {}); await loadMyPts(); }
     render();
   },
@@ -766,6 +819,7 @@ const ACTIONS = {
   },
   back() { flushSaves(); S.view = 'round'; render(); },
   chip(el) { toggleChip(el.dataset.c); },
+  push() { return (S.fcm && S.fcm.on) ? disablePush() : enablePush(); },
   ssc(el) { S.st.kind = el.dataset.k; refreshStats(); },
   sfx(el) { S.st.kind = 'match'; S.st.fid = el.dataset.fid; refreshStats(); },
   sday(el) { S.st.kind = 'day'; S.st.day = el.dataset.k; refreshStats(); },
@@ -867,7 +921,7 @@ document.addEventListener('input', e => { const t = e.target; if (t.dataset && t
 /* ───────── البداية ───────── */
 onAuthStateChanged(auth, async u => {
   S.user = u;
-  if (!u) { S.profile = null; S.admin = false; S.picks = {}; S.stats = {}; S.scores = {}; S.st = newSt(); S.view = 'login'; render(); return; }
+  if (!u) { S.profile = null; S.admin = false; S.picks = {}; S.stats = {}; S.scores = {}; S.st = newSt(); S.fcm = null; S.view = 'login'; render(); return; }
   S.view = 'loading'; render();
   try { await bootUser(); } catch (e) { console.error(e); S.view = 'error'; }
   render();
