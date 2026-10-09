@@ -436,7 +436,7 @@ function vRound() {
   const cur = days.find(d => d.key === S.day) || days[0];
   const pts = S.myGwPts == null ? '—' : N(S.myGwPts);
   const fin = S.boards['gw_' + g] && S.boards['gw_' + g].final;
-  return `<div class="h"><div><div class="m">الفانتاسي اليومي</div><b>الجولة ${N(g)}</b><div class="m">الخصائص المتبقية ${N(chipsLeft())} من ${N(MAX_CHIPS)}</div></div><div class="ctr"><div class="m">نقطك ${S.myGwPts == null ? '' : (fin ? '(نهائية)' : '(مؤقتة)')}</div><div class="d" style="font-size:24px">${pts}</div></div></div>
+  return `<div class="h"><div><div class="m">الفانتاسي اليومي</div><b>الجولة ${N(g)}</b><div class="m">الخواص المتبقية ${N(chipsLeft())} من ${N(MAX_CHIPS)}</div></div><div class="ctr"><div class="m">نقطك ${S.myGwPts == null ? '' : (fin ? '(نهائية)' : '(مؤقتة)')}</div><div class="d" style="font-size:24px">${pts}</div></div></div>
   ${nums.length > 1 ? `<div class="tg">${nums.map(n => `<button class="bt ${n === g ? 'on' : ''}" data-act="gw" data-g="${n}">الجولة ${N(n)}</button>`).join('')}</div>` : ''}
   <div class="tg">${days.map(d => `<button class="bt ${cur && d.key === cur.key ? 'on' : ''}" data-act="day" data-k="${d.key}">${esc(d.label)}</button>`).join('')}</div>
   <div class="f">${cur ? cur.list.map(card).join('') : ''}</div>`;
@@ -500,7 +500,7 @@ function renderMatchBody() {
   }
 
   /* صف الخصائص */
-  html += `<div class="r j" style="padding:0 16px 6px"><b>الخصائص</b><span class="m">متبقي ${N(chipsLeft())} من ${N(MAX_CHIPS)} في الجولة</span></div>
+  html += `<div class="r j" style="padding:0 16px 6px"><b>الخواص</b><span class="m">متبقي ${N(chipsLeft())} من ${N(MAX_CHIPS)} في الجولة</span></div>
   <div class="tg">${Object.keys(CHIPS).map(c => `<button class="bt ${p.chip === c ? 'on' : ''} ${p.chip !== c && canUseChip(fid, c) ? 'dz' : ''}" data-act="chip" data-c="${c}" style="font-size:13px">${CHIPS[c].n}</button>`).join('')}</div>`;
   if (p.chip) html += `<div class="m" style="padding:0 16px 10px">${CHIPS[p.chip].d}</div>`;
   if (p.chip === 'steal') {
@@ -636,7 +636,7 @@ function vStats() {
   const st = S.st;
   if (S.gw == null) return `<div class="h"><b>الإحصائيات</b></div><div class="f"><div class="k ctr">مفيش جولات لسه.</div></div>`;
   const all = startedFx(S.gw), days = [...new Set(all.map(f => dayKey(koOf(f))))];
-  const tabs = [['caps', 'الكباتن'], ['chips', 'الخصائص'], ['combo', 'الكومبو'], ['cmp', 'مقارنة']];
+  const tabs = [['caps', 'الكباتن'], ['chips', 'الخواص'], ['combo', 'الكومبو'], ['cmp', 'مقارنة']];
   const sub = st.kind === 'match'
     ? `<div class="tg">${all.map(f => `<button class="bt ${String(st.fid) === String(f.id) ? 'on' : ''}" data-act="sfx" data-fid="${f.id}" style="font-size:13px">${esc(f.h.sn)} ضد ${esc(f.a.sn)}</button>`).join('')}</div>`
     : st.kind === 'day' ? `<div class="tg">${days.map(k => `<button class="bt ${st.day === k ? 'on' : ''}" data-act="sday" data-k="${k}" style="font-size:13px">${esc(fmtDay(Date.parse(k + 'T12:00:00Z')))}</button>`).join('')}</div>` : '';
