@@ -67,6 +67,7 @@ button{cursor:pointer}
 .sl .nm{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:700}
 .av{width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;color:#fff;flex:none;overflow:hidden}
 .bar{height:6px;border-radius:3px;background:rgba(255,255,255,.2)}
+.bar i{display:block;height:100%;border-radius:3px;background:#2fd06b}
 .ph{position:relative;display:inline-block;width:38px;height:44px;flex:none}
 .ph svg{width:100%;height:100%}
 .ph img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:top}
@@ -98,7 +99,7 @@ a.lnk,.lnk{color:#8bffb8;background:none;border:0;padding:6px 0;text-decoration:
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
 import { getAuth, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail, signOut } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
 import { getMessaging, getToken, onMessage, isSupported } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-messaging.js";
-import { getFirestore, doc, getDoc, getDocs, setDoc, updateDoc, collection, query, where, writeBatch, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+import { getFirestore, doc, getDoc, getDocs, setDoc, updateDoc, deleteDoc, collection, query, where, writeBatch, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 
 /* ───────── الإعدادات ───────── */
 const firebaseConfig = {
@@ -172,7 +173,8 @@ const S = {
   boards: {}, bt: 'total', myGwPts: null,
   fx: null, pos: 1, q: '', save: '',
   users: [], uq: '',
-  stats: {}, st: null, fcm: null
+  stats: {}, st: null, fcm: null,
+  tours: [], tour: null, tt: { tab: 'groups', r: null }, tn: null, cal: null
 };
 const newSt = () => ({ kind: 'gw', fid: null, day: null, tab: 'caps', q: '', opp: null, oq: '', ex: {}, loading: false });
 S.st = newSt();
@@ -375,7 +377,7 @@ function render() {
   const v = S.view;
   const nonav = ['loading', 'login', 'setup', 'banned', 'error', 'match'].includes(v);
   root.className = nonav ? 'nonav' : '';
-  const views = { loading: vLoading, login: vLogin, setup: vSetup, banned: vBanned, error: vError, round: vRound, match: vMatch, board: vBoard, stats: vStats, account: vAccount, admin: vAdmin };
+  const views = { loading: vLoading, login: vLogin, setup: vSetup, banned: vBanned, error: vError, round: vRound, match: vMatch, board: vBoard, stats: vStats, tour: vTourList, tdet: vTourDetail, tnew: vTourNew, account: vAccount, admin: vAdmin };
   root.innerHTML = (views[v] || vLoading)() + (nonav ? '' : nav());
   if (v === 'match') renderMatchBody();
   if (v === 'stats') renderStatsBody();
@@ -388,9 +390,9 @@ function lockSig() {
   return gwFixtures(S.gw).map(f => (koOf(f) && Date.now() >= koOf(f)) ? 1 : 0).join('');
 }
 function nav() {
-  const t = S.view === 'admin' ? 'account' : S.view;
+  const t = S.view === 'admin' ? 'account' : (S.view === 'tdet' || S.view === 'tnew') ? 'tour' : S.view;
   const b = (k, label, svg) => `<button class="n ${t === k ? 'on' : ''}" data-act="nav" data-v="${k}"><svg viewBox="0 0 24 24">${svg}</svg>${label}</button>`;
-  return `<nav class="nv">${b('round', 'الجولة', '<path d="M3 5h18v14H3zM3 10h18"/>')}${b('board', 'الترتيب', '<path d="M6 20v-9M12 20V4M18 20v-6"/>')}${b('stats', 'الإحصائيات', '<path d="M12 3v9h9M20 15a9 9 0 11-11-11"/>')}${b('account', 'حسابي', '<circle cx="12" cy="8" r="4"/><path d="M4 21c1-6 15-6 16 0"/>')}</nav>`;
+  return `<nav class="nv">${b('round', 'الجولة', '<path d="M3 5h18v14H3zM3 10h18"/>')}${b('board', 'الترتيب', '<path d="M6 20v-9M12 20V4M18 20v-6"/>')}${b('tour', 'البطولات', '<path d="M8 4h8v5a4 4 0 01-8 0zM8 6H4v2a3 3 0 003 3M16 6h4v2a3 3 0 01-3 3M12 13v4M8 20h8"/>')}${b('stats', 'الإحصائيات', '<path d="M12 3v9h9M20 15a9 9 0 11-11-11"/>')}${b('account', 'حسابي', '<circle cx="12" cy="8" r="4"/><path d="M4 21c1-6 15-6 16 0"/>')}</nav>`;
 }
 const vLoading = () => `<div class="login ctr"><img class="logo" src="icon-192.png" alt="" style="margin:0 auto;display:block"><div class="m">جاري التحميل…</div></div>`;
 const vError = () => `<div class="login ctr"><div>حصلت مشكلة في تحميل البيانات</div><button class="bt on" data-act="retry">حاول تاني</button><button class="lnk" data-act="logout">تسجيل الخروج</button></div>`;
@@ -582,6 +584,193 @@ async function disablePush() {
   try { await setDoc(doc(db, 'fcm', S.user.uid), { token: (S.fcm && S.fcm.token) || '', on: false, updatedAt: serverTimestamp() }); S.fcm = { ...(S.fcm || {}), on: false }; toast('اتقفلت التنبيهات'); }
   catch (e) { toast('مقدرتش أقفلها: ' + (e.code || e.message)); }
   render();
+}
+
+/* ───────── البطولات ───────── */
+const koName = (j, K) => { const left = K - j; return left === 1 ? 'النهائي' : left === 2 ? 'نصف النهائي' : left === 3 ? 'ربع النهائي' : 'دور الـ ' + N(2 ** left); };
+const unitLabel = u => u.t === 'gw' ? 'الجولة ' + N(u.g) : fmtDay(Date.parse(u.k + 'T12:00:00Z'));
+const roundTitle = (t, r) => r < t.cfg.rounds ? 'جولة المجموعات ' + N(r + 1) : koName(r - t.cfg.rounds, t.koRounds);
+
+/* القرعة والجدول (بتتعمل في متصفح الإدارة وبتتخزن في Firestore) */
+function shuffled(arr, rand) { const a = [...arr]; for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(rand() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+const cryptoRand = () => { const u = new Uint32Array(1); crypto.getRandomValues(u); return u[0] / 4294967296; };
+function roundRobin(uids) {
+  const a = [...uids]; if (a.length % 2) a.push(null);
+  const n = a.length, rounds = [];
+  for (let r = 0; r < n - 1; r++) {
+    const m = []; for (let i = 0; i < n / 2; i++) m.push([a[i], a[n - 1 - i]]);
+    rounds.push(m); a.splice(1, 0, a.pop());
+  }
+  return rounds;
+}
+function evenSizes(n, g) { const b = Math.floor(n / g), r = n % g; return Array.from({ length: g }, (_, i) => b + (i < r ? 1 : 0)); }
+const maxRounds = (sizes, legs) => Math.max(0, ...sizes.map(z => z < 2 ? 0 : legs * (z % 2 ? z : z - 1)));
+const koCount = (sizes, k) => { const q = sizes.reduce((s, z) => s + Math.min(k, z), 0); return q > 1 ? Math.ceil(Math.log2(q)) : 0; };
+function makeDraw(sizes, legs, rounds, uids, rand) {
+  const sh = shuffled(uids, rand); let i = 0;
+  const groups = sizes.map((z, gi) => ({ name: String.fromCharCode(65 + gi), uids: sh.slice(i, i += z) }));
+  const fixtures = [];
+  groups.forEach((g, gi) => {
+    let rr = roundRobin(g.uids);
+    if (legs === 2) rr = rr.concat(rr.map(m => m.map(([x, y]) => [y, x])));
+    rr.slice(0, rounds).forEach((m, r) => m.forEach(([a, b]) => { if (a && b) fixtures.push({ r, g: gi, a, b }); }));
+  });
+  return { groups, fixtures };
+}
+function makeUnits(scope, start, n) {
+  if (scope === 'gw') return (start >= 1 && start + n - 1 <= 38) ? Array.from({ length: n }, (_, i) => ({ t: 'gw', g: start + i })) : null;
+  const days = S.cal || [], i0 = days.findIndex(d => d.k === start);
+  return (i0 >= 0 && i0 + n <= days.length) ? days.slice(i0, i0 + n).map(d => ({ t: 'day', k: d.k, g: d.g })) : null;
+}
+
+async function loadTours() {
+  const s = await getDocs(collection(db, 'tournaments'));
+  S.tours = s.docs.map(d => ({ id: d.id, ...d.data() })).filter(t => S.admin || t.status !== 'draft').sort((a, b) => (tsMs(b.createdAt) || 0) - (tsMs(a.createdAt) || 0));
+}
+async function loadUsersList() {
+  const s = await getDocs(collection(db, 'users'));
+  S.users = s.docs.map(d => ({ id: d.id, ...d.data() }));
+}
+async function openTour(id) {
+  const t = S.tours.find(x => x.id === id); if (!t) return;
+  let st = null;
+  if (t.status !== 'draft') { try { const r = await getDoc(doc(db, 'tstate', id)); st = r.exists() ? r.data() : null; } catch (e) { st = null; } }
+  S.tour = { id, t, st };
+  S.tt = { tab: 'groups', r: null };
+}
+const tName = (t, u) => u === 'BYE' ? 'bye' : u ? esc(t.players[u] || '؟') : '—';
+function curRound(t, st) {
+  if (!st) return 0;
+  const all = [...st.rounds, ...st.ko];
+  const i = all.findIndex(x => !x.final);
+  return i < 0 ? all.length - 1 : i;
+}
+function matchRow(t, m, ko) {
+  const me = S.user.uid;
+  const wuid = ko ? m.w : (m.w === 'a' ? m.a : m.w === 'b' ? m.b : null);
+  const final = ko ? !!m.w : m.w != null;
+  const col = u => (final && wuid && wuid === u) ? ';color:#8bffb8' : '';
+  const mine = m.a === me || m.b === me;
+  const score = m.bye ? 'bye' : (m.pa == null ? '–' : N(m.pa) + ' – ' + N(m.pb));
+  return `<div class="k r j" style="padding:10px 12px${mine ? ';border-color:#2fd06b;background:rgba(47,208,107,.18)' : ''}"><span class="g nm" style="font-size:13px${col(m.a)}">${tName(t, m.a)}</span><span class="d ctr" style="font-size:16px;min-width:64px">${score}${m.tb ? `<div class="sub">${m.tb === 'cap' ? 'بنقط الكابتن' : 'بالقرعة'}</div>` : (!final && m.pa != null ? '<div class="sub">مؤقتة</div>' : (final && !ko && m.w === 'd' ? '<div class="sub">تعادل</div>' : ''))}</span><span class="g nm" style="font-size:13px;text-align:end${col(m.b)}">${tName(t, m.b)}</span></div>`;
+}
+function groupsHtml(t, st) {
+  const k = t.cfg.qualifiers, me = S.user.uid;
+  const grid = 'display:grid;grid-template-columns:22px 1fr 28px 28px 28px 28px 38px;gap:2px;align-items:center';
+  return t.groups.map((g, gi) => {
+    const rows = st && st.tables[gi] ? st.tables[gi].rows : g.uids.map(u => ({ uid: u, P: 0, W: 0, D: 0, L: 0, pts: 0 }));
+    return `<div class="k" style="padding:8px 12px"><div class="r j"><b>${t.cfg.groups > 1 ? 'المجموعة ' + esc(g.name) : 'الدوري'}</b>${k > 0 ? `<span class="m">يتأهل أول ${N(Math.min(k, g.uids.length))}</span>` : ''}</div>
+    <div class="m" style="${grid};padding:8px 9px 4px 0"><span>#</span><span>اللاعب</span><span>لعب</span><span>ف</span><span>ت</span><span>خ</span><span>نقط</span></div>
+    ${rows.map((r, i) => `<div style="${grid};padding:7px ${i < k ? '6px' : '9px'} 7px 0;border-top:1px solid rgba(255,255,255,.14);${i < k ? 'border-right:3px solid #2fd06b;' : ''}${r.uid === me ? 'background:rgba(47,208,107,.14);' : ''}"><span class="d">${N(i + 1)}</span><span style="font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${tName(t, r.uid)}</span><span>${N(r.P)}</span><span>${N(r.W)}</span><span>${N(r.D)}</span><span>${N(r.L)}</span><span class="d" style="color:#8bffb8">${N(r.pts)}</span></div>`).join('')}</div>`;
+  }).join('') + (st ? '<div class="m">الجدول بيتحسب من الجولات النهائية بس (بعد مراجعة البونص).</div>' : '<div class="m">النتايج بتظهر بعد أول جولة نهائية.</div>');
+}
+function roundBlock(t, st, r) {
+  const R = t.cfg.rounds, unit = t.units[r];
+  if (r < R) {
+    const rd = st && st.rounds[r];
+    const ms = rd ? rd.matches : t.fixtures.filter(f => f.r === r).map(f => ({ g: f.g, a: f.a, b: f.b, pa: null, pb: null, w: null }));
+    const status = rd ? (rd.final ? '<span class="pl ok">نهائية</span>' : rd.started ? '<span class="pl lv">مؤقتة</span>' : '<span class="pl">لسه</span>') : '<span class="pl">لسه</span>';
+    const body = t.cfg.groups > 1
+      ? t.groups.map((g, gi) => { const l = ms.filter(m => m.g === gi); return l.length ? `<div class="m mt">المجموعة ${esc(g.name)}</div>${l.map(m => matchRow(t, m, false)).join('')}` : ''; }).join('')
+      : ms.map(m => matchRow(t, m, false)).join('');
+    return `<div class="r j"><b>${roundTitle(t, r)}</b>${status}</div><div class="m">${unitLabel(unit)}</div>${body || '<div class="k ctr">مفيش مباريات في الجولة دي.</div>'}`;
+  }
+  const j = r - R, kr = st && st.ko[j];
+  const status = kr ? (kr.final ? '<span class="pl ok">نهائية</span>' : kr.started ? '<span class="pl lv">مؤقتة</span>' : '<span class="pl">لسه</span>') : '<span class="pl">لسه</span>';
+  return `<div class="r j"><b>${roundTitle(t, r)}</b>${status}</div><div class="m">${unitLabel(unit)}</div>${kr ? kr.matches.map(m => matchRow(t, m, true)).join('') : '<div class="k ctr">بتتحدد بعد ما دور المجموعات يخلص.</div>'}`;
+}
+function roundsHtml(t, st) {
+  const total = t.cfg.rounds + t.koRounds, r = S.tt.r ?? curRound(t, st);
+  const chips = Array.from({ length: total }, (_, i) => `<button class="bt ${i === r ? 'on' : ''}" data-act="tround" data-r="${i}" style="font-size:13px">${i < t.cfg.rounds ? 'ج' + N(i + 1) : koName(i - t.cfg.rounds, t.koRounds)}</button>`).join('');
+  return `<div class="tg" style="padding:0 0 8px">${chips}</div>${roundBlock(t, st, r)}`;
+}
+function koHtml(t, st) {
+  if (t.cfg.qualifiers <= 0) return '<div class="k ctr">البطولة دي دوري بس من غير إقصائيات.</div>';
+  if (!st || !st.groupDone) return `<div class="k ctr">الإقصائيات بتبدأ لما دور المجموعات يخلص (${N(t.koRounds)} أدوار).</div>`;
+  return (st.champion ? `<div class="k r j" style="border-color:#f5b301;background:rgba(245,179,1,.18)"><b>بطل البطولة</b><span class="d" style="font-size:20px">${tName(t, st.champion)}</span></div>` : '')
+    + st.ko.map(kr => `<div class="r j mt"><b>${koName(kr.j, t.koRounds)}</b><span class="m">${unitLabel(kr.unit)}</span></div>${kr.matches.map(m => matchRow(t, m, true)).join('')}`).join('');
+}
+function mineHtml(t, st) {
+  const me = S.user.uid, out = [];
+  if (!t.players[me]) return '<div class="k ctr">انت مش مشارك في البطولة دي.</div>';
+  const gi = t.groups.findIndex(g => g.uids.includes(me));
+  if (st && st.tables[gi]) { const i = st.tables[gi].rows.findIndex(r => r.uid === me); out.push(`<div class="k r j"><div><b>ترتيبك في ${t.cfg.groups > 1 ? 'المجموعة ' + esc(t.groups[gi].name) : 'الدوري'}</b><div class="m">${N(st.tables[gi].rows[i].pts)} نقطة بعد ${N(st.tables[gi].rows[i].P)} مباريات</div></div><span class="d" style="font-size:28px">${N(i + 1)}</span></div>`); }
+  const R = t.cfg.rounds;
+  for (let r = 0; r < R; r++) {
+    const ms = (st ? st.rounds[r].matches : t.fixtures.filter(f => f.r === r)).filter(m => m.a === me || m.b === me);
+    if (ms.length) out.push(`<div class="r j mt"><b>${roundTitle(t, r)}</b><span class="m">${unitLabel(t.units[r])}</span></div>${ms.map(m => matchRow(t, { pa: null, pb: null, w: null, ...m }, false)).join('')}`);
+  }
+  if (st) st.ko.forEach(kr => { const ms = kr.matches.filter(m => m.a === me || m.b === me); if (ms.length) out.push(`<div class="r j mt"><b>${koName(kr.j, t.koRounds)}</b><span class="m">${unitLabel(kr.unit)}</span></div>${ms.map(m => matchRow(t, m, true)).join('')}`); });
+  return out.join('') || '<div class="k ctr">مفيش مباريات ليك لسه.</div>';
+}
+function draftBody(t) {
+  const prev = t.groups.map(g => `<div class="k"><b>${t.cfg.groups > 1 ? 'المجموعة ' + esc(g.name) : 'الدوري'}</b>${g.uids.map(u => `<div class="r" style="padding:6px 0;border-top:1px solid rgba(255,255,255,.14)"><div class="av" style="width:28px;height:28px;font-size:12px">${initial(t.players[u])}</div><span>${tName(t, u)}</span></div>`).join('')}</div>`).join('');
+  const ctl = S.admin ? `<div class="k"><b>القرعة اتعملت</b><div class="m mt">راجعها، ولو مناسبة اعتمد البطولة علشان تظهر للاعبين، أو أعد القرعة.</div><div class="r mt"><button class="bt on g" data-act="tapprove">اعتماد وبدء البطولة</button></div><div class="r mt"><button class="bt g" data-act="tredraw">إعادة القرعة</button><button class="bt red" data-act="tdel">حذف</button></div></div>` : '<div class="k ctr">البطولة لسه مسودة.</div>';
+  return `<div class="f">${ctl}${prev}<div class="k"><b>الجدول</b><div class="m mt">${N(t.cfg.rounds)} جولات مجموعات${t.koRounds ? ' + ' + N(t.koRounds) + ' أدوار إقصائية' : ''} · من ${unitLabel(t.units[0])} إلى ${unitLabel(t.units[t.units.length - 1])}</div></div></div>`;
+}
+function vTourList() {
+  return `<div class="h"><b>البطولات</b>${S.admin ? '<button class="bt on" style="height:36px;padding:0 12px" data-act="tnew">+ بطولة جديدة</button>' : ''}</div>
+  <div class="f">${S.tours.length ? S.tours.map(t => `<button class="k" data-act="topen" data-id="${esc(t.id)}" style="cursor:pointer"><div class="r j"><b style="font-size:17px">${esc(t.name)}</b>${t.status === 'draft' ? '<span class="pl">مسودة</span>' : '<span class="pl ok">شغالة</span>'}</div><div class="m mt">${N(Object.keys(t.players || {}).length)} لاعب · ${t.cfg.groups === 1 ? 'دوري واحد' : N(t.cfg.groups) + ' مجموعات'} · ${t.scope === 'day' ? 'مواجهات بنقط اليوم' : 'مواجهات بنقط الجولة'}</div></button>`).join('') : '<div class="k ctr">مفيش بطولات لسه.</div>'}</div>`;
+}
+function vTourDetail() {
+  const T = S.tour; if (!T) return vLoading();
+  const { t, st } = T, tab = S.tt.tab;
+  const head = `<div class="h"><button class="bt" data-act="tback" style="padding:0 14px" aria-label="رجوع">›</button><div class="g"><b style="font-size:20px">${esc(t.name)}</b><div class="m">${t.scope === 'day' ? 'المواجهات بنقط اليوم' : 'المواجهات بنقط الجولة'} · ${t.status === 'draft' ? 'مسودة' : (st && st.finished) ? 'انتهت' : 'شغالة'}</div></div></div>`;
+  if (t.status === 'draft') return head + draftBody(t);
+  const tabs = [['groups', 'المجموعات'], ['rounds', 'المباريات'], ['ko', 'الإقصائيات'], ['mine', 'بطولتي']];
+  const body = tab === 'groups' ? groupsHtml(t, st) : tab === 'rounds' ? roundsHtml(t, st) : tab === 'ko' ? koHtml(t, st) : mineHtml(t, st);
+  return head + `<div class="tg">${tabs.map(([k, l]) => `<button class="bt ${tab === k ? 'on' : ''}" data-act="ttab" data-k="${k}" style="font-size:13px">${l}</button>`).join('')}</div><div class="f">${st ? '' : '<div class="m">الحسابات بتظهر خلال ٥ دقايق من بداية البطولة.</div>'}${body}</div>`;
+}
+
+/* إنشاء بطولة جديدة (للإدارة) */
+const newTn = () => ({ name: '', groups: 1, legs: 1, rounds: null, k: 0, scope: 'gw', start: null, custom: false, sizes: null, picked: {} });
+function tnCalc() {
+  const tn = S.tn, uids = Object.keys(tn.picked).filter(u => tn.picked[u]), n = uids.length;
+  const g = Math.max(1, tn.groups);
+  const sizes = (tn.custom && tn.sizes && tn.sizes.length === g) ? tn.sizes : evenSizes(n, g);
+  const maxR = maxRounds(sizes, tn.legs), R = Math.max(1, Math.min(tn.rounds ?? maxR, maxR || 1));
+  const minSize = Math.min(...sizes), k = Math.min(tn.k, minSize);
+  const K = koCount(sizes, k);
+  const start = tn.start ?? (tn.scope === 'gw' ? (S.gw || 1) : ((S.cal || []).find(d => d.k >= dayKey(Date.now())) || {}).k);
+  let err = '';
+  if (!tn.name.trim()) err = 'اكتب اسم البطولة';
+  else if (n < 2) err = 'اختار لاعبين على الأقل';
+  else if (sizes.reduce((a, b) => a + b, 0) !== n) err = 'مجموع أحجام المجموعات (' + N(sizes.reduce((a, b) => a + b, 0)) + ') لازم يساوي عدد اللاعبين (' + N(n) + ')';
+  else if (minSize < 2) err = 'كل مجموعة لازم فيها لاعبين على الأقل';
+  const units = err ? null : makeUnits(tn.scope, start, R + K);
+  if (!err && !units) err = tn.scope === 'gw' ? 'الجولات هتعدّي الجولة ٣٨، قدّم الجولة الأولى' : 'مفيش أيام كفاية في التقويم، قدّم اليوم الأول';
+  return { uids, n, sizes, maxR, R, k, K, start, units, err };
+}
+function vTourNew() {
+  const tn = S.tn; if (!tn) return vLoading();
+  const c = tnCalc();
+  const step = (label, sub, val, f, extra = '') => `<div class="k r j" style="padding:8px 12px"><div class="g"><b>${label}</b><div class="m">${sub}</div></div><div class="r" style="gap:6px"><button class="bt" style="width:44px;padding:0;font-size:20px" data-act="tn" data-f="${f}" data-d="1" ${extra} aria-label="زيادة">+</button><span class="d" style="min-width:34px;text-align:center;font-size:20px">${val}</span><button class="bt" style="width:44px;padding:0;font-size:20px" data-act="tn" data-f="${f}" data-d="-1" ${extra} aria-label="نقصان">−</button></div></div>`;
+  const users = (S.users || []).filter(u => !u.banned).sort((a, b) => (a.username || '').localeCompare(b.username || ''));
+  const startLbl = c.units ? unitLabel(c.units[0]) : '—';
+  return `<div class="h"><b>بطولة جديدة</b><button class="bt" data-act="tcancel">رجوع</button></div><div class="f" style="gap:8px">
+  <div><div class="m" style="margin-bottom:4px">اسم البطولة</div><input class="in" data-in="tnname" value="${esc(tn.name)}" aria-label="اسم البطولة"></div>
+  <div class="k"><div class="r j"><b>المشاركون (${N(c.n)})</b><span class="r"><button class="lnk" data-act="tnall">الكل</button><button class="lnk" data-act="tnclear">مسح</button></span></div>
+    <div style="display:flex;flex-direction:column;margin-top:6px;max-height:240px;overflow-y:auto">${users.map(u => `<button class="r" data-act="tnp" data-u="${esc(u.id)}" style="background:none;border:0;border-top:1px solid rgba(255,255,255,.14);padding:8px 0;text-align:start"><span class="av" style="width:26px;height:26px;font-size:11px;${tn.picked[u.id] ? 'background:#2fd06b;color:#04150a' : ''}">${tn.picked[u.id] ? '✓' : initial(u.username)}</span><span class="g">${esc(u.username)}</span></button>`).join('') || '<div class="m">بنحمّل اللاعبين…</div>'}</div></div>
+  ${step('عدد المجموعات', 'ممكن مجموعة واحدة (دوري)', N(tn.groups), 'groups')}
+  <div class="k"><div class="r j"><div class="g"><b>أحجام المجموعات</b><div class="m">${c.sizes.map(N).join(' · ')}</div></div><button class="bt ${tn.custom ? 'on' : ''}" data-act="tncustom" style="height:36px;padding:0 12px">${tn.custom ? 'تلقائي' : 'تعديل'}</button></div>${tn.custom && tn.sizes ? tn.sizes.map((z, i) => `<div class="r j" style="padding-top:8px"><span>المجموعة ${String.fromCharCode(65 + i)}</span><span class="r" style="gap:6px"><button class="bt" style="width:44px;padding:0" data-act="tn" data-f="size" data-i="${i}" data-d="1" aria-label="زيادة">+</button><span class="d" style="min-width:28px;text-align:center">${N(z)}</span><button class="bt" style="width:44px;padding:0" data-act="tn" data-f="size" data-i="${i}" data-d="-1" aria-label="نقصان">−</button></span></div>`).join('') : ''}</div>
+  <div style="display:flex;gap:6px"><button class="bt ${tn.legs === 1 ? 'on' : ''}" data-act="tnlegs" data-v="1" style="flex:1;padding:0">ذهاب فقط</button><button class="bt ${tn.legs === 2 ? 'on' : ''}" data-act="tnlegs" data-v="2" style="flex:1;padding:0">ذهاب وإياب</button></div>
+  ${step('عدد الجولات في المجموعة', 'الأقصى ' + N(c.maxR || 0), N(c.R), 'rounds')}
+  ${step('يتأهل من كل مجموعة', '٠ = دوري بدون إقصائيات', N(c.k), 'k')}
+  <div style="display:flex;gap:6px"><button class="bt ${tn.scope === 'gw' ? 'on' : ''}" data-act="tnscope" data-v="gw" style="flex:1;padding:0">نقط الجولة</button><button class="bt ${tn.scope === 'day' ? 'on' : ''}" data-act="tnscope" data-v="day" style="flex:1;padding:0">نقط اليوم</button></div>
+  ${step(tn.scope === 'gw' ? 'أول جولة' : 'أول يوم', startLbl, tn.scope === 'gw' ? N(c.start || 0) : '', 'start')}
+  <div class="k"><b>ملخص</b><div class="m mt">${N(c.n)} لاعب · ${tn.groups === 1 ? 'دوري واحد' : N(tn.groups) + ' مجموعات'} (${c.sizes.map(N).join('/')}) · ${tn.legs === 2 ? 'ذهاب وإياب' : 'ذهاب فقط'}</div><div class="m">${N(c.R)} جولات مجموعات${c.K ? ' + ' + N(c.K) + ' أدوار إقصائية' : ''}${c.units ? ' · من ' + unitLabel(c.units[0]) + ' إلى ' + unitLabel(c.units[c.units.length - 1]) : ''}</div><div class="m">التعادل في الإقصائيات: نقط الكابتن ثم القرعة. اللاعب المحظور بيخسر بالانسحاب.</div>${c.err ? `<div class="err mt">${esc(c.err)}</div>` : ''}</div>
+  <button class="bt on" data-act="tndraw" style="height:52px;margin-bottom:8px" ${c.err ? 'disabled' : ''}>إجراء القرعة</button></div>`;
+}
+async function createTour(redraw) {
+  const c = tnCalc(), tn = S.tn;
+  if (c.err) return toast(c.err);
+  const dr = makeDraw(c.sizes, tn.legs, c.R, c.uids, cryptoRand);
+  const names = {}; c.uids.forEach(u => { names[u] = ((S.users || []).find(x => x.id === u) || {}).username || '؟'; });
+  const data = { name: tn.name.trim(), scope: tn.scope, status: 'draft', cfg: { groups: tn.groups, sizes: c.sizes, legs: tn.legs, rounds: c.R, qualifiers: c.k }, players: names, groups: dr.groups, fixtures: dr.fixtures, units: c.units, koRounds: c.K, createdAt: serverTimestamp() };
+  const id = Date.now().toString(36);
+  await setDoc(doc(db, 'tournaments', id), data);
+  await loadTours();
+  S.tn = null; S.view = 'tdet'; await openTour(id);
 }
 
 /* ───────── الإحصائيات والمقارنة ───────── */
@@ -803,6 +992,7 @@ const ACTIONS = {
     S.view = v;
     S.q = '';
     if (v === 'board') { render(); await Promise.all([loadBoard('total'), S.gw != null ? loadBoard('gw_' + S.gw) : null]); }
+    else if (v === 'tour') { render(); await loadTours().catch(() => {}); }
     else if (v === 'stats') { initStats(); S.st.loading = true; render(); await loadStatsScope(); S.st.loading = false; }
     else if (v === 'account') { render(); await Promise.all([S.boards.total ? null : loadBoard('total').catch(() => {}), loadFcm()]); }
     else if (v === 'round') { await loadPicks().catch(() => {}); await loadMyPts(); }
@@ -819,6 +1009,56 @@ const ACTIONS = {
   },
   back() { flushSaves(); S.view = 'round'; render(); },
   chip(el) { toggleChip(el.dataset.c); },
+  async topen(el) { S.view = 'loading'; render(); try { await openTour(el.dataset.id); S.view = 'tdet'; } catch (e) { toast('مقدرتش أفتح البطولة'); S.view = 'tour'; } render(); },
+  tback() { S.view = 'tour'; render(); },
+  ttab(el) { S.tt.tab = el.dataset.k; render(); },
+  tround(el) { S.tt.r = Number(el.dataset.r); render(); },
+  async tnew() {
+    S.tn = newTn(); S.view = 'tnew'; render();
+    try {
+      await loadUsersList();
+      const c = await getDoc(doc(db, 'config', 'calendar')); S.cal = c.exists() ? c.data().days : [];
+    } catch (e) { toast('مقدرتش أحمّل اللاعبين'); }
+    render();
+  },
+  tcancel() { S.tn = null; S.view = 'tour'; render(); },
+  tn(el) {
+    const tn = S.tn, f = el.dataset.f, d = Number(el.dataset.d), c = tnCalc();
+    if (f === 'groups') { tn.groups = Math.max(1, Math.min(tn.groups + d, Math.max(1, Math.floor(c.n / 2)))); tn.sizes = null; tn.custom = false; tn.rounds = null; }
+    else if (f === 'rounds') tn.rounds = Math.max(1, Math.min(c.R + d, c.maxR || 1));
+    else if (f === 'k') tn.k = Math.max(0, Math.min(tn.k + d, Math.min(...c.sizes)));
+    else if (f === 'size') { const i = Number(el.dataset.i); tn.sizes = [...(tn.sizes || c.sizes)]; tn.sizes[i] = Math.max(1, tn.sizes[i] + d); }
+    else if (f === 'start') {
+      if (tn.scope === 'gw') tn.start = Math.max(1, Math.min(38, (c.start || 1) + d));
+      else { const days = S.cal || [], i = days.findIndex(x => x.k === c.start); const j = Math.max(0, Math.min(days.length - 1, (i < 0 ? 0 : i) + d)); tn.start = days[j] && days[j].k; }
+    }
+    render();
+  },
+  tnlegs(el) { S.tn.legs = Number(el.dataset.v); S.tn.rounds = null; render(); },
+  tnscope(el) { S.tn.scope = el.dataset.v; S.tn.start = null; render(); },
+  tncustom() { const c = tnCalc(); S.tn.custom = !S.tn.custom; S.tn.sizes = S.tn.custom ? [...c.sizes] : null; render(); },
+  tnall() { (S.users || []).filter(u => !u.banned).forEach(u => { S.tn.picked[u.id] = true; }); S.tn.sizes = null; render(); },
+  tnclear() { S.tn.picked = {}; S.tn.sizes = null; render(); },
+  tnp(el) { const u = el.dataset.u; S.tn.picked[u] = !S.tn.picked[u]; S.tn.sizes = null; S.tn.custom = false; render(); },
+  async tndraw() { try { await createTour(false); } catch (e) { console.error(e); toast('مقدرتش أحفظ القرعة: ' + (e.code || e.message)); S.view = 'tnew'; } render(); },
+  async tapprove() {
+    try { await updateDoc(doc(db, 'tournaments', S.tour.id), { status: 'active' }); S.tour.t.status = 'active'; const x = S.tours.find(y => y.id === S.tour.id); if (x) x.status = 'active'; toast('البطولة اتعتمدت، الجداول هتظهر خلال ٥ دقايق'); }
+    catch (e) { toast('مقدرتش أعتمدها: ' + (e.code || e.message)); }
+    render();
+  },
+  async tredraw() {
+    const t = S.tour.t, uids = Object.keys(t.players);
+    const dr = makeDraw(t.cfg.sizes, t.cfg.legs, t.cfg.rounds, uids, cryptoRand);
+    try { await updateDoc(doc(db, 'tournaments', S.tour.id), { groups: dr.groups, fixtures: dr.fixtures }); t.groups = dr.groups; t.fixtures = dr.fixtures; toast('اتعملت قرعة جديدة'); }
+    catch (e) { toast('مقدرتش أعيد القرعة: ' + (e.code || e.message)); }
+    render();
+  },
+  async tdel() {
+    if (!confirm('تحذف البطولة دي؟')) return;
+    try { await deleteDoc(doc(db, 'tournaments', S.tour.id)); try { await deleteDoc(doc(db, 'tstate', S.tour.id)); } catch (e) { /* مفيش حالة */ } S.tours = S.tours.filter(x => x.id !== S.tour.id); S.tour = null; S.view = 'tour'; toast('اتحذفت'); }
+    catch (e) { toast('مقدرتش أحذفها: ' + (e.code || e.message)); }
+    render();
+  },
   push() { return (S.fcm && S.fcm.on) ? disablePush() : enablePush(); },
   ssc(el) { S.st.kind = el.dataset.k; refreshStats(); },
   sfx(el) { S.st.kind = 'match'; S.st.fid = el.dataset.fid; refreshStats(); },
@@ -900,6 +1140,7 @@ const FORMS = {
 let unameTimer;
 const INPUTS = {
   psearch(t) { S.q = t.value; renderList(); },
+  tnname(t) { S.tn.name = t.value; },
   ssearch(t) { S.st.q = t.value; renderStatsBody(); },
   sopp(t) { S.st.oq = t.value; const l = $('#ol'); if (l) l.innerHTML = oppRows([...aggStats().users].filter(u => u !== S.profile.username).sort()); },
   usearch(t) { S.uq = t.value; const l = $('#ulist'); if (l) l.innerHTML = adminRows(); },
@@ -921,7 +1162,7 @@ document.addEventListener('input', e => { const t = e.target; if (t.dataset && t
 /* ───────── البداية ───────── */
 onAuthStateChanged(auth, async u => {
   S.user = u;
-  if (!u) { S.profile = null; S.admin = false; S.picks = {}; S.stats = {}; S.scores = {}; S.st = newSt(); S.fcm = null; S.view = 'login'; render(); return; }
+  if (!u) { S.profile = null; S.admin = false; S.picks = {}; S.stats = {}; S.scores = {}; S.st = newSt(); S.fcm = null; S.tours = []; S.tour = null; S.tn = null; S.view = 'login'; render(); return; }
   S.view = 'loading'; render();
   try { await bootUser(); } catch (e) { console.error(e); S.view = 'error'; }
   render();
