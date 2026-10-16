@@ -89,6 +89,32 @@ img.logo{background:none;object-fit:cover;width:72px;height:72px;border-radius:1
 .gbtn{height:50px;background:#fff;color:#1f1f1f;border:0}
 .err{color:#ffb4b6;font-size:13px}
 a.lnk,.lnk{color:#8bffb8;background:none;border:0;padding:6px 0;text-decoration:underline}
+/* خلفية الدخول المتحركة */
+.lbg{position:fixed;inset:0;z-index:-1;overflow:hidden;background:linear-gradient(135deg,#052418,#0a4a35,#0b3560,#07182f);background-size:300% 300%;animation:lg 20s ease infinite}
+@keyframes lg{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
+.lbg>i{position:absolute;border-radius:50%;filter:blur(70px);opacity:.5;animation:orb 16s ease-in-out infinite alternate}
+.lbg>i:nth-child(1){width:55vmax;height:55vmax;left:-18vmax;top:-14vmax;background:#18c070}
+.lbg>i:nth-child(2){width:50vmax;height:50vmax;right:-16vmax;bottom:-14vmax;background:#2f7bff;animation-duration:22s}
+.lbg>i:nth-child(3){width:26vmax;height:26vmax;left:35%;top:40%;background:#f5b301;opacity:.18;animation-duration:26s}
+@keyframes orb{from{transform:translate(0,0) scale(1)}to{transform:translate(9vmax,7vmax) scale(1.25)}}
+.lbg .pc{position:absolute;left:50%;top:50%;width:min(80vmin,420px);height:min(80vmin,420px);margin:calc(min(80vmin,420px)/-2);border:2px solid rgba(255,255,255,.16);border-radius:50%;animation:pulse 6s ease-in-out infinite}
+.lbg .pcl{position:absolute;left:0;right:0;top:50%;height:2px;background:rgba(255,255,255,.12)}
+@keyframes pulse{0%,100%{transform:scale(1);opacity:.7}50%{transform:scale(1.06);opacity:1}}
+.lbg>b{position:absolute;bottom:-70px;width:var(--s,28px);height:var(--s,28px);opacity:0;animation:rise var(--d,14s) linear infinite;animation-delay:var(--l,0s)}
+.lbg>b svg{width:100%;height:100%}
+@keyframes rise{0%{transform:translateY(0) rotate(0);opacity:0}10%{opacity:.55}90%{opacity:.45}100%{transform:translateY(-118vh) rotate(420deg);opacity:0}}
+@media (prefers-reduced-motion:reduce){.lbg,.lbg *{animation:none!important}}
+/* أزرار الدخول باللوجو */
+.sbtn{display:flex;align-items:center;justify-content:center;gap:12px;height:52px;border-radius:14px;font-size:15px}
+.sbtn .si{width:26px;height:26px;flex:none;display:flex}
+.sbtn svg{width:100%;height:100%}
+.fbtn{background:#1877f2;color:#fff;border:0}
+.legal{display:flex;justify-content:center;gap:16px;font-size:12px;margin-top:4px}
+.legal a{color:#bfe8d0}
+/* علامة X لشيل اللاعب من المربع */
+.rm{position:absolute;top:-8px;right:-6px;width:22px;height:22px;border-radius:50%;background:#d63a3f;color:#fff;border:0;padding:0;font-size:15px;line-height:1;display:flex;align-items:center;justify-content:center;z-index:2}
+.rm::after{content:"";position:absolute;inset:-12px}
+div.sl{cursor:pointer}
 </style>
 </head>
 <body>
@@ -97,7 +123,7 @@ a.lnk,.lnk{color:#8bffb8;background:none;border:0;padding:6px 0;text-decoration:
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
-import { getAuth, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail, signOut } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+import { getAuth, onAuthStateChanged, GoogleAuthProvider, FacebookAuthProvider, signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail, signOut } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
 import { getMessaging, getToken, onMessage, isSupported } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-messaging.js";
 import { getFirestore, doc, getDoc, getDocs, setDoc, updateDoc, deleteDoc, collection, query, where, writeBatch, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 
@@ -120,7 +146,7 @@ const CHIPS = {
   steal: { n: 'هلقط رزقي', d: 'اختار فريق، وبعد نهاية الماتش بتاخد نقط أعلى لاعب فيه كبونص فوق اختياراتك.' }
 };
 const MAX_CHIPS = 2;   // لازم يكون زي MAX_CHIPS_PER_GW في Code.gs
-const AR = { 'Arsenal':'أرسنال','Aston Villa':'أستون فيلا','Bournemouth':'بورنموث','Brentford':'برينتفورد','Brighton':'برايتون','Burnley':'بيرنلي','Chelsea':'تشيلسي','Crystal Palace':'كريستال بالاس','Everton':'إيفرتون','Fulham':'فولهام','Leeds':'ليدز','Liverpool':'ليفربول','Man City':'مان سيتي','Man Utd':'مان يونايتد','Newcastle':'نيوكاسل',"Nott'm Forest":'نوتنجهام فورست','Sunderland':'سندرلاند','Spurs':'توتنهام','West Ham':'وست هام','Wolves':'وولفرهامبتون','Leicester':'ليستر','Ipswich Town':'إبسويتش','Southampton':'ساوثهامبتون','Coventry':'كوفنتري','Hull':'هال سيتي' };
+const AR = { 'Arsenal':'أرسنال','Aston Villa':'أستون فيلا','Bournemouth':'بورنموث','Brentford':'برينتفورد','Brighton':'برايتون','Burnley':'بيرنلي','Chelsea':'تشيلسي','Crystal Palace':'كريستال بالاس','Everton':'إيفرتون','Fulham':'فولهام','Leeds':'ليدز','Liverpool':'ليفربول','Man City':'مان سيتي','Man Utd':'مان يونايتد','Newcastle':'نيوكاسل',"Nott'm Forest":'نوتنجهام فورست','Sunderland':'سندرلاند','Spurs':'توتنهام','West Ham':'وست هام','Wolves':'وولفرهامبتون','Leicester':'ليستر','Ipswich':'إبسويتش','Southampton':'ساوثهامبتون','Coventry':'كوفنتري','Hull':'هال سيتي' };
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
@@ -159,6 +185,8 @@ function authMsg(e) {
     'auth/missing-password': 'اكتب كلمة السر',
     'auth/too-many-requests': 'محاولات كتير، استنى شوية وجرّب تاني',
     'auth/network-request-failed': 'مفيش اتصال بالإنترنت',
+    'auth/account-exists-with-different-credential': 'الإيميل ده مسجل قبل كده بطريقة دخول تانية (جوجل أو الإيميل). ادخل بيها.',
+    'auth/operation-not-allowed': 'طريقة الدخول دي لسه مش مفعّلة من الإدارة',
     'auth/popup-blocked': 'المتصفح منع نافذة الدخول، اسمح بالنوافذ المنبثقة',
     'auth/unauthorized-domain': 'عنوان الموقع مش مضاف في Firebase (Authentication > Settings > Authorized domains)'
   };
@@ -174,9 +202,12 @@ const S = {
   fx: null, pos: 1, q: '', save: '',
   users: [], uq: '',
   stats: {}, st: null, fcm: null,
-  tours: [], tour: null, tt: { tab: 'groups', r: null }, tn: null, cal: null
+  tours: [], tour: null, tt: { tab: 'groups', r: null }, tn: null, cal: null,
+  names: {}, namesAt: 0, editName: false,
+  userList: [], snames: {}, agg: null, ud: null, bm: null,
+  stealAsk: null   // ماتش مستني اختيار فريق هلقط رزقي (الخاصية مش بتتفعّل غير مع الفريق)
 };
-const newSt = () => ({ kind: 'gw', fid: null, day: null, tab: 'caps', q: '', opp: null, oq: '', ex: {}, loading: false });
+const newSt = () => ({ kind: 'gw', fid: null, day: null, tab: 'caps', q: '', opp: null, oq: '', ex: {}, loading: false, sort: 'own' });
 S.st = newSt();
 
 /* ───────── مكونات صغيرة ───────── */
@@ -200,6 +231,29 @@ function photo(p) {
   return `<span class="ph">${SHIRT(`hsl(${hue(p.t * 3)} 60% 50%)`)}<img src="${IMG_URL.p(0, esc(p.c))}" data-k="p" data-i="0" data-c="${esc(p.c)}" alt="" referrerpolicy="no-referrer" loading="lazy" onload="this.previousElementSibling.style.display='none'" onerror="imgNext(this)"></span>`;
 }
 const initial = s => esc((s || '?').trim().charAt(0).toUpperCase());
+/* ───────── الأسماء: أي اسم مسموح، بس مينفعش اسمين يبقوا شبه بعض ───────── */
+function normName(s) {
+  s = String(s).normalize('NFKC').toLowerCase();
+  s = s.replace(/[\u064B-\u065F\u0670\u0640\u200B-\u200F\u202A-\u202E\u2060\uFEFF]/g, '');
+  s = s.replace(/[أإآٱ]/g, 'ا').replace(/ى/g, 'ي').replace(/ة/g, 'ه').replace(/ؤ/g, 'و').replace(/ئ/g, 'ي');
+  s = s.replace(/[٠-٩]/g, d => String('٠١٢٣٤٥٦٧٨٩'.indexOf(d))).replace(/[۰-۹]/g, d => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(d)));
+  s = s.replace(/[\s._\-·•'’`~!@#$%^&*()+=\[\]{}|\\:;"<>,?\/]+/g, '');
+  s = s.replace(/[01il]/g, c => c === '0' ? 'o' : 'l');
+  return s;
+}
+function checkName(name) {
+  const len = [...name].length;
+  if (len < 2 || len > 24) return 'الاسم لازم يكون من ٢ لـ ٢٤ حرف';
+  if ([...normName(name)].length < 2) return 'اكتب اسم فيه حروف أو أرقام';
+  return null;
+}
+const collate = new Intl.Collator(['ar', 'en'], { numeric: true, sensitivity: 'base' });
+const byName = (a, b) => collate.compare(a, b);
+const avatar = (photo, name, size = 36) => `<div class="av" style="width:${size}px;height:${size}px;font-size:${Math.round(size * 0.4)}px">${photo ? `<img src="${esc(photo)}" alt="" referrerpolicy="no-referrer" style="width:100%;height:100%;object-fit:cover">` : initial(name)}</div>`;
+const GOOGLE_SVG = `<svg viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>`;
+const FB_SVG = `<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#fff" d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/><path fill="#1877F2" d="M16.671 15.543l.532-3.47h-3.328v-2.25c0-.949.465-1.874 1.956-1.874h1.514V4.996s-1.374-.235-2.686-.235c-2.741 0-4.533 1.662-4.533 4.669v2.643H7.078v3.47h3.047v8.385a12.1 12.1 0 003.75 0v-8.385h2.796z"/></svg>`;
+const BALL = `<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10.5" fill="#fff"/><path d="M12 7.5l3.4 2.5-1.3 4h-4.2l-1.3-4z" fill="#1a1a1a"/><path d="M12 7.5V3M15.4 10l4.3-1.3M14.1 14l2.6 3.6M9.9 14l-2.6 3.6M8.6 10L4.3 8.7" stroke="#1a1a1a" stroke-width="1.2" fill="none"/></svg>`;
+const lbg = () => `<div class="lbg" aria-hidden="true"><i></i><i></i><i></i><div class="pc"></div><div class="pcl"></div>${[[8, 24, 16, 0], [22, 18, 13, 3], [38, 30, 18, 6], [55, 22, 15, 1.5], [70, 26, 17, 8], [86, 20, 14, 4.5]].map(([l, z, d, dl]) => `<b style="left:${l}%;--s:${z}px;--d:${d}s;--l:${dl}s">${BALL}</b>`).join('')}</div>`;
 
 /* ───────── منطق الجولات ───────── */
 const gwNums = () => Object.keys(S.gws).map(Number).sort((a, b) => a - b);
@@ -306,6 +360,7 @@ function canPick(fx, p, pl) {
 }
 /* الاختيار سليم بقواعد الخاصية دي؟ (chip = null يعني القواعد العادية) */
 function validIds(fx, ids, chip) {
+  if (new Set(ids).size !== ids.length) return false;   // نفس اللاعب مرتين ممنوع
   const pos = {}, team = {};
   for (const id of ids) {
     const o = fx.players.find(x => x.i === id);
@@ -327,16 +382,22 @@ function canUseChip(fid, c) {
 function toggleChip(c) {
   const fid = S.fx, p = pickOf(fid), d = S.fxdocs[fid];
   if (isLocked(fid)) return toast('الماتش بدأ، الاختيار مقفول');
+  if (c === 'steal' && S.stealAsk === fid && p.chip !== 'steal') { S.stealAsk = null; return renderMatchBody(); }   // إلغاء قبل اختيار الفريق
   if (p.chip === c) {
     if (!validIds(d, p.ids, null)) return toast('شيل اللاعبين الزيادة الأول، من غير الخاصية لازم تلتزم بالقواعد العادية');
-    p.chip = null; p.team = null;
+    p.chip = null; p.team = null; S.stealAsk = null;
   } else {
     if (p.chip) return toast('ألغِ الخاصية الحالية الأول');
+    if (S.stealAsk === fid) return toast('اختار فريق هلقط رزقي الأول، أو دوس عليها تاني تلغيها');
     const why = canUseChip(fid, c); if (why) return toast(why);
+    /* هلقط رزقي مبتتفعّلش غير لما تختار الفريق، علشان متتحسبش خاصية من غير بونص */
+    if (c === 'steal') { S.stealAsk = fid; return renderMatchBody(); }
     p.chip = c; p.team = null;
   }
   changed(fid);
 }
+/* هلقط رزقي متفعّلة من غير فريق (اختيار قديم): مينفعش تخرج من الماتش كده */
+const stealMissing = fid => { const p = S.picks[fid]; return !!(p && p.chip === 'steal' && p.team == null && !isLocked(fid)); };
 function capTakenElsewhere(fid) {
   const day = dayOfFx(fid);
   return Object.keys(S.picks).some(k => k !== String(fid) && S.picks[k].cap != null && dayOfFx(k) === day);
@@ -360,6 +421,7 @@ async function doSave(fid) {
   pending.delete(fid);
   const p = S.picks[fid], fx = S.fxdocs[fid];
   if (!S.user || !p || !fx) return;
+  if (p.chip === 'steal' && p.team == null) { if (S.fx === fid) setSave('error'); return toast('اختار فريق هلقط رزقي علشان التعديل يتحفظ'); }
   try {
     await setDoc(doc(db, 'picks', fid + '_' + S.user.uid), { uid: S.user.uid, gw: fx.gw, fid: String(fid), ids: p.ids, cap: p.cap, chip: p.chip || null, team: p.team ?? null, updatedAt: serverTimestamp() });
     if (S.fx === fid) setSave('saved');
@@ -375,13 +437,14 @@ function changed(fid) { queueSave(fid); renderMatchBody(); }
 function render() {
   const root = $('#app');
   const v = S.view;
-  const nonav = ['loading', 'login', 'setup', 'banned', 'error', 'match'].includes(v);
+  const nonav = ['loading', 'login', 'setup', 'banned', 'error', 'match', 'udet'].includes(v);
   root.className = nonav ? 'nonav' : '';
-  const views = { loading: vLoading, login: vLogin, setup: vSetup, banned: vBanned, error: vError, round: vRound, match: vMatch, board: vBoard, stats: vStats, tour: vTourList, tdet: vTourDetail, tnew: vTourNew, account: vAccount, admin: vAdmin };
+  const views = { loading: vLoading, login: vLogin, setup: vSetup, banned: vBanned, error: vError, round: vRound, match: vMatch, board: vBoard, stats: vStats, udet: vUser, tour: vTourList, tdet: vTourDetail, tnew: vTourNew, account: vAccount, admin: vAdmin };
   root.innerHTML = (views[v] || vLoading)() + (nonav ? '' : nav());
   if (v === 'match') renderMatchBody();
   if (v === 'stats') renderStatsBody();
   lastSig = lockSig();
+  syncHistory();
 }
 /* بصمة حالات القفل: بنعيد رسم شاشة الجولة لما ماتش يتقفل بس */
 let lastSig = '';
@@ -389,6 +452,21 @@ function lockSig() {
   if (S.view !== 'round' || S.gw == null) return '';
   return gwFixtures(S.gw).map(f => (koOf(f) && Date.now() >= koOf(f)) ? 1 : 0).join('');
 }
+/* زرار الرجوع في الموبايل بيرجع خطوة جوه التطبيق بدل ما يخرج منه */
+const PARENT = { match: 'round', admin: 'account', tdet: 'tour', tnew: 'tour', udet: 'board' };
+let histSub = false, ignorePop = false;
+function syncHistory() { if (PARENT[S.view] && !histSub) { history.pushState({ sub: 1 }, ''); histSub = true; } }
+function leaveSub() { if (histSub) { histSub = false; ignorePop = true; history.back(); setTimeout(() => { ignorePop = false; }, 600); } }
+window.addEventListener('popstate', () => {
+  if (ignorePop) { ignorePop = false; return; }
+  if (!histSub) return;
+  if (S.view === 'match' && stealMissing(S.fx)) { history.pushState({ sub: 1 }, ''); toast('اختار فريق هلقط رزقي الأول، أو ألغِ الخاصية'); return; }
+  histSub = false;
+  const to = PARENT[S.view]; if (!to) return;
+  if (S.view === 'match') { S.stealAsk = null; flushSaves(); }
+  S.view = to; render();
+});
+try { history.replaceState(null, ''); } catch (e) { /* مش مهم */ }
 function nav() {
   const t = S.view === 'admin' ? 'account' : (S.view === 'tdet' || S.view === 'tnew') ? 'tour' : S.view;
   const b = (k, label, svg) => `<button class="n ${t === k ? 'on' : ''}" data-act="nav" data-v="${k}"><svg viewBox="0 0 24 24">${svg}</svg>${label}</button>`;
@@ -400,12 +478,12 @@ const vBanned = () => `<div class="login ctr"><div class="logo" style="margin:0 
 
 function vLogin() {
   const signup = S.mode === 'signup';
-  return `<div class="login">
+  return `<div class="login">${lbg()}
     <img class="logo" src="icon-192.png" alt="">
     <div class="d" style="font-size:32px;line-height:1.1">الفانتاسي اليومي</div>
     <div class="m" style="font-size:15px;margin-bottom:8px">اختار ٤ لاعبين من كل ماتش ونافس واثبتلهم انك التوب</div>
-    <button class="bt gbtn" data-act="google">الدخول بحساب جوجل</button>
-    <button class="bt" disabled title="قريباً">الدخول بحساب فيسبوك (قريباً)</button>
+    <button class="bt sbtn gbtn" data-act="google"><span class="si">${GOOGLE_SVG}</span><span>الدخول بحساب جوجل</span></button>
+    <button class="bt sbtn fbtn" data-act="facebook"><span class="si">${FB_SVG}</span><span>الدخول بحساب فيسبوك</span></button>
     <div class="m ctr">أو بالإيميل</div>
     <form data-form="login" class="login" style="padding:0;gap:10px;flex:none">
       <input class="in" type="email" name="email" placeholder="الإيميل" dir="ltr" autocomplete="email" value="${esc(S.email)}" required>
@@ -414,16 +492,17 @@ function vLogin() {
       <button class="bt on" type="submit">${signup ? 'إنشاء حساب' : 'دخول'}</button>
     </form>
     <div class="r j"><button class="lnk" data-act="mode">${signup ? 'عندي حساب، دخول' : 'مفيش عندي حساب، إنشاء حساب'}</button>${signup ? '' : '<button class="lnk" data-act="reset">نسيت كلمة السر</button>'}</div>
+    <div class="legal"><a href="privacy.html" target="_blank" rel="noopener">سياسة الخصوصية</a><a href="data-deletion.html" target="_blank" rel="noopener">حذف البيانات</a></div>
   </div>`;
 }
 function vSetup() {
-  return `<div class="login">
+  return `<div class="login">${lbg()}
     <div class="d" style="font-size:28px">أكمل بروفايلك</div>
     <div class="ctr"><div class="av" style="width:84px;height:84px;font-size:34px;margin:0 auto">${S.user && S.user.photoURL ? `<img src="${esc(S.user.photoURL)}" alt="" referrerpolicy="no-referrer" style="width:100%;height:100%;object-fit:cover">` : initial(S.user && (S.user.displayName || S.user.email))}</div></div>
     <form data-form="setup" class="login" style="padding:0;gap:10px;flex:none">
       <label class="m" for="u">اسم المستخدم</label>
-      <input id="u" class="in" name="u" dir="ltr" maxlength="20" autocomplete="off" autocapitalize="off" data-in="uname" placeholder="player_01" required>
-      <div id="uhint" class="m">حروف إنجليزي وأرقام و_ فقط، من ٣ لـ ٢٠. مبيتغيرش بعد كده إلا عن طريق الإدارة.</div>
+      <input id="u" class="in" name="u" maxlength="24" autocomplete="off" data-in="uname" placeholder="اسمك في اللعبة" required>
+      <div id="uhint" class="m">أي اسم تحبه (عربي أو إنجليزي)، بس مينفعش يكون شبه اسم موجود. وتقدر تغيّره بعدين من حسابي.</div>
       <button class="bt on" type="submit" style="height:52px">ابدأ اللعب</button>
     </form>
     <button class="lnk" data-act="logout">تسجيل الخروج</button>
@@ -451,7 +530,7 @@ function card(f) {
     <div class="r j"><div class="t">${crest(f.h)}<span>${esc(teamName(f.h))}</span></div>
     <div class="ctr"><div class="tm">${k ? fmtTime(k) : '—'}</div>${status}</div>
     <div class="t">${crest(f.a)}<span>${esc(teamName(f.a))}</span></div></div>
-    <div class="r j m mt"><span>اختياراتك ${N(n)}/٤${S.picks[f.id] && S.picks[f.id].chip ? ' · <b class="warn">' + CHIPS[S.picks[f.id].chip].n + '</b>' : ''}</span><span>${locked ? 'عرض اختياراتك' : 'اختار لاعبينك'} ‹</span></div>
+    <div class="r j m mt"><span>اختياراتك ${N(n)}/٤${S.picks[f.id] && S.picks[f.id].chip ? ' · <b class="warn">' + CHIPS[S.picks[f.id].chip].n + '</b>' : ''}${stealMissing(f.id) ? ' · <b class="warn">اختار الفريق!</b>' : ''}</span><span>${locked ? 'عرض اختياراتك' : 'اختار لاعبينك'} ‹</span></div>
   </button>`;
 }
 
@@ -471,7 +550,7 @@ function renderMatchBody() {
   const byId = id => d.players.find(x => x.i === id);
   const chosen = p.ids.map(byId).filter(Boolean);
   const btn = (pl, pos, label) => pl
-    ? `<button class="sl fl ${S.pos === pl.p && !locked ? 'act' : ''}" data-act="pos" data-p="${pl.p}">${p.cap === pl.i ? '<span class="c">C</span>' : ''}${photo(pl)}<span class="nm">${esc(pl.n)}</span><span class="sub">${POS[pl.p]}${locked ? ' · ' + N(sc.pts[pl.i] || 0) : ''}</span></button>`
+    ? `<div class="sl fl ${S.pos === pl.p && !locked ? 'act' : ''}" data-act="pos" data-p="${pl.p}" role="button" tabindex="0">${p.cap === pl.i ? '<span class="c">C</span>' : ''}${locked ? '' : `<button class="rm" data-act="rmp" data-pid="${pl.i}" aria-label="شيل ${esc(pl.n)}">×</button>`}${photo(pl)}<span class="nm">${esc(pl.n)}</span><span class="sub">${POS[pl.p]}${locked ? ' · ' + N(sc.pts[pl.i] || 0) : ''}</span></div>`
     : `<button class="sl" data-act="pos" data-p="${pos}"><span>${locked ? '—' : '+'}</span><span>${label}</span></button>`;
   const slots = p.chip === 'free_pos'
     ? [0, 1, 2, 3].map(i => btn(chosen[i], S.pos, 'لاعب ' + N(i + 1)))
@@ -502,12 +581,13 @@ function renderMatchBody() {
   }
 
   /* صف الخصائص */
+  const asking = S.stealAsk === fid && p.chip !== 'steal';
   html += `<div class="r j" style="padding:0 16px 6px"><b>الخواص</b><span class="m">متبقي ${N(chipsLeft())} من ${N(MAX_CHIPS)} في الجولة</span></div>
-  <div class="tg">${Object.keys(CHIPS).map(c => `<button class="bt ${p.chip === c ? 'on' : ''} ${p.chip !== c && canUseChip(fid, c) ? 'dz' : ''}" data-act="chip" data-c="${c}" style="font-size:13px">${CHIPS[c].n}</button>`).join('')}</div>`;
-  if (p.chip) html += `<div class="m" style="padding:0 16px 10px">${CHIPS[p.chip].d}</div>`;
-  if (p.chip === 'steal') {
+  <div class="tg">${Object.keys(CHIPS).map(c => `<button class="bt ${p.chip === c || (c === 'steal' && asking) ? 'on' : ''} ${p.chip !== c && canUseChip(fid, c) ? 'dz' : ''}" data-act="chip" data-c="${c}" style="font-size:13px">${CHIPS[c].n}</button>`).join('')}</div>`;
+  if (p.chip || asking) html += `<div class="m" style="padding:0 16px 10px">${CHIPS[p.chip || 'steal'].d}</div>`;
+  if (p.chip === 'steal' || asking) {
+    if (p.team == null) html += `<div class="k" style="margin:0 16px 10px;width:auto;border-color:#f5b301;background:rgba(245,179,1,.16)"><b class="warn">اختار الفريق اللي هتلقط منه</b><div class="m">${asking ? 'الخاصية مش هتتفعّل ولا هتتحسب عليك غير لما تختار فريق.' : 'الخاصية متفعّلة من غير فريق ومش هتتحسب. اختار فريق أو ألغيها.'}</div></div>`;
     html += `<div class="tg" style="gap:8px">${[d.h, d.a].map(t => `<button class="bt ${p.team === t.id ? 'on' : ''}" data-act="steam" data-t="${t.id}" style="display:flex;align-items:center;justify-content:center;gap:8px">${crest(t, 22)}<span>${esc(teamName(t))}</span></button>`).join('')}</div>`;
-    if (p.team == null) html += `<div class="m warn" style="padding:0 16px 10px">اختار الفريق علشان الخاصية تتحسب.</div>`;
   }
 
   html += `<div class="tg">${[1, 2, 3, 4].map(x => `<button class="bt ${S.pos === x ? 'on' : ''}" data-act="pos" data-p="${x}">${POS[x]}</button>`).join('')}</div>
@@ -633,12 +713,25 @@ async function loadUsersList() {
 }
 async function openTour(id) {
   const t = S.tours.find(x => x.id === id); if (!t) return;
+  await loadNames();
   let st = null;
   if (t.status !== 'draft') { try { const r = await getDoc(doc(db, 'tstate', id)); st = r.exists() ? r.data() : null; } catch (e) { st = null; } }
   S.tour = { id, t, st };
   S.tt = { tab: 'groups', r: null };
 }
-const tName = (t, u) => u === 'BYE' ? 'bye' : u ? esc(t.players[u] || '؟') : '—';
+async function loadNames() {
+  if (Date.now() - S.namesAt < 300000 && S.userList.length) return;
+  try {
+    const r = await getDocs(collection(db, 'users'));
+    S.userList = r.docs.map(d => ({ id: d.id, name: d.data().username, banned: !!d.data().banned, photo: d.data().photo || null }));
+    S.names = {}; S.userList.forEach(u => { S.names[u.id] = u.name; });
+    S.namesAt = Date.now();
+  } catch (e) { /* نستخدم الأسماء المخزنة */ }
+}
+const nm = uid => S.names[uid] || S.snames[uid] || '؟';
+const photoOf = uid => { const u = S.userList.find(x => x.id === uid); return u ? u.photo : null; };
+const activeIds = () => S.userList.filter(u => !u.banned).map(u => u.id);
+const tName = (t, u) => u === 'BYE' ? 'bye' : u ? esc(S.names[u] || t.players[u] || '؟') : '—';
 function curRound(t, st) {
   if (!st) return 0;
   const all = [...st.rounds, ...st.ko];
@@ -775,11 +868,19 @@ async function createTour(redraw) {
 
 /* ───────── الإحصائيات والمقارنة ───────── */
 const startedFx = g => gwFixtures(g).filter(f => koOf(f) && Date.now() >= koOf(f) + 120000).sort((a, b) => koOf(a) - koOf(b));
+const fxTitle = f => teamName(f.h) + ' ضد ' + teamName(f.a);
 function scopeFx() {
   const st = S.st, all = S.gw != null ? startedFx(S.gw) : [];
   if (st.kind === 'match') return all.filter(f => String(f.id) === String(st.fid));
   if (st.kind === 'day') return all.filter(f => dayKey(koOf(f)) === st.day);
   return all;
+}
+const scopeWord = () => ({ match: 'الماتش', day: 'اليوم', gw: 'الجولة' })[S.st.kind];
+function scopeLabel() {
+  const st = S.st, fx = scopeFx(), n = fx.length, cnt = n === 1 ? 'ماتش واحد' : N(n) + ' ماتشات';
+  if (st.kind === 'match') return fx[0] ? 'ماتش ' + fxTitle(fx[0]) : 'ماتش معين';
+  if (st.kind === 'day') return 'يوم ' + fmtDay(Date.parse(st.day + 'T12:00:00Z')) + ' · ' + cnt;
+  return 'الجولة ' + N(S.gw) + ' كلها · ' + cnt;
 }
 function initStats() {
   const all = S.gw != null ? startedFx(S.gw) : [], last = all[all.length - 1];
@@ -787,27 +888,56 @@ function initStats() {
   if (!S.st.fid || !all.some(f => String(f.id) === String(S.st.fid))) S.st.fid = last.id;
   if (!S.st.day || !all.some(f => dayKey(koOf(f)) === S.st.day)) S.st.day = dayKey(koOf(last));
 }
-async function loadStatsScope() {
-  await Promise.all(scopeFx().map(async f => {
+/* مستند الإحصائيات بيتحوّل لشكل واحد: { users: {uid: اختيار}, names: {uid: اسم} } سواء الجديد (بالـ uid) أو القديم (بالأسماء) */
+function normStats(sd) {
+  let users = sd.byUser || {}, names = sd.names;
+  if (!names) {
+    users = {}; names = {};
+    Object.keys(sd.byUser || {}).forEach(n => { const uid = (sd.uidOf && sd.uidOf[n]) || ('n:' + n); users[uid] = sd.byUser[n]; names[uid] = n; });
+  }
+  Object.keys(names).forEach(u => { S.snames[u] = names[u]; });
+  return { users, names };
+}
+async function ensureStats(fxs) {
+  await Promise.all(fxs.map(async f => {
     try {
       await loadFixture(f.id, false);
-      if (!S.stats[f.id]) { const r = await getDoc(doc(db, 'stats', String(f.id))); if (r.exists()) S.stats[f.id] = r.data(); }
+      if (!S.stats[f.id]) { const r = await getDoc(doc(db, 'stats', String(f.id))); if (r.exists()) S.stats[f.id] = normStats(r.data()); }
     } catch (e) { console.error(e); }
   }));
+}
+async function loadStatsScope() {
+  await Promise.all([loadNames(), ensureStats(scopeFx())]);
+  if (S.st.tab === 'care' && S.gw != null) await ensureStats(startedFx(S.gw));
 }
 async function refreshStats() { initStats(); S.st.loading = true; render(); await loadStatsScope(); S.st.loading = false; render(); }
 const ppl = (fid, id) => { const d = S.fxdocs[fid]; return d ? d.players.find(x => x.i === id) : null; };
 const tsn = (fid, p) => { const d = S.fxdocs[fid]; return d && p ? (p.t === d.h.id ? d.h : d.a).sn : ''; };
-function nameList(users) {
-  const me = S.profile.username;
-  return `<div style="display:flex;flex-direction:column;margin-top:8px">${[...users].sort().map(u => `<div class="r" style="padding:8px 0;border-top:1px solid rgba(255,255,255,.18)"><div class="av" style="width:28px;height:28px;font-size:12px">${initial(u)}</div><span>${esc(u)}${u === me ? ' (أنت)' : ''}</span></div>`).join('')}</div>`;
+const ptsOf = (fid, pid) => { const sc = S.scores[fid]; return (sc && sc.pts && sc.pts[pid]) || 0; };
+
+/* قايمة أسماء (أبجدياً)، وتقدر تحط ملاحظة جنب كل اسم */
+function nameList(uids, notes) {
+  const me = S.user.uid;
+  return `<div style="display:flex;flex-direction:column;margin-top:8px">${[...uids].sort((a, b) => byName(nm(a), nm(b))).map(u => `<div class="r" style="padding:8px 0;border-top:1px solid rgba(255,255,255,.18)">${avatar(photoOf(u), nm(u), 28)}<span class="g">${esc(nm(u))}${u === me ? ' (أنت)' : ''}</span>${notes && notes[u] ? `<span class="sub">${esc(notes[u])}</span>` : ''}</div>`).join('')}</div>`;
 }
+
+/* حساب نقط اختيار واحد في ماتش */
+function calcPick(fid, p) {
+  const d = S.fxdocs[fid], sc = S.scores[fid] || { pts: {}, status: 'ns' };
+  const list = p.ids.map(id => d.players.find(x => x.i === id)).filter(Boolean).sort((a, b) => a.p - b.p);
+  const base = list.reduce((s, pl) => s + (sc.pts[pl.i] || 0), 0);
+  const cap = p.cap != null ? (sc.pts[p.cap] || 0) * (CAP_MULT - 1) : 0;
+  let steal = 0;
+  if (p.chip === 'steal' && p.team != null && sc.status === 'ft') steal = Math.max(0, ...d.players.filter(x => x.t === p.team).map(x => sc.pts[x.i] || 0));
+  return { d, sc, list, base, cap, steal, total: base + cap + steal };
+}
+
 function aggStats() {
   const A = { n: 0, picks: {}, caps: {}, chips: [], pairs: {}, combos: [], users: new Set() };
   scopeFx().forEach(f => {
     const sd = S.stats[f.id]; if (!sd) return;
-    Object.keys(sd.byUser).forEach(u => {
-      const p = sd.byUser[u]; A.n++; A.users.add(u);
+    Object.keys(sd.users).forEach(u => {
+      const p = sd.users[u]; A.n++; A.users.add(u);
       p.ids.forEach(id => { const k = f.id + ':' + id; (A.picks[k] = A.picks[k] || { fid: f.id, id, users: [] }).users.push(u); });
       if (p.cap != null) { const k = f.id + ':' + p.cap; (A.caps[k] = A.caps[k] || { fid: f.id, id: p.cap, users: [] }).users.push(u); }
       if (p.chip) A.chips.push({ u, chip: p.chip, fid: f.id, team: p.team });
@@ -821,17 +951,20 @@ function aggStats() {
   });
   return A;
 }
+const othersList = () => [...aggStats().users].filter(u => u !== S.user.uid).sort((a, b) => byName(nm(a), nm(b)));
+
 function vStats() {
   const st = S.st;
   if (S.gw == null) return `<div class="h"><b>الإحصائيات</b></div><div class="f"><div class="k ctr">مفيش جولات لسه.</div></div>`;
   const all = startedFx(S.gw), days = [...new Set(all.map(f => dayKey(koOf(f))))];
-  const tabs = [['caps', 'الكباتن'], ['chips', 'الخواص'], ['combo', 'الكومبو'], ['cmp', 'مقارنة']];
+  const tabs = [['players', 'اللاعبين'], ['caps', 'الكباتن'], ['chips', 'الخواص'], ['combo', 'الكومبو'], ['cmp', 'مقارنة'], ['care', 'العناية المركزة']];
   const sub = st.kind === 'match'
     ? `<div class="tg">${all.map(f => `<button class="bt ${String(st.fid) === String(f.id) ? 'on' : ''}" data-act="sfx" data-fid="${f.id}" style="font-size:13px">${esc(f.h.sn)} ضد ${esc(f.a.sn)}</button>`).join('')}</div>`
     : st.kind === 'day' ? `<div class="tg">${days.map(k => `<button class="bt ${st.day === k ? 'on' : ''}" data-act="sday" data-k="${k}" style="font-size:13px">${esc(fmtDay(Date.parse(k + 'T12:00:00Z')))}</button>`).join('')}</div>` : '';
   return `<div class="h"><b>الإحصائيات</b><span class="m">بعد بداية الماتش</span></div>
-  <div class="tg"><button class="bt ${st.kind === 'match' ? 'on' : ''}" data-act="ssc" data-k="match">ماتش</button><button class="bt ${st.kind === 'day' ? 'on' : ''}" data-act="ssc" data-k="day">اليوم</button><button class="bt ${st.kind === 'gw' ? 'on' : ''}" data-act="ssc" data-k="gw">الجولة ${N(S.gw)}</button></div>
+  <div class="tg"><button class="bt ${st.kind === 'match' ? 'on' : ''}" data-act="ssc" data-k="match">ماتش معين</button><button class="bt ${st.kind === 'day' ? 'on' : ''}" data-act="ssc" data-k="day">اليوم</button><button class="bt ${st.kind === 'gw' ? 'on' : ''}" data-act="ssc" data-k="gw">الجولة كلها</button></div>
   ${sub}
+  <div class="m" style="padding:0 16px 8px">النطاق: ${esc(scopeLabel())}</div>
   <div class="tg">${tabs.map(([k, l]) => `<button class="bt ${st.tab === k ? 'on' : ''}" data-act="stab" data-k="${k}">${l}</button>`).join('')}</div>
   <div style="padding:0 16px 10px"><input class="in" data-in="ssearch" placeholder="ابحث عن لاعب" aria-label="ابحث عن لاعب" value="${esc(st.q)}"></div>
   <div class="f" id="sbody"></div>`;
@@ -842,28 +975,52 @@ function renderStatsBody() {
   if (st.loading) { el.innerHTML = '<div class="k ctr">جاري التحميل…</div>'; return; }
   if (!fx.length) { el.innerHTML = '<div class="k ctr">لسه مفيش ماتشات بدأت في النطاق ده. الإحصائيات بتظهر بعد بداية الماتش بدقيقتين تقريباً.</div>'; return; }
   if (!fx.some(f => S.stats[f.id])) { el.innerHTML = '<div class="k ctr">الإحصائيات بتتجهز دلوقتي، حدّث بعد دقيقة.</div>'; return; }
-  const A = aggStats();
-  if (!A.n) { el.innerHTML = '<div class="k ctr">محدش اختار لاعبين في النطاق ده.</div>'; return; }
-  el.innerHTML = searchHtml(A) + (st.tab === 'caps' ? capsHtml(A) : st.tab === 'chips' ? chipsHtml(A) : st.tab === 'combo' ? comboHtml(A) : cmpHtml(A));
+  const A = aggStats(); S.agg = A;
+  if (!A.n && st.tab !== 'care') { el.innerHTML = '<div class="k ctr">محدش اختار لاعبين في النطاق ده.</div>'; return; }
+  const body = ({ players: playersHtml, caps: capsHtml, chips: chipsHtml, combo: comboHtml, cmp: cmpHtml, care: careHtml })[st.tab](A);
+  el.innerHTML = (st.tab === 'care' ? '' : searchHtml(A)) + body;
 }
-function capsHtml(A) {
-  const rows = Object.values(A.caps).sort((a, b) => b.users.length - a.users.length);
-  if (!rows.length) return '<div class="k ctr">محدش اختار كابتن.</div>';
-  const max = rows[0].users.length;
-  return rows.map(r => {
-    const pl = ppl(r.fid, r.id); if (!pl) return '';
-    const key = 'c' + r.fid + ':' + r.id, open = S.st.ex[key];
-    return `<div class="k" data-act="sx" data-k="${key}" style="cursor:pointer"><div class="r">${photo(pl)}<div class="g"><div class="nm">${esc(pl.n)} <span class="sub">${esc(tsn(r.fid, pl))}</span></div><div class="sub">${N(r.users.length)} كابتن</div></div><span class="m">${open ? 'إخفاء' : 'الأسماء'}</span></div><div class="bar mt"><i style="width:${Math.round(r.users.length / max * 100)}%"></i></div>${open ? nameList(r.users) : ''}</div>`;
-  }).join('');
+
+/* ترتيب اللاعبين: بالملكية أو بالنقاط (الاتنين بيظهروا دايماً، والفرز بيغيّر الترتيب بس) */
+function rowsFor(src) {
+  const rows = Object.values(src).map(r => ({ ...r, n: r.users.length, pts: ptsOf(r.fid, r.id) }));
+  const byPts = S.st.sort === 'pts';
+  rows.sort((a, b) => (byPts ? (b.pts - a.pts) || (b.n - a.n) : (b.n - a.n) || (b.pts - a.pts)) || ((ppl(a.fid, a.id) || {}).n || '').localeCompare((ppl(b.fid, b.id) || {}).n || ''));
+  return rows;
 }
+const sortBar = () => `<div class="r" style="gap:6px"><span class="m">الفرز:</span><button class="bt ${S.st.sort === 'own' ? 'on' : ''}" data-act="ssort" data-k="own" style="height:36px;padding:0 14px">بالملكية</button><button class="bt ${S.st.sort === 'pts' ? 'on' : ''}" data-act="ssort" data-k="pts" style="height:36px;padding:0 14px">بالنقاط</button></div>`;
+function plCard(r, kind, mx) {
+  const pl = ppl(r.fid, r.id); if (!pl) return '';
+  const key = (kind === 'cap' ? 'c' : 'o') + r.fid + ':' + r.id, open = S.st.ex[key], own = S.st.sort !== 'pts';
+  const hl = on => on ? 'color:#8bffb8;font-weight:800' : '';
+  const pct = own ? (mx.n ? r.n / mx.n : 0) : (mx.p > 0 ? Math.max(0, r.pts) / mx.p : 0);
+  let more = '';
+  if (open) {
+    if (kind === 'cap') more = `<div class="m mt">مين كبّنه</div>${nameList(r.users)}`;
+    else {
+      const partners = Object.values(S.agg.pairs).filter(x => x.fid === r.fid && (x.a === r.id || x.b === r.id)).sort((a, b) => b.users.length - a.users.length).slice(0, 8);
+      more = `<div class="m mt">مين اختاره</div>${nameList(r.users)}${partners.length ? `<div class="m mt">اتاخد مع</div>${partners.map(x => { const o = ppl(r.fid, x.a === r.id ? x.b : x.a); return `<div class="r j" style="padding:6px 0;border-top:1px solid rgba(255,255,255,.18)"><span>${esc(o ? o.n : '؟')}</span><span class="pl">${N(x.users.length)}</span></div>`; }).join('')}` : ''}`;
+    }
+  }
+  return `<div class="k" data-act="sx" data-k="${key}" style="cursor:pointer"><div class="r">${photo(pl)}<div class="g"><div class="nm">${esc(pl.n)} <span class="sub">${esc(tsn(r.fid, pl))}</span></div><div class="sub"><span style="${hl(own)}">${kind === 'cap' ? 'الكباتن' : 'الملكية'} ${N(r.n)}</span> · <span style="${hl(!own)}">النقاط ${N(r.pts)}</span></div></div><span class="m">${open ? 'إخفاء' : 'التفاصيل'}</span></div><div class="bar mt"><i style="width:${Math.round(pct * 100)}%"></i></div>${more}</div>`;
+}
+function listHtml(src, kind, emptyMsg) {
+  const rows = rowsFor(src);
+  if (!rows.length) return `<div class="k ctr">${emptyMsg}</div>`;
+  const mx = { n: Math.max(...rows.map(r => r.n)), p: Math.max(...rows.map(r => r.pts)) };
+  return sortBar() + rows.map(r => plCard(r, kind, mx)).join('');
+}
+const playersHtml = A => listHtml(A.picks, 'own', 'محدش اختار لاعبين.');
+const capsHtml = A => listHtml(A.caps, 'cap', 'محدش اختار كابتن.');
+
 function chipsHtml(A) {
-  const me = S.profile.username;
+  const me = S.user.uid;
   return Object.keys(CHIPS).map(c => {
-    const list = A.chips.filter(x => x.chip === c).sort((a, b) => a.u.localeCompare(b.u));
+    const list = A.chips.filter(x => x.chip === c).sort((a, b) => byName(nm(a.u), nm(b.u)));
     return `<div class="k"><div class="r j"><b>${CHIPS[c].n}</b><span class="pl ${list.length ? 'ok' : ''}">${N(list.length)} استخدام</span></div>${list.length ? list.map(x => {
       const d = S.fxdocs[x.fid]; if (!d) return '';
       const t = c === 'steal' && x.team != null ? (x.team === d.h.id ? d.h : d.a) : null;
-      return `<div class="r j" style="padding:8px 0;border-top:1px solid rgba(255,255,255,.18)"><span class="r" style="gap:8px"><span class="av" style="width:28px;height:28px;font-size:12px">${initial(x.u)}</span>${esc(x.u)}${x.u === me ? ' (أنت)' : ''}</span><span class="sub">${esc(d.h.sn)} ضد ${esc(d.a.sn)}${t ? ' · فريق ' + esc(t.sn) : ''}</span></div>`;
+      return `<div class="r j" style="padding:8px 0;border-top:1px solid rgba(255,255,255,.18)"><span class="r" style="gap:8px">${avatar(photoOf(x.u), nm(x.u), 28)}${esc(nm(x.u))}${x.u === me ? ' (أنت)' : ''}</span><span class="sub">${esc(d.h.sn)} ضد ${esc(d.a.sn)}${t ? ' · فريق ' + esc(t.sn) : ''}</span></div>`;
     }).join('') : '<div class="m mt">محدش استخدمها.</div>'}</div>`;
   }).join('');
 }
@@ -872,7 +1029,7 @@ function comboHtml(A) {
   const row = (key, label, users) => `<div data-act="sx" data-k="${key}" style="cursor:pointer;padding:8px 0;border-top:1px solid rgba(255,255,255,.18)"><div class="r j"><span class="g nm" style="font-size:13px">${label}</span><span class="pl">${N(users.length)} لاعبين</span></div>${S.st.ex[key] ? nameList(users) : ''}</div>`;
   const pairs = Object.values(A.pairs).filter(x => x.users.length >= 2).sort((a, b) => b.users.length - a.users.length).slice(0, 15);
   const combos = A.combos.filter(x => x.users.length >= 2).sort((a, b) => b.users.length - a.users.length);
-  return `<div class="k"><b>أكتر لاعبين اتاخدوا مع بعض</b>${pairs.length ? pairs.map(x => row('p' + x.fid + ':' + x.a + '_' + x.b, lab(x.fid, [x.a, x.b]), x.users)).join('') : '<div class="m mt">مفيش ثنائي اتكرر عند أكتر من لاعب.</div>'}</div>
+  return `<div class="k"><b>أكتر لاعبين اتاخدوا مع بعض في ${scopeWord()}</b>${pairs.length ? pairs.map(x => row('p' + x.fid + ':' + x.a + '_' + x.b, lab(x.fid, [x.a, x.b]), x.users)).join('') : '<div class="m mt">مفيش ثنائي اتكرر عند أكتر من لاعب.</div>'}</div>
   <div class="k"><b>نفس التشكيلة بالظبط</b>${combos.length ? combos.map(x => row('k' + x.k, lab(x.fid, x.ids), x.users)).join('') : '<div class="m mt">مفيش تشكيلتين متطابقتين.</div>'}</div>`;
 }
 function searchHtml(A) {
@@ -886,25 +1043,63 @@ function searchHtml(A) {
     const partners = Object.values(A.pairs).filter(x => x.fid === fid && (x.a === p.i || x.b === p.i)).sort((a, b) => b.users.length - a.users.length).slice(0, 5);
     const k1 = 'sp' + fid + ':' + p.i, k2 = 'sk' + fid + ':' + p.i;
     const tog = (key, label, users) => `<div data-act="sx" data-k="${key}" style="cursor:pointer;padding:8px 0;border-top:1px solid rgba(255,255,255,.18)"><div class="r j"><span>${label}</span><span class="m">${S.st.ex[key] ? 'إخفاء' : 'الأسماء'}</span></div>${S.st.ex[key] ? nameList(users) : ''}</div>`;
-    return `<div class="k"><div class="r">${photo(p)}<div class="g"><div class="nm">${esc(p.n)} <span class="sub">${esc(tsn(fid, p))}</span></div><div class="sub">اختاره ${N(pk ? pk.users.length : 0)} · كبّنه ${N(cp ? cp.users.length : 0)}</div></div></div>
+    return `<div class="k"><div class="r">${photo(p)}<div class="g"><div class="nm">${esc(p.n)} <span class="sub">${esc(tsn(fid, p))}</span></div><div class="sub">اختاره ${N(pk ? pk.users.length : 0)} · كبّنه ${N(cp ? cp.users.length : 0)} · نقاطه ${N(ptsOf(fid, p.i))}</div></div></div>
       ${pk ? tog(k1, 'مين اختاره', pk.users) : ''}${cp ? tog(k2, 'مين كبّنه', cp.users) : ''}
       ${partners.length ? `<div style="padding:8px 0;border-top:1px solid rgba(255,255,255,.18)"><div class="m">اتاخد معاه</div>${partners.map(x => { const o = ppl(fid, x.a === p.i ? x.b : x.a); return `<div class="r j" style="padding:4px 0"><span>${esc(o ? o.n : '؟')}</span><span class="pl">${N(x.users.length)}</span></div>`; }).join('')}</div>` : ''}</div>`;
   }).join('');
 }
+
+/* العناية المركزة: مين نسي إيه */
+function careHtml() {
+  const roster = activeIds(), w = scopeWord();
+  if (!roster.length) return '<div class="k ctr">مفيش لاعبين لسه.</div>';
+  const fxs = scopeFx().filter(f => S.stats[f.id] && S.fxdocs[f.id]);
+  const row = (key, label, uids, notes) => `<div data-act="sx" data-k="${key}" style="cursor:pointer;padding:8px 0;border-top:1px solid rgba(255,255,255,.18)"><div class="r j"><span class="g nm" style="font-size:13px">${label}</span><span class="pl bad">${N(uids.length)}</span></div>${S.st.ex[key] ? nameList(uids, notes) : ''}</div>`;
+  let html = `<div class="m">مين نسي إيه في ${w} (بعد بداية الماتش)</div>`;
+  fxs.forEach(f => {
+    const sd = S.stats[f.id], d = S.fxdocs[f.id], per = {};
+    roster.forEach(uid => {
+      const p = sd.users[uid], ids = p ? p.ids : [];
+      if (!ids.length) { per[uid] = { none: true, miss: [1, 2, 3, 4] }; return; }
+      if (p.chip === 'free_pos') { per[uid] = { none: false, miss: Array(Math.max(0, 4 - ids.length)).fill(0) }; return; }
+      const have = new Set(ids.map(id => (d.players.find(x => x.i === id) || {}).p));
+      per[uid] = { none: false, miss: [1, 2, 3, 4].filter(pos => !have.has(pos)) };
+    });
+    const label = pos => POS[pos] || 'لاعب (أي مركز)';
+    const notesFor = uids => { const o = {}; uids.forEach(u => { o[u] = per[u].miss.map(p => POS[p] || 'لاعب').join('، '); }); return o; };
+    const byPos = [1, 2, 3, 4, 0].map(pos => ({ pos, uids: roster.filter(u => !per[u].none && per[u].miss.includes(pos)) })).filter(x => x.uids.length);
+    const grp = n => roster.filter(u => !per[u].none && per[u].miss.length === n);
+    const none = roster.filter(u => per[u].none), g2 = grp(2), g3 = grp(3);
+    const rows = [
+      ...byPos.map(x => row('cp' + f.id + ':' + x.pos, 'نسوا ' + label(x.pos), x.uids)),
+      g2.length ? row('c2' + f.id, 'نسوا مركزين', g2, notesFor(g2)) : '',
+      g3.length ? row('c3' + f.id, 'نسوا ٣ مراكز', g3, notesFor(g3)) : '',
+      none.length ? row('c4' + f.id, 'ما اختاروش خالص', none) : ''
+    ].filter(Boolean);
+    html += `<div class="k"><b>${esc(fxTitle(f))}</b>${rows.length ? rows.join('') : '<div class="m mt">الكل كمّل تشكيلته ✓</div>'}</div>`;
+  });
+  if (!fxs.length) html += '<div class="k ctr">لسه مفيش إحصائيات جاهزة في النطاق ده.</div>';
+  /* الخواص المنسية: بتظهر في آخر الجولة */
+  const gwAll = gwFixtures(S.gw), done = gwAll.length > 0 && gwAll.every(f => koOf(f) && Date.now() > koOf(f) + END_AFTER);
+  if (!done) html += '<div class="k"><b>الخواص المنسية</b><div class="m mt">بتظهر في آخر الجولة، بعد ما كل الماتشات تخلص.</div></div>';
+  else {
+    /* بنعدّ الخواص اللي اتحسبت فعلاً (مثلاً هلقط رزقي من غير فريق تعتبر منسية) */
+    const used = {}, all = startedFx(S.gw);
+    roster.forEach(u => { used[u] = new Set(effPicks(u, all).filter(it => it.p.chip && !it.invalid).map(it => it.p.chip)); });
+    const z = roster.filter(u => used[u].size === 0), o1 = roster.filter(u => used[u].size === 1);
+    html += `<div class="k"><b>الخواص المنسية في الجولة ${N(S.gw)}</b>${z.length ? row('cz', 'نسوا الخاصيتين', z) : ''}${o1.length ? row('co', 'نسوا خاصية واحدة', o1) : ''}${!z.length && !o1.length ? '<div class="m mt">الكل استخدم خاصيتين ✓</div>' : ''}</div>`;
+  }
+  return html;
+}
+
 function oppRows(others) {
   const q = S.st.oq.trim().toLowerCase();
-  const list = others.filter(u => !q || u.toLowerCase().includes(q));
-  return list.map(u => `<button class="k r" data-act="sopp" data-u="${esc(u)}"><div class="av">${initial(u)}</div><span class="g nm">${esc(u)}</span><span class="m">قارن ‹</span></button>`).join('') || '<div class="k ctr">مفيش نتايج.</div>';
+  const list = others.filter(u => !q || nm(u).toLowerCase().includes(q));
+  return list.map(u => `<button class="k r" data-act="sopp" data-u="${esc(u)}">${avatar(photoOf(u), nm(u))}<span class="g nm">${esc(nm(u))}</span><span class="m">قارن ‹</span></button>`).join('') || '<div class="k ctr">مفيش نتايج.</div>';
 }
 function cmpSide(f, u) {
-  const sd = S.stats[f.id], d = S.fxdocs[f.id], sc = S.scores[f.id] || { pts: {}, status: 'ns' };
-  const p = sd.byUser[u] || { ids: [], cap: null, chip: null, team: null };
-  const list = p.ids.map(id => d.players.find(x => x.i === id)).filter(Boolean).sort((a, b) => a.p - b.p);
-  const base = list.reduce((s, pl) => s + (sc.pts[pl.i] || 0), 0);
-  const cap = p.cap != null ? (sc.pts[p.cap] || 0) * (CAP_MULT - 1) : 0;
-  let steal = 0;
-  if (p.chip === 'steal' && p.team != null && sc.status === 'ft') steal = Math.max(0, ...d.players.filter(x => x.t === p.team).map(x => sc.pts[x.i] || 0));
-  return { p, list, sc, total: base + cap + steal };
+  const sd = S.stats[f.id], p = sd.users[u] || { ids: [], cap: null, chip: null, team: null };
+  return { p, ...calcPick(f.id, p) };
 }
 function cmpBlock(f, me, opp) {
   const d = S.fxdocs[f.id], a = cmpSide(f, me), b = cmpSide(f, opp), n = Math.max(a.list.length, b.list.length);
@@ -923,39 +1118,146 @@ function cmpBlock(f, me, opp) {
   return { html, a: a.total, b: b.total };
 }
 function cmpHtml(A) {
-  const st = S.st, me = S.profile.username;
-  const others = [...A.users].filter(u => u !== me).sort();
+  const st = S.st, me = S.user.uid;
   if (!st.opp || !A.users.has(st.opp)) {
-    return `<div class="k"><b>اختار لاعب تقارن بيه</b><div style="margin-top:8px"><input class="in" data-in="sopp" placeholder="ابحث باسم المستخدم" aria-label="بحث" value="${esc(st.oq)}"></div></div><div id="ol" style="display:flex;flex-direction:column;gap:8px">${oppRows(others)}</div>`;
+    return `<div class="k"><b>اختار لاعب تقارن بيه</b><div style="margin-top:8px"><input class="in" data-in="sopp" placeholder="ابحث باسم المستخدم" aria-label="بحث" value="${esc(st.oq)}"></div></div><div id="ol" style="display:flex;flex-direction:column;gap:8px">${oppRows(othersList())}</div>`;
   }
   const blocks = scopeFx().filter(f => S.stats[f.id] && S.fxdocs[f.id]).map(f => cmpBlock(f, me, st.opp));
   const ta = blocks.reduce((s, x) => s + x.a, 0), tb = blocks.reduce((s, x) => s + x.b, 0);
-  return `<div class="k r j"><div class="r"><div class="av">${initial(me)}</div><b>أنت</b></div><button class="lnk" data-act="sopp0">تغيير</button><div class="r"><b>${esc(st.opp)}</b><div class="av">${initial(st.opp)}</div></div></div>
+  return `<div class="k r j"><div class="r">${avatar(photoOf(me), nm(me))}<b>أنت</b></div><button class="lnk" data-act="sopp0">تغيير</button><div class="r"><b>${esc(nm(st.opp))}</b>${avatar(photoOf(st.opp), nm(st.opp))}</div></div>
     <div class="r m"><span style="width:12px;height:12px;border-radius:3px;background:rgba(245,179,1,.45)"></span>لاعب مشترك بينكم</div>
     ${blocks.map(x => x.html).join('')}
-    ${blocks.length > 1 ? `<div class="k r j"><span class="d" style="font-size:24px${ta > tb ? ';color:#8bffb8' : ''}">${N(ta)}</span><span class="m">إجمالي النطاق</span><span class="d" style="font-size:24px${tb > ta ? ';color:#8bffb8' : ''}">${N(tb)}</span></div>` : ''}`;
+    ${blocks.length > 1 ? `<div class="k r j"><span class="d" style="font-size:24px${ta > tb ? ';color:#8bffb8' : ''}">${N(ta)}</span><span class="m">إجمالي ${scopeWord()}</span><span class="d" style="font-size:24px${tb > ta ? ';color:#8bffb8' : ''}">${N(tb)}</span></div>` : ''}`;
 }
 
 function ranked(rows) {
   let prev = null, rank = 0;
   return rows.map((r, i) => { if (!prev || r.pts !== prev.pts) rank = i + 1; prev = r; return { ...r, rank }; });
 }
+/* ───────── الترتيب ───────── */
+const nameOfRow = r => S.names[r.uid] || r.name;
+function rankRow(r, tap, sub, attrs) {
+  const me = r.uid === S.user.uid;
+  const style = me ? 'border-color:#2fd06b;background:rgba(47,208,107,.26)' : '';
+  const nmv = nameOfRow(r);
+  const inner = `<span class="d" style="width:30px;font-size:18px;color:${r.rank <= 3 ? '#f5b301' : '#d0dde8'}">${N(r.rank)}</span>${avatar(photoOf(r.uid), nmv)}<div class="g"><div class="nm">${esc(nmv)}${me ? ' (أنت)' : ''}</div>${sub ? `<div class="sub" style="margin-top:3px">${sub}</div>` : ''}</div><span class="d" style="font-size:20px">${N(r.pts)}</span>`;
+  return tap ? `<button class="k r" data-act="udet" ${attrs || ''} data-uid="${esc(r.uid)}" style="${style}">${inner}</button>` : `<div class="k r" style="${style}">${inner}</div>`;
+}
+/* ترتيب ماتش واحد بنفس قواعد الحساب الرسمية (أول خاصيتين في الجولة، وكابتن واحد في اليوم) */
+function matchRanking(fid) {
+  const sd = S.stats[fid]; if (!sd || !S.fxdocs[fid]) return null;
+  const ids = activeIds().length ? activeIds() : Object.keys(sd.users);
+  const fxs = startedFx(S.gw);
+  return ids.map(uid => {
+    if (!sd.users[uid]) return { uid, name: nm(uid), none: true, total: 0, p: null, c: null };
+    const it = effPicks(uid, fxs).find(x => String(x.f.id) === String(fid));
+    if (!it) return { uid, name: nm(uid), none: true, total: 0, p: null, c: null };
+    return { uid, name: nm(uid), none: false, total: it.c.total, p: it.p, c: it.c, it };
+  }).sort((a, b) => b.total - a.total || byName(a.name, b.name));
+}
+function boardMatchView(tabs) {
+  const all = startedFx(S.gw), head = `<div class="h"><b>الترتيب</b></div>${tabs}`;
+  if (!all.length) return head + `<div class="f"><div class="k ctr">لسه مفيش ماتشات بدأت في الجولة دي.</div></div>`;
+  const bm = S.bm || {}, fid = bm.fid;
+  const chips = `<div class="tg">${all.map(f => `<button class="bt ${String(fid) === String(f.id) ? 'on' : ''}" data-act="bmatch" data-fid="${f.id}" style="font-size:13px">${esc(f.h.sn)} ضد ${esc(f.a.sn)}</button>`).join('')}</div>`;
+  if (bm.loading) return head + chips + '<div class="f"><div class="k ctr">جاري التحميل…</div></div>';
+  const rows = matchRanking(fid);
+  if (!rows) return head + chips + '<div class="f"><div class="k ctr">الترتيب بيتجهز دلوقتي، حدّث بعد دقيقة.</div></div>';
+  const rk = ranked(rows.map(r => ({ ...r, pts: r.total })));
+  const sc = S.scores[fid] || {};
+  const notes = r => {
+    if (r.none) return '<span class="pl">ما اختارش</span>';
+    const out = [];
+    if (r.p.cap != null) { const pl = ppl(fid, r.p.cap); if (pl) out.push(`<span class="pl" style="background:rgba(245,179,1,.25);color:#ffd45c">كابتن ${esc(pl.n)}</span>`); }
+    if (r.p.chip) out.push(`<span class="pl ok">${CHIPS[r.p.chip].n}${r.p.chip === 'steal' && r.c.steal ? ' +' + N(r.c.steal) : ''}</span>`);
+    if (r.it && r.it.droppedCap) out.push('<span class="pl">الكابتن مش محسوب</span>');
+    if (r.it && r.it.droppedChip) out.push('<span class="pl">الخاصية مش محسوبة</span>');
+    if (r.it && r.it.invalid) out.push('<span class="pl bad">تشكيلة مخالفة</span>');
+    return out.join(' ');
+  };
+  return head + chips + `<div class="f"><div class="m">${sc.status === 'ft' ? 'نقط نهائية للماتش' : 'نقط مؤقتة، الماتش لسه شغال'} · ${esc(fxTitle(fxInfo(fid)))} · اضغط على أي لاعب تشوف تشكيلته</div>${rk.map(r => rankRow(r, true, notes(r), `data-mode="match" data-fid="${fid}"`)).join('')}</div>`;
+}
 function vBoard() {
+  const tabs = `<div class="tg"><button class="bt ${S.bt === 'total' ? 'on' : ''}" data-act="bt" data-k="total">الإجمالي</button>${S.gw != null ? `<button class="bt ${S.bt === 'gw' ? 'on' : ''}" data-act="bt" data-k="gw">الجولة ${N(S.gw)}</button><button class="bt ${S.bt === 'match' ? 'on' : ''}" data-act="bt" data-k="match">الماتش</button>` : ''}</div>`;
+  if (S.bt === 'match' && S.gw != null) return boardMatchView(tabs);
   const id = S.bt === 'total' ? 'total' : 'gw_' + S.gw;
   const b = S.boards[id];
-  const rows = b ? ranked(b.rows) : [];
+  const rows = b ? ranked([...b.rows].sort((a, c) => (c.pts - a.pts) || byName(nameOfRow(a), nameOfRow(c)))) : [];
   const when = b && b.updatedAt ? 'آخر تحديث ' + fmtTime(tsMs(b.updatedAt)) : '';
-  const note = S.bt === 'gw' ? (b ? (b.final ? 'نقط نهائية' : 'نقط مؤقتة لحد ما الجولة تخلص') : '') : 'الإجمالي بيتثبت بعد نهاية كل جولة';
-  return `<div class="h"><b>الترتيب</b><span class="m">${when}</span></div>
-  <div class="tg"><button class="bt ${S.bt === 'total' ? 'on' : ''}" data-act="bt" data-k="total">الإجمالي</button>${S.gw != null ? `<button class="bt ${S.bt === 'gw' ? 'on' : ''}" data-act="bt" data-k="gw">الجولة ${N(S.gw)}</button>` : ''}</div>
+  const tap = S.bt === 'gw';
+  const note = S.bt === 'gw' ? (b ? (b.final ? 'نقط نهائية' : 'نقط مؤقتة لحد ما الجولة تخلص') + ' · اضغط على أي لاعب تشوف تشكيلته' : '') : 'الإجمالي بيتثبت بعد نهاية كل جولة';
+  return `<div class="h"><b>الترتيب</b><span class="m">${when}</span></div>${tabs}
   <div class="f"><div class="m">${note}</div>
-  ${b ? rows.map(r => `<div class="k r" style="${r.uid === S.user.uid ? 'border-color:#2fd06b;background:rgba(47,208,107,.26)' : ''}"><span class="d" style="width:30px;font-size:18px;color:${r.rank <= 3 ? '#f5b301' : '#d0dde8'}">${N(r.rank)}</span><div class="av">${initial(r.name)}</div><div class="g nm">${esc(r.name)}${r.uid === S.user.uid ? ' (أنت)' : ''}</div><span class="d" style="font-size:20px">${N(r.pts)}</span></div>`).join('') || '<div class="k ctr">مفيش لاعبين لسه.</div>' : '<div class="k ctr">الترتيب لسه ما اتحسبش. بيظهر بعد أول ماتش.</div>'}</div>`;
+  ${b ? rows.map(r => rankRow(r, tap)).join('') || '<div class="k ctr">مفيش لاعبين لسه.</div>' : '<div class="k ctr">الترتيب لسه ما اتحسبش. بيظهر بعد أول ماتش.</div>'}</div>`;
 }
+
+/* تشكيلة لاعب في الجولة أو في ماتش: بنطبّق نفس قواعد الحساب (أول خاصيتين، وكابتن واحد في اليوم) */
+function effPicks(uid, fxs) {
+  const list = fxs.filter(f => S.stats[f.id] && S.stats[f.id].users[uid] && S.fxdocs[f.id]).sort((a, b) => koOf(a) - koOf(b));
+  const used = {}; let nUsed = 0; const capDay = {};
+  return list.map(f => {
+    const p = { ...S.stats[f.id].users[uid] };
+    let chip = p.chip, dc = false, dcap = false;
+    if (chip) {
+      if (used[chip] || nUsed >= MAX_CHIPS || (chip === 'steal' && p.team !== f.h.id && p.team !== f.a.id)) { chip = null; dc = true; }
+      else { used[chip] = true; nUsed++; }
+    }
+    let cap = p.cap;
+    if (cap != null) { const dk = dayKey(koOf(f)); if (capDay[dk]) { cap = null; dcap = true; } else capDay[dk] = true; }
+    const eff = { ...p, chip, cap, team: chip ? p.team : null };
+    /* زي Code.gs: لو الخاصية اتشالت والتشكيلة مخالفة للقواعد العادية، الماتش كله ما يتحسبش */
+    if (!validIds(S.fxdocs[f.id], p.ids, chip)) {
+      if (chip) { used[chip] = false; nUsed--; }
+      if (cap != null && !dcap) delete capDay[dayKey(koOf(f))];
+      const z = calcPick(f.id, { ...eff, ids: [], cap: null, chip: null });
+      return { f, p: eff, c: { ...z, list: calcPick(f.id, eff).list }, droppedChip: dc, droppedCap: dcap, invalid: true };
+    }
+    return { f, p: eff, c: calcPick(f.id, eff), droppedChip: dc, droppedCap: dcap };
+  });
+}
+async function openUser(uid, mode, fid) {
+  S.ud = { uid, mode, fid, sort: 'match', loading: true };
+  S.view = 'udet'; render();
+  try { await Promise.all([loadNames(), ensureStats(S.gw != null ? startedFx(S.gw) : [])]); } catch (e) { console.error(e); }
+  S.ud.loading = false; render();
+}
+function vUser() {
+  const u = S.ud; if (!u) return vLoading();
+  const name = nm(u.uid), me = u.uid === S.user.uid;
+  const fxs = u.mode === 'match' ? [fxInfo(u.fid)].filter(Boolean) : (S.gw != null ? startedFx(S.gw) : []);
+  const scope = u.mode === 'match' ? (fxs[0] ? 'ماتش ' + fxTitle(fxs[0]) : '') : 'الجولة ' + N(S.gw) + ' كلها';
+  const head = `<div class="h"><button class="bt" data-act="uback" style="padding:0 14px" aria-label="رجوع">›</button><div class="r g" style="min-width:0">${avatar(photoOf(u.uid), name, 44)}<div class="g"><b style="font-size:20px">${esc(name)}${me ? ' (أنت)' : ''}</b><div class="m">${esc(scope)}</div></div></div></div>`;
+  if (u.loading) return head + '<div class="f"><div class="k ctr">جاري التحميل…</div></div>';
+  /* الحساب على الجولة كلها (علشان قواعد الخواص والكابتن)، وبعدين بنعرض النطاق المطلوب بس */
+  const items = effPicks(u.uid, S.gw != null ? startedFx(S.gw) : fxs).filter(it => fxs.some(f => String(f.id) === String(it.f.id)));
+  if (!items.length) return head + '<div class="f"><div class="k ctr">مختارش لاعبين في النطاق ده.</div></div>';
+  const total = items.reduce((s, it) => s + it.c.total, 0);
+  const prow = (it, pl) => `<div class="k r">${photo(pl)}<div class="g"><div class="nm">${esc(pl.n)} ${it.p.cap === pl.i ? '<span class="c" style="display:inline-flex" title="كابتن">C</span>' : ''}</div><div class="sub">${POS[pl.p]} · ${esc(tsn(it.f.id, pl))}</div></div><span class="d" style="font-size:22px">${N(ptsOf(it.f.id, pl.i))}</span></div>`;
+  const boxes = items.filter(it => it.p.chip).map(it => `<div class="k r j" style="border-color:#2fd06b"><div class="g"><b>الخاصية: ${CHIPS[it.p.chip].n}</b><div class="m">${esc(fxTitle(it.f))}${it.p.chip === 'steal' && it.p.team != null ? ' · فريق ' + esc(teamName(it.p.team === it.f.h.id ? it.f.h : it.f.a)) : ''}</div></div><div class="ctr"><span class="d" style="font-size:22px">${N(it.c.total)}</span><div class="sub">نقاط الماتش${it.c.steal ? ' (+' + N(it.c.steal) + ' بونص)' : ''}</div></div></div>`).join('');
+  const dropped = items.filter(it => it.droppedChip).map(it => `<div class="m warn">الخاصية في ${esc(fxTitle(it.f))} ما اتحسبتش${it.p && S.stats[it.f.id].users[u.uid].chip === 'steal' && S.stats[it.f.id].users[u.uid].team == null ? ' (هلقط رزقي من غير فريق)' : ' (خاصيتين مختلفتين بس في الجولة)'}.</div>`).join('')
+    + items.filter(it => it.invalid).map(it => `<div class="m warn">تشكيلة ${esc(fxTitle(it.f))} مخالفة للقواعد من غير الخاصية، فما اتحسبتش.</div>`).join('');
+  let list;
+  if (u.sort === 'pts') {
+    const flat = []; items.forEach(it => it.c.list.forEach(pl => flat.push({ it, pl, pts: ptsOf(it.f.id, pl.i) })));
+    flat.sort((a, b) => (b.pts - a.pts) || a.pl.n.localeCompare(b.pl.n));
+    list = flat.map(x => prow(x.it, x.pl)).join('');
+  } else {
+    list = items.map(it => `<div class="r j" style="padding:8px 2px 0"><span class="m">${esc(fxTitle(it.f))}${it.droppedCap ? ' · الكابتن مش محسوب (كابتن واحد في اليوم)' : ''}</span><span class="m">${N(it.c.total)} نقطة</span></div>${it.c.list.map(pl => prow(it, pl)).join('')}`).join('');
+  }
+  return head + `<div class="f"><div class="k r j"><div class="g"><b>المجموع</b><div class="m">${u.mode === 'match' ? 'في الماتش ده' : 'في الجولة'} · شامل الكابتن ×${N(CAP_MULT)} والخواص · نقط مؤقتة لحد النهاية</div></div><span class="d" style="font-size:28px">${N(total)}</span></div>
+  ${boxes}${dropped}
+  <div class="r" style="gap:6px"><span class="m">الفرز:</span><button class="bt ${u.sort !== 'pts' ? 'on' : ''}" data-act="usort" data-k="match" style="height:36px;padding:0 14px">بالماتشات</button><button class="bt ${u.sort === 'pts' ? 'on' : ''}" data-act="usort" data-k="pts" style="height:36px;padding:0 14px">بالنقاط</button></div>
+  ${list}</div>`;
+}
+
+function photoLeftMs() { const at = tsMs(S.profile.photoAt); return at ? Math.max(0, at + 30 * 86400000 - Date.now()) : 0; }
 function vAccount() {
-  const t = S.boards.total, rows = t ? ranked(t.rows) : [], me = rows.find(r => r.uid === S.user.uid);
+  const t = S.boards.total, rows = t ? ranked(t.rows) : [], me = rows.find(r => r.uid === S.user.uid), left = photoLeftMs();
   return `<div class="h"><b>حسابي</b></div><div class="f" style="gap:10px">
-    <div class="k r"><div class="av" style="width:56px;height:56px;font-size:22px">${S.profile.photo ? `<img src="${esc(S.profile.photo)}" alt="" referrerpolicy="no-referrer" style="width:100%;height:100%;object-fit:cover">` : initial(S.profile.username)}</div>
+    <div class="k r">${avatar(S.profile.photo, S.profile.username, 56)}
       <div class="g"><b style="font-size:18px">${esc(S.profile.username)}</b><div class="m" dir="ltr" style="text-align:start">${esc(S.user.email || '')}</div></div></div>
+    <div class="k"><div class="r j"><div class="g"><b>صورة البروفايل</b><div class="m">${left ? 'تقدر تغيّرها بعد ' + N(Math.ceil(left / 86400000)) + ' يوم' : 'ارفع صورتك. بعد ما ترفعها مش هتقدر تغيّرها لمدة ٣٠ يوم.'}</div></div>${left ? '<button class="bt" disabled>رفع صورة</button>' : '<label class="bt on" for="pf" style="display:flex;align-items:center;cursor:pointer">رفع صورة</label>'}</div><input id="pf" type="file" accept="image/*" hidden data-in="pfile"></div>
+    ${S.editName ? `<form class="k" data-form="rename" style="display:flex;flex-direction:column;gap:10px"><label class="m" for="u2">اسم المستخدم الجديد</label><input id="u2" class="in" name="u" maxlength="24" autocomplete="off" data-in="uname2" value="${esc(S.profile.username)}" required><div id="uhint2" class="m">أي اسم تحبه، بس مينفعش يكون شبه اسم موجود.</div><div class="r"><button class="bt on g" type="submit">حفظ</button><button class="bt g" type="button" data-act="renameCancel">إلغاء</button></div></form>` : '<button class="bt" data-act="renameOpen">تغيير اسم المستخدم</button>'}
     <div style="display:flex;gap:8px"><div class="k ctr g"><div class="d" style="font-size:26px">${me ? N(me.pts) : '—'}</div><div class="m">إجمالي النقط</div></div><div class="k ctr g"><div class="d" style="font-size:26px">${me ? N(me.rank) : '—'}</div><div class="m">المركز${rows.length ? ' من ' + N(rows.length) : ''}</div></div></div>
     <div class="k"><div class="r j"><div class="g"><b>تنبيهات الماتشات</b><div class="m">${S.fcm && S.fcm.on ? 'مفعّلة: هنبعتلك قبل الماتش بحوالي ساعة لو تشكيلتك ناقصة.' : 'فعّلها علشان يوصلك تنبيه قبل الماتش بساعة لو تشكيلتك ناقصة.'}</div></div><button class="bt ${S.fcm && S.fcm.on ? '' : 'on'}" data-act="push">${S.fcm && S.fcm.on ? 'إيقاف' : 'تفعيل'}</button></div>${isIOS() && !isStandalone() ? '<div class="m warn mt">على الآيفون لازم تضيف التطبيق للشاشة الرئيسية الأول.</div>' : ''}</div>
     ${S.admin ? '<button class="bt" data-act="admin">لوحة الإدارة</button>' : ''}
@@ -968,14 +1270,44 @@ function vAdmin() {
 }
 function adminRows() {
   const q = S.uq.trim().toLowerCase();
-  const list = S.users.filter(u => !q || (u.username || '').toLowerCase().includes(q)).sort((a, b) => (a.username || '').localeCompare(b.username || ''));
-  return list.map(u => `<div class="k r ${u.banned ? 'dz' : ''}"><div class="av">${initial(u.username)}</div><div class="g"><div class="nm">${esc(u.username)}</div><div class="sub">${u.createdAt ? 'من ' + fmtDay(tsMs(u.createdAt)) : ''}</div></div><span class="pl ${u.banned ? 'bad' : 'ok'}">${u.banned ? 'محظور' : 'نشط'}</span><button class="bt ${u.banned ? '' : 'red'}" style="height:36px;padding:0 12px" data-act="ban" data-uid="${esc(u.id)}">${u.banned ? 'فك الحظر' : 'حظر'}</button></div>`).join('') || '<div class="k ctr">مفيش نتايج.</div>';
+  const list = S.users.filter(u => !q || (u.username || '').toLowerCase().includes(q)).sort((a, b) => byName(a.username || '', b.username || ''));
+  return list.map(u => `<div class="k r ${u.banned ? 'dz' : ''}">${avatar(u.photo, u.username)}<div class="g"><div class="nm">${esc(u.username)}</div><div class="sub">${u.createdAt ? 'من ' + fmtDay(tsMs(u.createdAt)) : ''}</div>${u.photo && u.photo.startsWith('data:') ? `<button class="lnk" style="font-size:12px;padding:2px 0" data-act="rmphoto" data-uid="${esc(u.id)}">مسح الصورة</button>` : ''}</div><span class="pl ${u.banned ? 'bad' : 'ok'}">${u.banned ? 'محظور' : 'نشط'}</span><button class="bt ${u.banned ? '' : 'red'}" style="height:36px;padding:0 12px" data-act="ban" data-uid="${esc(u.id)}">${u.banned ? 'فك الحظر' : 'حظر'}</button></div>`).join('') || '<div class="k ctr">مفيش نتايج.</div>';
 }
 
 /* ───────── الأحداث ───────── */
+/* صورة البروفايل: بتتصغّر وبتتخزن جوه مستند المستخدم، ومينفعش تتغيّر قبل ٣٠ يوم */
+async function makeThumb(file) {
+  const img = await new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = URL.createObjectURL(file); });
+  const sz = Math.min(img.width, img.height), sx = (img.width - sz) / 2, sy = (img.height - sz) / 2;
+  for (const [side, q] of [[192, 0.82], [160, 0.76], [128, 0.7], [96, 0.65]]) {
+    const c = document.createElement('canvas'); c.width = c.height = side;
+    c.getContext('2d').drawImage(img, sx, sy, sz, sz, 0, 0, side, side);
+    const url = c.toDataURL('image/jpeg', q);
+    if (url.length < 40000) return url;
+  }
+  throw new Error('الصورة كبيرة');
+}
+async function changePhoto(file) {
+  const left = photoLeftMs();
+  if (left > 0) return toast('تقدر تغيّر صورتك بعد ' + N(Math.ceil(left / 86400000)) + ' يوم');
+  if (!confirm('هتقدر تغيّر صورتك تاني بعد ٣٠ يوم. تكمل؟')) return;
+  try {
+    const thumb = await (window.__mkThumb || makeThumb)(file);
+    await updateDoc(doc(db, 'users', S.user.uid), { photo: thumb, photoAt: serverTimestamp() });
+    const r = await getDoc(doc(db, 'users', S.user.uid)); S.profile = r.data(); S.namesAt = 0;
+    toast('اتغيرت صورتك ✓');
+  } catch (e) { console.error(e); toast(e.code === 'permission-denied' ? 'لسه مجاش ميعاد تغيير الصورة' : 'مقدرتش أغيّر الصورة'); }
+  render();
+}
 const ACTIONS = {
   async google() {
     try { await signInWithPopup(auth, new GoogleAuthProvider()); }
+    catch (e) { if (!['auth/popup-closed-by-user', 'auth/cancelled-popup-request'].includes(e.code)) toast(authMsg(e)); }
+  },
+  renameOpen() { S.editName = true; render(); },
+  renameCancel() { S.editName = false; render(); },
+  async facebook() {
+    try { await signInWithPopup(auth, new FacebookAuthProvider()); }
     catch (e) { if (!['auth/popup-closed-by-user', 'auth/cancelled-popup-request'].includes(e.code)) toast(authMsg(e)); }
   },
   mode() { S.mode = S.mode === 'login' ? 'signup' : 'login'; S.authErr = ''; render(); },
@@ -985,13 +1317,14 @@ const ACTIONS = {
     try { await sendPasswordResetEmail(auth, email.trim()); toast('بعتنالك رابط تغيير كلمة السر على الإيميل'); }
     catch (e) { toast(authMsg(e)); }
   },
-  async logout() { await flushSaves(); await signOut(auth); },
+  async logout() { leaveSub(); await flushSaves(); await signOut(auth); },
   retry() { S.view = 'loading'; render(); bootUser().then(render).catch(e => { console.error(e); S.view = 'error'; render(); }); },
   async nav(el) {
+    leaveSub();
     const v = el.dataset.v;
     S.view = v;
     S.q = '';
-    if (v === 'board') { render(); await Promise.all([loadBoard('total'), S.gw != null ? loadBoard('gw_' + S.gw) : null]); }
+    if (v === 'board') { render(); await Promise.all([loadBoard('total'), S.gw != null ? loadBoard('gw_' + S.gw) : null, loadNames()]); }
     else if (v === 'tour') { render(); await loadTours().catch(() => {}); }
     else if (v === 'stats') { initStats(); S.st.loading = true; render(); await loadStatsScope(); S.st.loading = false; }
     else if (v === 'account') { render(); await Promise.all([S.boards.total ? null : loadBoard('total').catch(() => {}), loadFcm()]); }
@@ -1002,15 +1335,18 @@ const ACTIONS = {
   day(el) { S.day = el.dataset.k; render(); },
   async open(el) {
     const fid = el.dataset.fid;
-    S.fx = fid; S.pos = 1; S.q = ''; S.save = '';
+    S.fx = fid; S.pos = 1; S.q = ''; S.save = ''; S.stealAsk = null;
     S.view = 'loading'; render();
     try { await loadFixture(fid); S.view = 'match'; } catch (e) { console.error(e); toast('مقدرتش أفتح الماتش: ' + (e.code || e.message)); S.view = 'round'; }
     render();
   },
-  back() { flushSaves(); S.view = 'round'; render(); },
+  back() {
+    if (stealMissing(S.fx)) return toast('اختار فريق هلقط رزقي الأول، أو ألغِ الخاصية');
+    S.stealAsk = null; leaveSub(); flushSaves(); S.view = 'round'; render();
+  },
   chip(el) { toggleChip(el.dataset.c); },
   async topen(el) { S.view = 'loading'; render(); try { await openTour(el.dataset.id); S.view = 'tdet'; } catch (e) { toast('مقدرتش أفتح البطولة'); S.view = 'tour'; } render(); },
-  tback() { S.view = 'tour'; render(); },
+  tback() { leaveSub(); S.view = 'tour'; render(); },
   ttab(el) { S.tt.tab = el.dataset.k; render(); },
   tround(el) { S.tt.r = Number(el.dataset.r); render(); },
   async tnew() {
@@ -1021,7 +1357,7 @@ const ACTIONS = {
     } catch (e) { toast('مقدرتش أحمّل اللاعبين'); }
     render();
   },
-  tcancel() { S.tn = null; S.view = 'tour'; render(); },
+  tcancel() { leaveSub(); S.tn = null; S.view = 'tour'; render(); },
   tn(el) {
     const tn = S.tn, f = el.dataset.f, d = Number(el.dataset.d), c = tnCalc();
     if (f === 'groups') { tn.groups = Math.max(1, Math.min(tn.groups + d, Math.max(1, Math.floor(c.n / 2)))); tn.sizes = null; tn.custom = false; tn.rounds = null; }
@@ -1055,7 +1391,7 @@ const ACTIONS = {
   },
   async tdel() {
     if (!confirm('تحذف البطولة دي؟')) return;
-    try { await deleteDoc(doc(db, 'tournaments', S.tour.id)); try { await deleteDoc(doc(db, 'tstate', S.tour.id)); } catch (e) { /* مفيش حالة */ } S.tours = S.tours.filter(x => x.id !== S.tour.id); S.tour = null; S.view = 'tour'; toast('اتحذفت'); }
+    try { await deleteDoc(doc(db, 'tournaments', S.tour.id)); try { await deleteDoc(doc(db, 'tstate', S.tour.id)); } catch (e) { /* مفيش حالة */ } S.tours = S.tours.filter(x => x.id !== S.tour.id); S.tour = null; leaveSub(); S.view = 'tour'; toast('اتحذفت'); }
     catch (e) { toast('مقدرتش أحذفها: ' + (e.code || e.message)); }
     render();
   },
@@ -1063,17 +1399,52 @@ const ACTIONS = {
   ssc(el) { S.st.kind = el.dataset.k; refreshStats(); },
   sfx(el) { S.st.kind = 'match'; S.st.fid = el.dataset.fid; refreshStats(); },
   sday(el) { S.st.kind = 'day'; S.st.day = el.dataset.k; refreshStats(); },
-  stab(el) { S.st.tab = el.dataset.k; S.st.q = ''; render(); },
+  async stab(el) {
+    S.st.tab = el.dataset.k; S.st.q = '';
+    if (S.st.tab === 'care') { S.st.loading = true; render(); await loadStatsScope(); S.st.loading = false; }
+    render();
+  },
+  ssort(el) { S.st.sort = el.dataset.k; renderStatsBody(); },
+  udet(el) { openUser(el.dataset.uid, el.dataset.mode || 'gw', el.dataset.fid); },
+  uback() { leaveSub(); S.view = 'board'; render(); },
+  usort(el) { S.ud.sort = el.dataset.k; render(); },
+  async bmatch(el) {
+    S.bm = S.bm || {}; S.bm.fid = el.dataset.fid; S.bm.loading = true; render();
+    await ensureStats(S.gw != null ? startedFx(S.gw) : []);
+    S.bm.loading = false; render();
+  },
+  async rmphoto(el) {
+    const u = S.users.find(x => x.id === el.dataset.uid); if (!u) return;
+    if (!confirm('تمسح صورة ' + u.username + '؟')) return;
+    try { await updateDoc(doc(db, 'users', u.id), { photo: null, photoAt: null }); u.photo = null; const l = $('#ulist'); if (l) l.innerHTML = adminRows(); toast('اتمسحت الصورة'); }
+    catch (e) { toast('مقدرتش أمسحها: ' + (e.code || e.message)); }
+  },
   sx(el) { const k = el.dataset.k; S.st.ex[k] = !S.st.ex[k]; renderStatsBody(); },
   sopp(el) { S.st.opp = el.dataset.u; renderStatsBody(); },
   sopp0() { S.st.opp = null; S.st.oq = ''; renderStatsBody(); },
   steam(el) {
     const fid = S.fx, p = pickOf(fid);
     if (isLocked(fid)) return toast('الماتش بدأ، الاختيار مقفول');
+    if (p.chip !== 'steal') {
+      if (S.stealAsk !== fid) return;
+      if (p.chip) return toast('ألغِ الخاصية الحالية الأول');
+      const why = canUseChip(fid, 'steal'); if (why) { S.stealAsk = null; renderMatchBody(); return toast(why); }
+      p.chip = 'steal';
+      toast('اتفعّلت هلقط رزقي ✓');
+    }
+    S.stealAsk = null;
     p.team = Number(el.dataset.t);
     changed(fid);
   },
   pos(el) { S.pos = Number(el.dataset.p); renderMatchBody(); },
+  rmp(el, e) {
+    e.stopPropagation();
+    const fid = S.fx, p = pickOf(fid), pid = Number(el.dataset.pid);
+    if (isLocked(fid)) return toast('الماتش بدأ، الاختيار مقفول');
+    p.ids = p.ids.filter(x => x !== pid);
+    if (p.cap === pid) p.cap = null;
+    changed(fid);
+  },
   tp(el) {
     const fid = S.fx, d = S.fxdocs[fid], p = pickOf(fid), pid = Number(el.dataset.pid);
     if (isLocked(fid)) return toast('الماتش بدأ، الاختيار مقفول');
@@ -1097,7 +1468,20 @@ const ACTIONS = {
     else { if (capTakenElsewhere(fid)) return toast('اخترت كابتن في ماتش تاني النهاردة'); p.cap = pid; }
     changed(fid);
   },
-  async bt(el) { S.bt = el.dataset.k; render(); const id = S.bt === 'total' ? 'total' : 'gw_' + S.gw; await loadBoard(id); render(); },
+  async bt(el) {
+    S.bt = el.dataset.k;
+    if (S.bt === 'match') {
+      const all = S.gw != null ? startedFx(S.gw) : [];
+      S.bm = S.bm || {};
+      if (all.length && (!S.bm.fid || !all.some(f => String(f.id) === String(S.bm.fid)))) S.bm.fid = all[all.length - 1].id;
+      S.bm.loading = true; render();
+      await Promise.all([loadNames(), ensureStats(all)]);
+      S.bm.loading = false; render(); return;
+    }
+    render();
+    const id = S.bt === 'total' ? 'total' : 'gw_' + S.gw;
+    await Promise.all([loadBoard(id), loadNames()]); render();
+  },
   async admin() {
     S.view = 'admin'; S.uq = ''; render();
     try { const s = await getDocs(collection(db, 'users')); S.users = s.docs.map(d => ({ id: d.id, ...d.data() })); }
@@ -1113,6 +1497,23 @@ const ACTIONS = {
   }
 };
 const FORMS = {
+  async rename(f) {
+    const name = f.elements.u.value.trim().replace(/\s+/g, ' ');
+    const err = checkName(name); if (err) return toast(err);
+    const key = normName(name), old = S.profile.usernameLower || '';
+    if (name === S.profile.username) { S.editName = false; return render(); }
+    try {
+      if (key !== old) { const t = await getDoc(doc(db, 'usernames', key)); if (t.exists()) return toast('الاسم ده مستخدم أو شبه اسم تاني، اختار اسم مختلف'); }
+      const b = writeBatch(db);
+      if (key !== old) { if (old) b.delete(doc(db, 'usernames', old)); b.set(doc(db, 'usernames', key), { uid: S.user.uid }); }
+      b.update(doc(db, 'users', S.user.uid), key !== old ? { username: name, usernameLower: key } : { username: name });
+      await b.commit();
+      S.profile.username = name; S.profile.usernameLower = key; S.names[S.user.uid] = name;
+      const ul = S.userList.find(x => x.id === S.user.uid); if (ul) ul.name = name;
+      S.editName = false; toast('اتغير اسمك ✓');
+    } catch (e) { console.error(e); toast(e.code === 'permission-denied' ? 'الاسم ده مستخدم أو مش مسموح' : 'مقدرتش أغيّر الاسم'); }
+    render();
+  },
   async login(f) {
     const email = f.elements.email.value.trim(), pw = f.elements.pw.value;
     S.email = email; S.authErr = '';
@@ -1122,14 +1523,15 @@ const FORMS = {
     } catch (e) { S.authErr = authMsg(e); render(); }
   },
   async setup(f) {
-    const name = f.elements.u.value.trim(), low = name.toLowerCase();
-    if (!/^[A-Za-z0-9_]{3,20}$/.test(name)) return toast('الاسم لازم ٣ لـ ٢٠ حرف إنجليزي أو رقم أو _');
+    const name = f.elements.u.value.trim().replace(/\s+/g, ' ');
+    const err = checkName(name); if (err) return toast(err);
+    const key = normName(name);
     try {
-      const t = await getDoc(doc(db, 'usernames', low));
-      if (t.exists()) return toast('الاسم ده مستخدم، اختار غيره');
+      const t = await getDoc(doc(db, 'usernames', key));
+      if (t.exists()) return toast('الاسم ده مستخدم أو شبه اسم تاني، اختار اسم مختلف');
       const b = writeBatch(db);
-      b.set(doc(db, 'usernames', low), { uid: S.user.uid });
-      b.set(doc(db, 'users', S.user.uid), { username: name, usernameLower: low, photo: S.user.photoURL || null, banned: false, createdAt: serverTimestamp() });
+      b.set(doc(db, 'usernames', key), { uid: S.user.uid });
+      b.set(doc(db, 'users', S.user.uid), { username: name, usernameLower: key, photo: S.user.photoURL || null, banned: false, createdAt: serverTimestamp() });
       await b.commit();
       S.view = 'loading'; render();
       await bootUser();
@@ -1138,22 +1540,30 @@ const FORMS = {
   }
 };
 let unameTimer;
+function nameHint(h, v, current) {
+  clearTimeout(unameTimer);
+  if (current != null && v === current) { h.className = 'm'; h.textContent = 'ده اسمك الحالي.'; return; }
+  const err = v ? checkName(v) : 'اكتب اسم';
+  if (err) { h.className = 'm'; h.textContent = err; return; }
+  h.className = 'm'; h.textContent = 'بنشوف لو متاح…';
+  const key = normName(v);
+  unameTimer = setTimeout(async () => {
+    try {
+      const r = await getDoc(doc(db, 'usernames', key));
+      const taken = r.exists() && r.data().uid !== (S.user && S.user.uid);
+      h.className = taken ? 'err' : 'm'; h.textContent = taken ? 'الاسم ده مستخدم أو شبه اسم تاني' : 'متاح ✓';
+    } catch (e) { h.textContent = ''; }
+  }, 400);
+}
 const INPUTS = {
+  uname2(t) { nameHint($('#uhint2'), t.value.trim().replace(/\s+/g, ' '), S.profile.username); },
+  uname(t) { nameHint($('#uhint'), t.value.trim().replace(/\s+/g, ' '), null); },
   psearch(t) { S.q = t.value; renderList(); },
   tnname(t) { S.tn.name = t.value; },
   ssearch(t) { S.st.q = t.value; renderStatsBody(); },
-  sopp(t) { S.st.oq = t.value; const l = $('#ol'); if (l) l.innerHTML = oppRows([...aggStats().users].filter(u => u !== S.profile.username).sort()); },
+  sopp(t) { S.st.oq = t.value; const l = $('#ol'); if (l) l.innerHTML = oppRows(othersList()); },
   usearch(t) { S.uq = t.value; const l = $('#ulist'); if (l) l.innerHTML = adminRows(); },
-  uname(t) {
-    const v = t.value.trim(), h = $('#uhint');
-    clearTimeout(unameTimer);
-    if (!/^[A-Za-z0-9_]{3,20}$/.test(v)) { h.className = 'm'; h.textContent = 'حروف إنجليزي وأرقام و_ فقط، من ٣ لـ ٢٠.'; return; }
-    h.textContent = 'بنشوف لو متاح…';
-    unameTimer = setTimeout(async () => {
-      try { const s = await getDoc(doc(db, 'usernames', v.toLowerCase())); h.className = s.exists() ? 'err' : 'm'; h.textContent = s.exists() ? 'الاسم ده مستخدم' : 'متاح ✓'; }
-      catch (e) { h.textContent = ''; }
-    }, 400);
-  }
+  pfile(t) { const f = t.files && t.files[0]; t.value = ''; if (f) changePhoto(f); }
 };
 document.addEventListener('click', e => { const el = e.target.closest('[data-act]'); if (el && ACTIONS[el.dataset.act]) ACTIONS[el.dataset.act](el, e); });
 document.addEventListener('submit', e => { const f = e.target.closest('[data-form]'); if (f) { e.preventDefault(); FORMS[f.dataset.form](f); } });
@@ -1162,7 +1572,7 @@ document.addEventListener('input', e => { const t = e.target; if (t.dataset && t
 /* ───────── البداية ───────── */
 onAuthStateChanged(auth, async u => {
   S.user = u;
-  if (!u) { S.profile = null; S.admin = false; S.picks = {}; S.stats = {}; S.scores = {}; S.st = newSt(); S.fcm = null; S.tours = []; S.tour = null; S.tn = null; S.view = 'login'; render(); return; }
+  if (!u) { leaveSub(); S.editName = false; S.profile = null; S.admin = false; S.picks = {}; S.stats = {}; S.scores = {}; S.st = newSt(); S.fcm = null; S.tours = []; S.tour = null; S.tn = null; S.view = 'login'; render(); return; }
   S.view = 'loading'; render();
   try { await bootUser(); } catch (e) { console.error(e); S.view = 'error'; }
   render();
