@@ -188,7 +188,7 @@ const CHIPS = {
   steal: { n: 'هلقط رزقي', d: 'اختار فريق، وبعد نهاية الماتش بتاخد نقط أعلى لاعب فيه كبونص فوق اختياراتك.' }
 };
 const MAX_CHIPS = 2;   // لازم يكون زي MAX_CHIPS_PER_GW في Code.gs
-const AR = { 'Arsenal':'أرسنال','Aston Villa':'أستون فيلا','Bournemouth':'بورنموث','Brentford':'برينتفورد','Brighton':'برايتون','Burnley':'بيرنلي','Chelsea':'تشيلسي','Crystal Palace':'كريستال بالاس','Everton':'إيفرتون','Fulham':'فولهام','Leeds':'ليدز','Liverpool':'ليفربول','Man City':'مان سيتي','Man Utd':'مان يونايتد','Newcastle':'نيوكاسل',"Nott'm Forest":'نوتنجهام فورست','Sunderland':'سندرلاند','Spurs':'توتنهام','West Ham':'وست هام','Wolves':'وولفرهامبتون','Leicester':'ليستر','Ipswich Town':'إبسويتش','Southampton':'ساوثهامبتون','Coventry City':'كوفنتري','Hull':'هال سيتي' };
+const AR = { 'Arsenal':'أرسنال','Aston Villa':'أستون فيلا','Bournemouth':'بورنموث','Brentford':'برينتفورد','Brighton':'برايتون','Burnley':'بيرنلي','Chelsea':'تشيلسي','Crystal Palace':'كريستال بالاس','Everton':'إيفرتون','Fulham':'فولهام','Leeds':'ليدز','Liverpool':'ليفربول','Man City':'مان سيتي','Man Utd':'مان يونايتد','Newcastle':'نيوكاسل',"Nott'm Forest":'نوتنجهام فورست','Sunderland':'سندرلاند','Spurs':'توتنهام','West Ham':'وست هام','Wolves':'وولفرهامبتون','Leicester':'ليستر','Ipswich Town':'إبسويتش','Southampton':'ساوثهامبتون','Coventry City':'كوفنتري','Hull City':'هال سيتي' };
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
@@ -508,11 +508,28 @@ function render() {
   const nonav = ['loading', 'login', 'setup', 'banned', 'expired', 'error', 'match', 'udet'].includes(v);
   root.className = nonav ? 'nonav' : '';
   const views = { loading: vLoading, login: vLogin, setup: vSetup, banned: vBanned, expired: vExpired, error: vError, round: vRound, match: vMatch, board: vBoard, stats: vStats, udet: vUser, tour: vTourList, tdet: vTourDetail, tnew: vTourNew, account: vAccount, admin: vAdmin };
+  /* إعادة الرسم في نفس الشاشة: بنحافظ على مكان سحب صفوف الأزرار (التبويبات/الأيام) ومكان الصفحة */
+  const same = v === lastView, rows = same ? [...root.querySelectorAll('.tg')].map(t => t.scrollLeft) : [], y = window.scrollY;
   root.innerHTML = (views[v] || vLoading)() + (nonav ? '' : nav());
   if (v === 'match') renderMatchBody();
   if (v === 'stats') renderStatsBody();
+  root.querySelectorAll('.tg').forEach((t, i) => {
+    if (same && rows[i] != null) t.scrollLeft = rows[i];
+    showOn(t);
+  });
+  if (same) window.scrollTo(0, Math.max(y, keepY));
+  else { keepY = 0; window.scrollTo(0, 0); }
+  lastView = v;
   lastSig = lockSig();
   syncHistory();
+}
+let lastView = '', keepY = 0;
+/* الزرار المختار في صف الأزرار لازم يبان، من غير ما الصفحة نفسها تتحرك لفوق أو لتحت */
+function showOn(row) {
+  const on = row.querySelector('.bt.on'); if (!on) return;
+  const r = row.getBoundingClientRect(), b = on.getBoundingClientRect();
+  if (b.left < r.left) row.scrollLeft -= (r.left - b.left) + 16;
+  else if (b.right > r.right) row.scrollLeft += (b.right - r.right) + 16;
 }
 /* بصمة حالات القفل: بنعيد رسم شاشة الجولة لما ماتش يتقفل بس */
 let lastSig = '';
@@ -1524,8 +1541,8 @@ const ACTIONS = {
   sday(el) { S.st.kind = 'day'; S.st.day = el.dataset.k; refreshStats(); },
   async stab(el) {
     S.st.tab = el.dataset.k; S.st.q = '';
-    if (S.st.tab === 'care') { S.st.loading = true; render(); await loadStatsScope(); S.st.loading = false; }
-    render();
+    if (S.st.tab === 'care') { keepY = window.scrollY; S.st.loading = true; render(); await loadStatsScope(); S.st.loading = false; }
+    render(); keepY = 0;
   },
   ssort(el) { S.st.sort = el.dataset.k; renderStatsBody(); },
   udet(el) { openUser(el.dataset.uid, el.dataset.mode || 'gw', el.dataset.fid); },
