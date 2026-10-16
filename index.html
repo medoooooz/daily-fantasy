@@ -115,6 +115,38 @@ a.lnk,.lnk{color:#8bffb8;background:none;border:0;padding:6px 0;text-decoration:
 .rm{position:absolute;top:-8px;right:-6px;width:22px;height:22px;border-radius:50%;background:#d63a3f;color:#fff;border:0;padding:0;font-size:15px;line-height:1;display:flex;align-items:center;justify-content:center;z-index:2}
 .rm::after{content:"";position:absolute;inset:-12px}
 div.sl{cursor:pointer}
+/* شاشة الدخول: دايرة نص الملعب بترسم نفسها، الكورة بتنزل على نقطة السنتر وبتتحول للوجو */
+#intro{position:fixed;inset:0;z-index:40;overflow:hidden;background:radial-gradient(circle at 88% 6%,rgba(47,208,107,.38),transparent 42%),radial-gradient(circle at 6% 82%,rgba(80,140,255,.38),transparent 48%),linear-gradient(165deg,#17607a,#0d3554 58%,#152a5c);transition:opacity .5s ease,transform .5s ease;cursor:pointer}
+#intro.out{opacity:0;transform:scale(1.06);pointer-events:none}
+#intro .il{position:absolute;left:0;right:0;top:50%;height:2px;margin-top:-1px;background:rgba(255,255,255,.32);transform:scaleX(0);animation:ilx .7s cubic-bezier(.6,0,.2,1) .05s forwards}
+#intro .ir{position:absolute;left:50%;top:50%;width:250px;height:250px;margin:-125px}
+#intro .ir circle{fill:none;stroke:rgba(255,255,255,.45);stroke-width:2;stroke-dasharray:754;stroke-dashoffset:754;animation:ird 1s cubic-bezier(.5,0,.2,1) .25s forwards}
+#intro .ib{position:absolute;left:50%;top:50%;width:38px;height:38px;margin:-19px;transform:translateY(-62vh);animation:ibd .75s cubic-bezier(.45,0,.9,.5) .7s forwards,ibo .25s ease 1.45s forwards}
+#intro .ib svg{width:100%;height:100%;animation:ibs .75s linear .7s}
+#intro .iw{position:absolute;left:50%;top:50%;width:120px;height:120px;margin:-60px;border-radius:50%;border:3px solid #2fd06b;opacity:0;animation:iwv .9s ease-out 1.42s}
+#intro .ilg{position:absolute;left:50%;top:50%;width:104px;height:104px;margin:-52px;border-radius:26px;opacity:0;transform:scale(.3);box-shadow:0 0 0 0 rgba(47,208,107,.0);animation:ilg .6s cubic-bezier(.3,1.6,.5,1) 1.45s forwards,igl 2.4s ease-in-out 2.1s infinite}
+#intro .itx{position:absolute;left:0;right:0;top:calc(50% + 78px);text-align:center;padding:0 20px}
+#intro .itt{font-weight:800;font-size:34px;line-height:1.1;clip-path:inset(0 0 0 100%);animation:itr .7s cubic-bezier(.6,0,.2,1) 1.75s forwards}
+#intro .its{color:#d0dde8;font-size:14px;margin-top:8px;opacity:0;animation:ifd .5s ease 2.25s forwards}
+#intro .igo{margin-top:22px;opacity:0;transform:translateY(8px);pointer-events:none;transition:.35s ease}
+#intro.tap .igo{opacity:1;transform:none;pointer-events:auto}
+#intro .igo .bt{height:50px;padding:0 34px;font-size:16px}
+@keyframes ilx{to{transform:scaleX(1)}}
+@keyframes ird{to{stroke-dashoffset:0}}
+@keyframes ibd{0%{transform:translateY(-62vh)}100%{transform:translateY(0)}}
+@keyframes ibs{to{transform:rotate(540deg)}}
+@keyframes ibo{to{opacity:0;transform:scale(1.6)}}
+@keyframes iwv{0%{opacity:.9;transform:scale(.2)}100%{opacity:0;transform:scale(3.2)}}
+@keyframes ilg{to{opacity:1;transform:scale(1)}}
+@keyframes igl{0%,100%{box-shadow:0 0 0 0 rgba(47,208,107,.0)}50%{box-shadow:0 0 34px 6px rgba(47,208,107,.45)}}
+@keyframes itr{to{clip-path:inset(0 0 0 0)}}
+@keyframes ifd{to{opacity:1}}
+@media (prefers-reduced-motion:reduce){#intro *{animation-duration:.01s!important;animation-delay:0s!important}#intro .ib{display:none}}
+/* مفتاح تشغيل/إيقاف في الإعدادات */
+.sw{position:relative;width:52px;height:30px;border-radius:15px;border:0;background:rgba(255,255,255,.25);flex:none;padding:0}
+.sw::after{content:"";position:absolute;top:3px;right:3px;width:24px;height:24px;border-radius:50%;background:#fff;transition:transform .2s}
+.sw.on{background:#2fd06b}
+.sw.on::after{transform:translateX(-22px)}
 </style>
 </head>
 <body>
@@ -146,7 +178,7 @@ const CHIPS = {
   steal: { n: 'هلقط رزقي', d: 'اختار فريق، وبعد نهاية الماتش بتاخد نقط أعلى لاعب فيه كبونص فوق اختياراتك.' }
 };
 const MAX_CHIPS = 2;   // لازم يكون زي MAX_CHIPS_PER_GW في Code.gs
-const AR = { 'Arsenal':'أرسنال','Aston Villa':'أستون فيلا','Bournemouth':'بورنموث','Brentford':'برينتفورد','Brighton':'برايتون','Burnley':'بيرنلي','Chelsea':'تشيلسي','Crystal Palace':'كريستال بالاس','Everton':'إيفرتون','Fulham':'فولهام','Leeds':'ليدز','Liverpool':'ليفربول','Man City':'مان سيتي','Man Utd':'مان يونايتد','Newcastle':'نيوكاسل',"Nott'm Forest":'نوتنجهام فورست','Sunderland':'سندرلاند','Spurs':'توتنهام','West Ham':'وست هام','Wolves':'وولفرهامبتون','Leicester':'ليستر','Ipswich':'إبسويتش','Southampton':'ساوثهامبتون','Coventry':'كوفنتري','Hull':'هال سيتي' };
+const AR = { 'Arsenal':'أرسنال','Aston Villa':'أستون فيلا','Bournemouth':'بورنموث','Brentford':'برينتفورد','Brighton':'برايتون','Burnley':'بيرنلي','Chelsea':'تشيلسي','Crystal Palace':'كريستال بالاس','Everton':'إيفرتون','Fulham':'فولهام','Leeds':'ليدز','Liverpool':'ليفربول','Man City':'مان سيتي','Man Utd':'مان يونايتد','Newcastle':'نيوكاسل',"Nott'm Forest":'نوتنجهام فورست','Sunderland':'سندرلاند','Spurs':'توتنهام','West Ham':'وست هام','Wolves':'وولفرهامبتون','Leicester':'ليستر','Ipswich Town':'إبسويتش','Southampton':'ساوثهامبتون','Coventry City':'كوفنتري','Hull':'هال سيتي' };
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
@@ -193,6 +225,28 @@ function authMsg(e) {
   return m[e.code] || ('حصلت مشكلة: ' + (e.code || e.message));
 }
 
+/* ───────── الدعوات ─────────
+   - رابط "تجربة": اللي يدخل بيه بيلعب لحد ميعاد معين، أو لحد ما الإدارة توقف الرابط، وبعدها بيتقفل عليه تلقائي.
+   - رابط "دائم": للاعبين الحقيقيين. إيقافه بيمنع تسجيل ناس جديدة بس، واللي دخلوا بيه بيفضلوا.
+   - الحسابات القديمة (قبل نظام الدعوات) دايمة. */
+const INV_KEY = 'fd_invite';
+try {
+  const q = new URLSearchParams(location.search).get('invite');
+  if (q) { localStorage.setItem(INV_KEY, q.trim()); history.replaceState(null, '', location.pathname); }
+} catch (e) { /* مش مهم */ }
+const savedInvite = () => { try { return localStorage.getItem(INV_KEY) || ''; } catch (e) { return ''; } };
+const canJoin = i => !!(i && i.active === true && (!i.until || tsMs(i.until) > Date.now()));
+const hasAccess = i => !!(i && (i.kind === 'full' || canJoin(i)));
+async function getInvite(code) {
+  if (!code) return null;
+  if (S.invites[code] !== undefined) return S.invites[code];
+  try { const r = await getDoc(doc(db, 'invites', code)); S.invites[code] = r.exists() ? { id: code, ...r.data() } : null; }
+  catch (e) { S.invites[code] = null; }
+  return S.invites[code];
+}
+const newCode = () => { const a = 'abcdefghjkmnpqrstuvwxyz23456789', u = new Uint32Array(10); crypto.getRandomValues(u); return [...u].map(x => a[x % a.length]).join(''); };
+const inviteLink = code => location.origin + location.pathname + '?invite=' + code;
+
 /* ───────── الحالة ───────── */
 const S = {
   view: 'loading', user: null, profile: null, admin: false,
@@ -205,6 +259,7 @@ const S = {
   tours: [], tour: null, tt: { tab: 'groups', r: null }, tn: null, cal: null,
   names: {}, namesAt: 0, editName: false,
   userList: [], snames: {}, agg: null, ud: null, bm: null,
+  invites: {}, gone: new Set(), inv: { kind: 'test', days: 7, name: '' },
   stealAsk: null   // ماتش مستني اختيار فريق هلقط رزقي (الخاصية مش بتتفعّل غير مع الفريق)
 };
 const newSt = () => ({ kind: 'gw', fid: null, day: null, tab: 'caps', q: '', opp: null, oq: '', ex: {}, loading: false, sort: 'own' });
@@ -327,6 +382,7 @@ async function bootUser() {
   if (!ps.exists()) { S.profile = null; S.view = 'setup'; return; }
   S.profile = ps.data();
   if (S.profile.banned) { S.view = 'banned'; return; }
+  if (S.profile.invite) { S.invites = {}; if (!hasAccess(await getInvite(S.profile.invite))) { S.view = 'expired'; return; } }
   try { const a = await getDoc(doc(db, 'admins', S.user.uid)); S.admin = a.exists(); } catch (e) { S.admin = false; }
   await loadRound();
   S.view = 'round';
@@ -437,9 +493,9 @@ function changed(fid) { queueSave(fid); renderMatchBody(); }
 function render() {
   const root = $('#app');
   const v = S.view;
-  const nonav = ['loading', 'login', 'setup', 'banned', 'error', 'match', 'udet'].includes(v);
+  const nonav = ['loading', 'login', 'setup', 'banned', 'expired', 'error', 'match', 'udet'].includes(v);
   root.className = nonav ? 'nonav' : '';
-  const views = { loading: vLoading, login: vLogin, setup: vSetup, banned: vBanned, error: vError, round: vRound, match: vMatch, board: vBoard, stats: vStats, udet: vUser, tour: vTourList, tdet: vTourDetail, tnew: vTourNew, account: vAccount, admin: vAdmin };
+  const views = { loading: vLoading, login: vLogin, setup: vSetup, banned: vBanned, expired: vExpired, error: vError, round: vRound, match: vMatch, board: vBoard, stats: vStats, udet: vUser, tour: vTourList, tdet: vTourDetail, tnew: vTourNew, account: vAccount, admin: vAdmin };
   root.innerHTML = (views[v] || vLoading)() + (nonav ? '' : nav());
   if (v === 'match') renderMatchBody();
   if (v === 'stats') renderStatsBody();
@@ -474,6 +530,7 @@ function nav() {
 }
 const vLoading = () => `<div class="login ctr"><img class="logo" src="icon-192.png" alt="" style="margin:0 auto;display:block"><div class="m">جاري التحميل…</div></div>`;
 const vError = () => `<div class="login ctr"><div>حصلت مشكلة في تحميل البيانات</div><button class="bt on" data-act="retry">حاول تاني</button><button class="lnk" data-act="logout">تسجيل الخروج</button></div>`;
+const vExpired = () => `<div class="login ctr"><img class="logo" src="icon-192.png" alt="" style="margin:0 auto;display:block"><b style="font-size:20px">فترة التجربة خلصت</b><div class="m">شكراً إنك جربت الفانتاسي اليومي. لو عايز تكمل معانا كلّم الإدارة.</div><button class="bt" data-act="logout">تسجيل الخروج</button></div>`;
 const vBanned = () => `<div class="login ctr"><div class="logo" style="margin:0 auto;background:#d63a3f;color:#fff">!</div><b style="font-size:20px">حسابك محظور من اللعب</b><div class="m">تواصل مع الإدارة لو شايف إن ده غلط.</div><button class="bt" data-act="logout">تسجيل الخروج</button></div>`;
 
 function vLogin() {
@@ -503,6 +560,9 @@ function vSetup() {
       <label class="m" for="u">اسم المستخدم</label>
       <input id="u" class="in" name="u" maxlength="24" autocomplete="off" data-in="uname" placeholder="اسمك في اللعبة" required>
       <div id="uhint" class="m">أي اسم تحبه (عربي أو إنجليزي)، بس مينفعش يكون شبه اسم موجود. وتقدر تغيّره بعدين من حسابي.</div>
+      <label class="m" for="inv">كود الدعوة</label>
+      <input id="inv" class="in" name="inv" dir="ltr" autocomplete="off" autocapitalize="off" value="${esc(savedInvite())}" placeholder="من رابط الدعوة" required>
+      <div class="m">${savedInvite() ? 'الكود اتحط تلقائي من رابط الدعوة.' : 'اللعب بالدعوة بس. لو معاكش كود اطلبه من الإدارة.'}</div>
       <button class="bt on" type="submit" style="height:52px">ابدأ اللعب</button>
     </form>
     <button class="lnk" data-act="logout">تسجيل الخروج</button>
@@ -620,7 +680,7 @@ function renderList() {
 /* ───────── تنبيهات الموبايل ───────── */
 const pushConfigured = () => VAPID_KEY && !VAPID_KEY.startsWith('PASTE');
 const isIOS = () => /iPad|iPhone|iPod/.test(navigator.userAgent);
-const isStandalone = () => (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true;
+const isStandalone = () => (window.matchMedia && (matchMedia('(display-mode: standalone)').matches || matchMedia('(display-mode: fullscreen)').matches)) || navigator.standalone === true;
 let fgBound = false;
 async function pushToken() {
   const reg = await navigator.serviceWorker.ready;
@@ -723,14 +783,20 @@ async function loadNames() {
   if (Date.now() - S.namesAt < 300000 && S.userList.length) return;
   try {
     const r = await getDocs(collection(db, 'users'));
-    S.userList = r.docs.map(d => ({ id: d.id, name: d.data().username, banned: !!d.data().banned, photo: d.data().photo || null }));
+    S.userList = r.docs.map(d => ({ id: d.id, name: d.data().username, banned: !!d.data().banned, photo: d.data().photo || null, invite: d.data().invite || null }));
+    S.invites = {};
+    await Promise.all([...new Set(S.userList.map(u => u.invite).filter(Boolean))].map(getInvite));
+    S.userList.forEach(u => { u.gone = !!u.invite && !hasAccess(S.invites[u.invite]); });
+    S.gone = new Set(S.userList.filter(u => u.gone).map(u => u.id));
     S.names = {}; S.userList.forEach(u => { S.names[u.id] = u.name; });
     S.namesAt = Date.now();
   } catch (e) { /* نستخدم الأسماء المخزنة */ }
 }
 const nm = uid => S.names[uid] || S.snames[uid] || '؟';
 const photoOf = uid => { const u = S.userList.find(x => x.id === uid); return u ? u.photo : null; };
-const activeIds = () => S.userList.filter(u => !u.banned).map(u => u.id);
+const activeIds = () => S.userList.filter(u => !u.banned && !u.gone).map(u => u.id);
+/* صفوف الترتيب من غير اللي تجربتهم خلصت (لحد ما Code.gs يعيد الحساب) */
+const liveRows = rows => rows.filter(r => !S.gone.has(r.uid));
 const tName = (t, u) => u === 'BYE' ? 'bye' : u ? esc(S.names[u] || t.players[u] || '؟') : '—';
 function curRound(t, st) {
   if (!st) return 0;
@@ -937,6 +1003,7 @@ function aggStats() {
   scopeFx().forEach(f => {
     const sd = S.stats[f.id]; if (!sd) return;
     Object.keys(sd.users).forEach(u => {
+      if (S.gone.has(u)) return;
       const p = sd.users[u]; A.n++; A.users.add(u);
       p.ids.forEach(id => { const k = f.id + ':' + id; (A.picks[k] = A.picks[k] || { fid: f.id, id, users: [] }).users.push(u); });
       if (p.cap != null) { const k = f.id + ':' + p.cap; (A.caps[k] = A.caps[k] || { fid: f.id, id: p.cap, users: [] }).users.push(u); }
@@ -1182,7 +1249,7 @@ function vBoard() {
   if (S.bt === 'match' && S.gw != null) return boardMatchView(tabs);
   const id = S.bt === 'total' ? 'total' : 'gw_' + S.gw;
   const b = S.boards[id];
-  const rows = b ? ranked([...b.rows].sort((a, c) => (c.pts - a.pts) || byName(nameOfRow(a), nameOfRow(c)))) : [];
+  const rows = b ? ranked(liveRows([...b.rows]).sort((a, c) => (c.pts - a.pts) || byName(nameOfRow(a), nameOfRow(c)))) : [];
   const when = b && b.updatedAt ? 'آخر تحديث ' + fmtTime(tsMs(b.updatedAt)) : '';
   const tap = S.bt === 'gw';
   const note = S.bt === 'gw' ? (b ? (b.final ? 'نقط نهائية' : 'نقط مؤقتة لحد ما الجولة تخلص') + ' · اضغط على أي لاعب تشوف تشكيلته' : '') : 'الإجمالي بيتثبت بعد نهاية كل جولة';
@@ -1252,7 +1319,7 @@ function vUser() {
 
 function photoLeftMs() { const at = tsMs(S.profile.photoAt); return at ? Math.max(0, at + 30 * 86400000 - Date.now()) : 0; }
 function vAccount() {
-  const t = S.boards.total, rows = t ? ranked(t.rows) : [], me = rows.find(r => r.uid === S.user.uid), left = photoLeftMs();
+  const t = S.boards.total, rows = t ? ranked(liveRows(t.rows)) : [], me = rows.find(r => r.uid === S.user.uid), left = photoLeftMs();
   return `<div class="h"><b>حسابي</b></div><div class="f" style="gap:10px">
     <div class="k r">${avatar(S.profile.photo, S.profile.username, 56)}
       <div class="g"><b style="font-size:18px">${esc(S.profile.username)}</b><div class="m" dir="ltr" style="text-align:start">${esc(S.user.email || '')}</div></div></div>
@@ -1260,18 +1327,48 @@ function vAccount() {
     ${S.editName ? `<form class="k" data-form="rename" style="display:flex;flex-direction:column;gap:10px"><label class="m" for="u2">اسم المستخدم الجديد</label><input id="u2" class="in" name="u" maxlength="24" autocomplete="off" data-in="uname2" value="${esc(S.profile.username)}" required><div id="uhint2" class="m">أي اسم تحبه، بس مينفعش يكون شبه اسم موجود.</div><div class="r"><button class="bt on g" type="submit">حفظ</button><button class="bt g" type="button" data-act="renameCancel">إلغاء</button></div></form>` : '<button class="bt" data-act="renameOpen">تغيير اسم المستخدم</button>'}
     <div style="display:flex;gap:8px"><div class="k ctr g"><div class="d" style="font-size:26px">${me ? N(me.pts) : '—'}</div><div class="m">إجمالي النقط</div></div><div class="k ctr g"><div class="d" style="font-size:26px">${me ? N(me.rank) : '—'}</div><div class="m">المركز${rows.length ? ' من ' + N(rows.length) : ''}</div></div></div>
     <div class="k"><div class="r j"><div class="g"><b>تنبيهات الماتشات</b><div class="m">${S.fcm && S.fcm.on ? 'مفعّلة: هنبعتلك قبل الماتش بحوالي ساعة لو تشكيلتك ناقصة.' : 'فعّلها علشان يوصلك تنبيه قبل الماتش بساعة لو تشكيلتك ناقصة.'}</div></div><button class="bt ${S.fcm && S.fcm.on ? '' : 'on'}" data-act="push">${S.fcm && S.fcm.on ? 'إيقاف' : 'تفعيل'}</button></div>${isIOS() && !isStandalone() ? '<div class="m warn mt">على الآيفون لازم تضيف التطبيق للشاشة الرئيسية الأول.</div>' : ''}</div>
+    <div class="k"><div class="r j"><div class="g"><b>أصوات الأزرار</b><div class="m">صوت هادي مع كل ضغطة، وصوت الدخول.</div></div><button class="sw ${prefOn('snd') ? 'on' : ''}" data-act="psnd" role="switch" aria-checked="${prefOn('snd')}" aria-label="أصوات الأزرار"></button></div>
+      ${isStandalone() ? '' : `<div class="r j mt" style="padding-top:10px;border-top:1px solid rgba(255,255,255,.18)"><div class="g"><b>ملء الشاشة</b><div class="m">${fsSupported() ? 'يخفي شريط المتصفح أول ما تدوس على الشاشة.' : 'المتصفح ده مش بيدعمه. ضيف التطبيق للشاشة الرئيسية وهيفتح على الشاشة كلها.'}</div></div>${fsSupported() ? `<button class="sw ${prefOn('fs') ? 'on' : ''}" data-act="pfs" role="switch" aria-checked="${prefOn('fs')}" aria-label="ملء الشاشة"></button>` : ''}</div>`}</div>
     ${S.admin ? '<button class="bt" data-act="admin">لوحة الإدارة</button>' : ''}
     <button class="bt red" data-act="logout" style="margin-top:auto">تسجيل الخروج</button></div>`;
 }
+/* روابط الدعوة في لوحة الإدارة */
+const fmtDate = ms => new Intl.DateTimeFormat('ar-EG', { weekday: 'long', day: 'numeric', month: 'long', hour: 'numeric', minute: '2-digit', timeZone: TZ }).format(ms);
+function invStatus(i) {
+  if (i.kind === 'full') return i.active === true ? '<span class="pl ok">دائم · شغال</span>' : '<span class="pl">دائم · التسجيل مقفول</span>';
+  if (canJoin(i)) return '<span class="pl ok">تجربة · شغالة</span>';
+  return '<span class="pl bad">تجربة · خلصت</span>';
+}
+function invitesHtml() {
+  const list = Object.values(S.invites).filter(Boolean).sort((a, b) => (tsMs(b.createdAt) || 0) - (tsMs(a.createdAt) || 0));
+  const cnt = code => S.users.filter(u => u.invite === code).length;
+  const iv = S.inv, liveTests = list.filter(i => i.kind === 'test' && canJoin(i));
+  const create = `<div class="k"><b>رابط دعوة جديد</b>
+    <input class="in mt" data-in="invname" placeholder="اسم الرابط (مثلاً: تجربة الشلة)" value="${esc(iv.name)}" aria-label="اسم الرابط">
+    <div class="r mt" style="gap:6px"><button class="bt g ${iv.kind === 'test' ? 'on' : ''}" data-act="invkind" data-k="test" style="padding:0">تجربة مؤقتة</button><button class="bt g ${iv.kind === 'full' ? 'on' : ''}" data-act="invkind" data-k="full" style="padding:0">لاعبين دايمين</button></div>
+    ${iv.kind === 'test' ? `<div class="m mt">مدة التجربة</div><div class="r" style="gap:6px;flex-wrap:wrap;margin-top:6px">${[1, 3, 7, 14, 30].map(d => `<button class="bt ${iv.days === d ? 'on' : ''}" data-act="invdays" data-d="${d}" style="height:36px;padding:0 12px">${d === 1 ? 'يوم' : N(d) + ' أيام'}</button>`).join('')}</div><div class="m mt">بعد المدة دي أي حد دخل بالرابط ده هيتقفل عليه تلقائي، ونقطه تختفي من الترتيب. وتقدر تنهيها بدري بزرار.</div>`
+      : '<div class="m mt">اللي يدخل بيه بيفضل على طول. لو وقفت الرابط بيتقفل التسجيل الجديد بس.</div>'}
+    <button class="bt on mt" data-act="invnew" style="width:100%">اعمل الرابط</button></div>`;
+  const rows = list.map(i => `<div class="k"><div class="r j"><b class="g">${esc(i.name || i.id)}</b>${invStatus(i)}</div>
+    <div class="m mt">${N(cnt(i.id))} دخلوا بيه${i.kind === 'test' && i.until ? ' · ' + (tsMs(i.until) > Date.now() ? 'بيخلص ' : 'خلص ') + fmtDate(tsMs(i.until)) : ''}</div>
+    <div class="r mt" style="gap:6px;flex-wrap:wrap">
+      <button class="bt" data-act="invcopy" data-c="${esc(i.id)}" style="height:36px;padding:0 12px">نسخ الرابط</button>
+      ${i.kind === 'test' ? `<button class="bt" data-act="invext" data-c="${esc(i.id)}" style="height:36px;padding:0 12px">مدّها ٧ أيام</button>` : ''}
+      ${i.active === true ? `<button class="bt red" data-act="invstop" data-c="${esc(i.id)}" style="height:36px;padding:0 12px">${i.kind === 'test' ? 'إنهاء التجربة' : 'قفل التسجيل'}</button>` : `<button class="bt" data-act="invon" data-c="${esc(i.id)}" style="height:36px;padding:0 12px">${i.kind === 'test' ? 'رجّع التجربة' : 'افتح التسجيل'}</button>`}
+    </div></div>`).join('');
+  return `<div class="r j"><b>روابط الدعوة</b>${liveTests.length > 1 ? '<button class="bt red" data-act="invstopall" style="height:36px;padding:0 12px">إنهاء كل التجارب</button>' : ''}</div>${create}${rows}`;
+}
 function vAdmin() {
   return `<div class="h"><div><b>الإدارة</b><div class="m">${N(S.users.length)} مسجل</div></div><button class="bt" data-act="nav" data-v="account">رجوع</button></div>
+  <div class="f" style="flex:none" id="ilist">${invitesHtml()}</div>
+  <div class="r j" style="padding:0 16px 8px"><b>اللاعبين</b></div>
   <div style="padding:0 16px 10px"><input class="in" data-in="usearch" placeholder="ابحث باسم المستخدم" aria-label="بحث" value="${esc(S.uq)}"></div>
   <div class="f" id="ulist">${adminRows()}</div>`;
 }
 function adminRows() {
   const q = S.uq.trim().toLowerCase();
   const list = S.users.filter(u => !q || (u.username || '').toLowerCase().includes(q)).sort((a, b) => byName(a.username || '', b.username || ''));
-  return list.map(u => `<div class="k r ${u.banned ? 'dz' : ''}">${avatar(u.photo, u.username)}<div class="g"><div class="nm">${esc(u.username)}</div><div class="sub">${u.createdAt ? 'من ' + fmtDay(tsMs(u.createdAt)) : ''}</div>${u.photo && u.photo.startsWith('data:') ? `<button class="lnk" style="font-size:12px;padding:2px 0" data-act="rmphoto" data-uid="${esc(u.id)}">مسح الصورة</button>` : ''}</div><span class="pl ${u.banned ? 'bad' : 'ok'}">${u.banned ? 'محظور' : 'نشط'}</span><button class="bt ${u.banned ? '' : 'red'}" style="height:36px;padding:0 12px" data-act="ban" data-uid="${esc(u.id)}">${u.banned ? 'فك الحظر' : 'حظر'}</button></div>`).join('') || '<div class="k ctr">مفيش نتايج.</div>';
+  return list.map(u => `<div class="k r ${u.banned ? 'dz' : ''}">${avatar(u.photo, u.username)}<div class="g"><div class="nm">${esc(u.username)}</div><div class="sub">${u.createdAt ? 'من ' + fmtDay(tsMs(u.createdAt)) : ''}</div>${u.invite && S.invites[u.invite] && S.invites[u.invite].kind === 'test' ? `<div class="r" style="gap:6px;margin-top:3px"><span class="pl ${hasAccess(S.invites[u.invite]) ? '' : 'bad'}">${hasAccess(S.invites[u.invite]) ? 'تجربة' : 'تجربته خلصت'}</span><button class="lnk" style="font-size:12px;padding:2px 0" data-act="keep" data-uid="${esc(u.id)}">ثبّته لاعب دايم</button></div>` : ''}${u.photo && u.photo.startsWith('data:') ? `<button class="lnk" style="font-size:12px;padding:2px 0" data-act="rmphoto" data-uid="${esc(u.id)}">مسح الصورة</button>` : ''}</div><span class="pl ${u.banned ? 'bad' : 'ok'}">${u.banned ? 'محظور' : 'نشط'}</span><button class="bt ${u.banned ? '' : 'red'}" style="height:36px;padding:0 12px" data-act="ban" data-uid="${esc(u.id)}">${u.banned ? 'فك الحظر' : 'حظر'}</button></div>`).join('') || '<div class="k ctr">مفيش نتايج.</div>';
 }
 
 /* ───────── الأحداث ───────── */
@@ -1299,7 +1396,22 @@ async function changePhoto(file) {
   } catch (e) { console.error(e); toast(e.code === 'permission-denied' ? 'لسه مجاش ميعاد تغيير الصورة' : 'مقدرتش أغيّر الصورة'); }
   render();
 }
+async function copyText(t) {
+  try { await navigator.clipboard.writeText(t); }
+  catch (e) { prompt('انسخ الرابط:', t); }
+}
+async function setInvite(i, patch, msg) {
+  try { await updateDoc(doc(db, 'invites', i.id), patch); Object.assign(i, patch); S.namesAt = 0; toast(msg); }
+  catch (e) { toast('مقدرتش: ' + (e.code || e.message)); }
+  render();
+}
 const ACTIONS = {
+  psnd() { setPref('snd', !prefOn('snd')); if (prefOn('snd')) clickSound(); render(); },
+  pfs() {
+    const on = !prefOn('fs'); setPref('fs', on);
+    if (on) goFullscreen(true); else if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
+    render();
+  },
   async google() {
     try { await signInWithPopup(auth, new GoogleAuthProvider()); }
     catch (e) { if (!['auth/popup-closed-by-user', 'auth/cancelled-popup-request'].includes(e.code)) toast(authMsg(e)); }
@@ -1327,7 +1439,7 @@ const ACTIONS = {
     if (v === 'board') { render(); await Promise.all([loadBoard('total'), S.gw != null ? loadBoard('gw_' + S.gw) : null, loadNames()]); }
     else if (v === 'tour') { render(); await loadTours().catch(() => {}); }
     else if (v === 'stats') { initStats(); S.st.loading = true; render(); await loadStatsScope(); S.st.loading = false; }
-    else if (v === 'account') { render(); await Promise.all([S.boards.total ? null : loadBoard('total').catch(() => {}), loadFcm()]); }
+    else if (v === 'account') { render(); await Promise.all([S.boards.total ? null : loadBoard('total').catch(() => {}), loadFcm(), loadNames()]); }
     else if (v === 'round') { await loadPicks().catch(() => {}); await loadMyPts(); }
     render();
   },
@@ -1484,8 +1596,50 @@ const ACTIONS = {
   },
   async admin() {
     S.view = 'admin'; S.uq = ''; render();
-    try { const s = await getDocs(collection(db, 'users')); S.users = s.docs.map(d => ({ id: d.id, ...d.data() })); }
-    catch (e) { toast('مقدرتش أحمّل المستخدمين'); }
+    try {
+      const [s, iv] = await Promise.all([getDocs(collection(db, 'users')), getDocs(collection(db, 'invites'))]);
+      S.users = s.docs.map(d => ({ id: d.id, ...d.data() }));
+      S.invites = {}; iv.docs.forEach(d => { S.invites[d.id] = { id: d.id, ...d.data() }; });
+    }
+    catch (e) { console.error(e); toast('مقدرتش أحمّل المستخدمين'); }
+    render();
+  },
+  invkind(el) { S.inv.kind = el.dataset.k; render(); },
+  invdays(el) { S.inv.days = Number(el.dataset.d); render(); },
+  async invnew() {
+    const iv = S.inv, code = newCode();
+    const data = { name: iv.name.trim() || (iv.kind === 'test' ? 'تجربة' : 'لاعبين'), kind: iv.kind, active: true, until: iv.kind === 'test' ? new Date(Date.now() + iv.days * 86400000) : null, createdAt: serverTimestamp() };
+    try {
+      await setDoc(doc(db, 'invites', code), data);
+      S.invites[code] = { id: code, ...data, createdAt: new Date() }; S.inv.name = '';
+      await copyText(inviteLink(code)); toast('اتعمل الرابط واتنسخ ✓ ابعته للناس');
+    } catch (e) { toast('مقدرتش أعمل الرابط: ' + (e.code || e.message)); }
+    render();
+  },
+  async invcopy(el) { await copyText(inviteLink(el.dataset.c)); toast('اتنسخ الرابط ✓'); },
+  async invstop(el) {
+    const i = S.invites[el.dataset.c]; if (!i) return;
+    if (!confirm(i.kind === 'test' ? 'تنهي التجربة دي دلوقتي؟ كل اللي دخلوا بالرابط ده هيتقفل عليهم.' : 'تقفل التسجيل بالرابط ده؟ اللي دخلوا بيه هيفضلوا.')) return;
+    await setInvite(i, { active: false }, i.kind === 'test' ? 'خلصت التجربة' : 'اتقفل التسجيل');
+  },
+  async invon(el) { const i = S.invites[el.dataset.c]; if (i) await setInvite(i, { active: true }, 'اتفتح تاني'); },
+  async invext(el) {
+    const i = S.invites[el.dataset.c]; if (!i) return;
+    const from = Math.max(Date.now(), tsMs(i.until) || 0);
+    await setInvite(i, { active: true, until: new Date(from + 7 * 86400000) }, 'اتمدّت ٧ أيام');
+  },
+  async invstopall() {
+    const list = Object.values(S.invites).filter(i => i && i.kind === 'test' && canJoin(i));
+    if (!list.length || !confirm('تنهي كل التجارب الشغالة (' + list.length + ')؟')) return;
+    try { const b = writeBatch(db); list.forEach(i => b.update(doc(db, 'invites', i.id), { active: false })); await b.commit(); list.forEach(i => { i.active = false; }); toast('خلصت كل التجارب'); }
+    catch (e) { toast('مقدرتش: ' + (e.code || e.message)); }
+    S.namesAt = 0; render();
+  },
+  async keep(el) {
+    const u = S.users.find(x => x.id === el.dataset.uid); if (!u) return;
+    if (!confirm('تثبّت ' + u.username + ' لاعب دايم؟ مش هيتأثر بنهاية التجربة.')) return;
+    try { await updateDoc(doc(db, 'users', u.id), { invite: null }); u.invite = null; S.namesAt = 0; toast('اتثبّت ✓'); }
+    catch (e) { toast('مقدرتش: ' + (e.code || e.message)); }
     render();
   },
   async ban(el) {
@@ -1525,13 +1679,18 @@ const FORMS = {
   async setup(f) {
     const name = f.elements.u.value.trim().replace(/\s+/g, ' ');
     const err = checkName(name); if (err) return toast(err);
-    const key = normName(name);
+    const key = normName(name), code = (f.elements.inv.value || '').trim();
+    if (!code) return toast('اكتب كود الدعوة');
     try {
+      delete S.invites[code];
+      const inv = await getInvite(code);
+      if (!inv) return toast('كود الدعوة غلط');
+      if (!canJoin(inv)) return toast('رابط الدعوة ده خلص أو اتوقف');
       const t = await getDoc(doc(db, 'usernames', key));
       if (t.exists()) return toast('الاسم ده مستخدم أو شبه اسم تاني، اختار اسم مختلف');
       const b = writeBatch(db);
       b.set(doc(db, 'usernames', key), { uid: S.user.uid });
-      b.set(doc(db, 'users', S.user.uid), { username: name, usernameLower: key, photo: S.user.photoURL || null, banned: false, createdAt: serverTimestamp() });
+      b.set(doc(db, 'users', S.user.uid), { username: name, usernameLower: key, photo: S.user.photoURL || null, banned: false, invite: code, createdAt: serverTimestamp() });
       await b.commit();
       S.view = 'loading'; render();
       await bootUser();
@@ -1562,6 +1721,7 @@ const INPUTS = {
   tnname(t) { S.tn.name = t.value; },
   ssearch(t) { S.st.q = t.value; renderStatsBody(); },
   sopp(t) { S.st.oq = t.value; const l = $('#ol'); if (l) l.innerHTML = oppRows(othersList()); },
+  invname(t) { S.inv.name = t.value; },
   usearch(t) { S.uq = t.value; const l = $('#ulist'); if (l) l.innerHTML = adminRows(); },
   pfile(t) { const f = t.files && t.files[0]; t.value = ''; if (f) changePhoto(f); }
 };
@@ -1572,12 +1732,112 @@ document.addEventListener('input', e => { const t = e.target; if (t.dataset && t
 /* ───────── البداية ───────── */
 onAuthStateChanged(auth, async u => {
   S.user = u;
-  if (!u) { leaveSub(); S.editName = false; S.profile = null; S.admin = false; S.picks = {}; S.stats = {}; S.scores = {}; S.st = newSt(); S.fcm = null; S.tours = []; S.tour = null; S.tn = null; S.view = 'login'; render(); return; }
+  if (!u) { leaveSub(); S.editName = false; S.profile = null; S.admin = false; S.picks = {}; S.stats = {}; S.scores = {}; S.st = newSt(); S.fcm = null; S.tours = []; S.tour = null; S.tn = null; S.invites = {}; S.gone = new Set(); S.userList = []; S.namesAt = 0; S.view = 'login'; render(); return; }
   S.view = 'loading'; render();
   try { await bootUser(); } catch (e) { console.error(e); S.view = 'error'; }
   render();
 });
 setInterval(() => { if (S.view === 'round' && lockSig() !== lastSig) render(); }, 30000);
+
+/* ───────── الإعدادات المحلية (على الجهاز ده بس) ───────── */
+const PREF_DEF = { snd: true, fs: true };
+const prefOn = k => { try { const v = localStorage.getItem('fd_' + k); return v == null ? PREF_DEF[k] : v === '1'; } catch (e) { return PREF_DEF[k]; } };
+const setPref = (k, on) => { try { localStorage.setItem('fd_' + k, on ? '1' : '0'); } catch (e) { /* مش مهم */ } };
+
+/* ───────── الأصوات (متولّدة بالكود، من غير ملفات) ───────── */
+let actx = null;
+function audio() {
+  try {
+    if (!actx) actx = new (window.AudioContext || window.webkitAudioContext)();
+    if (actx.state === 'suspended') actx.resume().catch(() => {});
+    return actx;
+  } catch (e) { return null; }
+}
+/* نغمة واحدة ناعمة: بتطلع وتختفي بسرعة من غير "طقّة" */
+function tone(ctx, out, { f, f2, t = 0, d = .12, g = .1, type = 'sine' }) {
+  const o = ctx.createOscillator(), v = ctx.createGain(), at = ctx.currentTime + t;
+  o.type = type; o.frequency.setValueAtTime(f, at);
+  if (f2) o.frequency.exponentialRampToValueAtTime(f2, at + d);
+  v.gain.setValueAtTime(0.0001, at);
+  v.gain.exponentialRampToValueAtTime(g, at + 0.006);
+  v.gain.exponentialRampToValueAtTime(0.0001, at + d);
+  o.connect(v); v.connect(out); o.start(at); o.stop(at + d + 0.02);
+  return o;
+}
+/* صوت الضغطة: "توك" خفيف وواطي */
+function clickSound() {
+  if (!prefOn('snd')) return;
+  const ctx = audio(); if (!ctx || ctx.state !== 'running') return;
+  const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 1800; lp.connect(ctx.destination);
+  tone(ctx, lp, { f: 760, f2: 430, d: .075, g: .05 });
+  tone(ctx, lp, { f: 1520, f2: 900, d: .04, g: .012 });
+}
+/* صوت الدخول: خبطة كورة، صفارة حكم قصيرة، وأكورد بيعلى مع همهمة جمهور */
+function introSound() {
+  if (!prefOn('snd')) return;
+  const ctx = audio(); if (!ctx) return;
+  const m = ctx.createGain(); m.gain.value = .55;
+  const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 5200;
+  m.connect(lp); lp.connect(ctx.destination);
+  tone(ctx, m, { f: 150, f2: 45, d: .22, g: .5 });                       // الكورة
+  [[.12, .09], [.26, .16]].forEach(([t, d]) => {                          // الصفارة
+    const o = tone(ctx, m, { f: 2650, t, d, g: .07 });
+    const l = ctx.createOscillator(), lg = ctx.createGain();
+    l.frequency.value = 38; lg.gain.value = 70; l.connect(lg); lg.connect(o.frequency);
+    l.start(ctx.currentTime + t); l.stop(ctx.currentTime + t + d + .02);
+  });
+  [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => tone(ctx, m, { f, t: .5 + i * .085, d: .9 - i * .1, g: .12, type: 'triangle' }));   // الأكورد
+  tone(ctx, m, { f: 261.63, t: .5, d: 1.1, g: .1, type: 'triangle' });
+  const len = 1.4, buf = ctx.createBuffer(1, ctx.sampleRate * len, ctx.sampleRate), ch = buf.getChannelData(0);   // الجمهور
+  for (let i = 0; i < ch.length; i++) ch[i] = Math.random() * 2 - 1;
+  const n = ctx.createBufferSource(), bp = ctx.createBiquadFilter(), ng = ctx.createGain(), at = ctx.currentTime + .45;
+  n.buffer = buf; bp.type = 'bandpass'; bp.frequency.value = 900; bp.Q.value = .7;
+  ng.gain.setValueAtTime(0.0001, at); ng.gain.exponentialRampToValueAtTime(.09, at + .5); ng.gain.exponentialRampToValueAtTime(0.0001, at + len - .05);
+  n.connect(bp); bp.connect(ng); ng.connect(m); n.start(at); n.stop(at + len);
+}
+document.addEventListener('click', e => {
+  if (e.target.closest('#intro')) return;
+  const el = e.target.closest('button,[data-act],label.bt,a');
+  if (el && !el.disabled) clickSound();
+}, true);
+
+/* ───────── ملء الشاشة ───────── */
+const fsSupported = () => !!(document.fullscreenEnabled && document.documentElement.requestFullscreen);
+let fsTried = false;
+function goFullscreen(force) {
+  if (!prefOn('fs') || isStandalone() || !fsSupported() || document.fullscreenElement) return;
+  if (fsTried && !force) return;
+  fsTried = true;
+  document.documentElement.requestFullscreen({ navigationUI: 'hide' }).catch(() => {});
+}
+/* المتصفح بيسمح بملء الشاشة بعد ضغطة بس، فبنجربه مع أول ضغطة */
+document.addEventListener('pointerup', () => goFullscreen(false), { once: true });
+
+/* ───────── شاشة الدخول ───────── */
+function showIntro() {
+  const el = document.createElement('div');
+  el.id = 'intro'; el.setAttribute('role', 'button'); el.setAttribute('aria-label', 'ادخل');
+  el.innerHTML = `<div class="il"></div><svg class="ir" viewBox="0 0 250 250" aria-hidden="true"><circle cx="125" cy="125" r="120"/></svg>
+    <div class="iw"></div><div class="ib">${BALL}</div><img class="ilg" src="icon-192.png" alt="">
+    <div class="itx"><div class="itt">الفانتاسي اليومي</div><div class="its">اختار ٤ لاعبين من كل ماتش ونافس واثبتلهم انك التوب</div><div class="igo"><button class="bt on" type="button">يلا ندخل</button></div></div>`;
+  document.body.appendChild(el);
+  let done = false;
+  const go = () => {
+    if (done) return; done = true;
+    goFullscreen(true);
+    if (!played) introSound();
+    el.classList.add('out');
+    setTimeout(() => el.remove(), 550);
+  };
+  /* لو المتصفح سامح بالصوت من غير ضغطة، الشاشة بتكمّل لوحدها. غير كده بيظهر زرار "يلا ندخل" والصوت يشتغل معاه */
+  const ctx = prefOn('snd') ? audio() : null;
+  const auto = !prefOn('snd') || (ctx && ctx.state === 'running');
+  let played = false;
+  if (auto && prefOn('snd')) setTimeout(() => { if (!done) { played = true; introSound(); } }, 1350);   // مع نزول الكورة
+  setTimeout(() => { if (done) return; if (auto) go(); else el.classList.add('tap'); }, auto ? 2900 : 2300);
+  setTimeout(() => el.addEventListener('click', go), 300);
+}
+showIntro();
 render();
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
 </script>
