@@ -45,6 +45,10 @@ button{cursor:pointer}
 .tg{display:flex;gap:6px;padding:0 16px 12px;overflow-x:auto;scrollbar-width:none}
 .tg::-webkit-scrollbar{display:none}
 .tg .bt{flex:1 0 auto;padding:0 14px;white-space:nowrap}
+/* أزرار الجولات والأيام: كلها بنفس العرض (تلت السطر)، ولو أكتر من ٣ السطر بيتسحب */
+.tg.eq .bt{flex:0 0 calc((100% - 12px) / 3);min-width:0;padding:0 6px;overflow:hidden;text-overflow:ellipsis}
+.tg.eq .bt.dy{height:52px;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.2}
+.tg.eq .bt.dy small{font-weight:500;font-size:11px;opacity:.85}
 .pl{font-weight:700;font-size:11px;padding:3px 9px;border-radius:6px;background:rgba(255,255,255,.16);color:#e6eef5;white-space:nowrap}
 .pl.lv{background:#d63a3f;color:#fff}
 .pl.ok{background:rgba(47,208,107,.26);color:#8bffb8}
@@ -169,6 +173,12 @@ const firebaseConfig = {
   appId: "1:856010520496:web:526a9ee316e7b4b5f24875"
 };
 const VAPID_KEY = 'BJCvYHRpVeKdXwapyT7aKp0nMnw5Y7ZhTkIv8Dips-sYm9lXHEw96ff3ZloT2pk2xhK-3_PaJj4Oi5UwljnQhW0';   // المفتاح العام من Firebase > Project settings > Cloud Messaging > Web Push certificates
+/* ───── الأصوات: حط لينك الملف بين العلامتين '' (لينك مباشر لملف mp3 أو wav أو ogg) ─────
+   لو سبته فاضي بيشتغل الصوت المتولّد بالكود. vol من 0 (صامت) لـ 1 (أعلى صوت). */
+const SOUND_LINKS = {
+  click: { url: '', vol: 0.35 },   // صوت الضغط على الأزرار (يفضّل أقل من نص ثانية)
+  intro: { url: '', vol: 0.8 }     // صوت شاشة الدخول
+};
 const TZ = 'Africa/Cairo';   // لازم تكون زي TZ في Code.gs
 const CAP_MULT = 2;          // لازم يكون زي CAPTAIN_MULT في Code.gs
 const POS = { 1: 'حارس', 2: 'مدافع', 3: 'وسط', 4: 'مهاجم' };
@@ -191,6 +201,8 @@ const nf = new Intl.NumberFormat('ar-EG');
 const N = v => nf.format(v);
 const fmtTime = ms => new Intl.DateTimeFormat('ar-EG', { hour: 'numeric', minute: '2-digit', hour12: true, timeZone: TZ }).format(ms);
 const fmtDay = ms => new Intl.DateTimeFormat('ar-EG', { weekday: 'long', day: 'numeric', month: 'long', timeZone: TZ }).format(ms);
+const fmtWd = ms => new Intl.DateTimeFormat('ar-EG', { weekday: 'long', timeZone: TZ }).format(ms);
+const fmtDm = ms => new Intl.DateTimeFormat('ar-EG', { day: 'numeric', month: 'long', timeZone: TZ }).format(ms);
 const dayKey = ms => new Intl.DateTimeFormat('en-CA', { timeZone: TZ, year: 'numeric', month: '2-digit', day: '2-digit' }).format(ms);
 const tsMs = t => (t && t.toMillis) ? t.toMillis() : (t ? Date.parse(t) : null);
 const teamName = t => AR[t.name] || t.name;
@@ -337,7 +349,7 @@ function daysOf(g) {
   gwFixtures(g).forEach(f => {
     const k = koOf(f);
     const key = k ? dayKey(k) : 'tbd';
-    (map[key] = map[key] || { key, label: k ? fmtDay(k) : 'مواعيد لسه مش معروفة', list: [] }).list.push(f);
+    (map[key] = map[key] || { key, ms: k, label: k ? fmtDay(k) : 'مواعيد لسه مش معروفة', list: [] }).list.push(f);
   });
   return Object.values(map).sort((a, b) => a.key.localeCompare(b.key)).map(d => {
     d.list.sort((a, b) => (koOf(a) || 9e15) - (koOf(b) || 9e15));
@@ -549,7 +561,6 @@ function vLogin() {
       <button class="bt on" type="submit">${signup ? 'إنشاء حساب' : 'دخول'}</button>
     </form>
     <div class="r j"><button class="lnk" data-act="mode">${signup ? 'عندي حساب، دخول' : 'مفيش عندي حساب، إنشاء حساب'}</button>${signup ? '' : '<button class="lnk" data-act="reset">نسيت كلمة السر</button>'}</div>
-    <div class="legal"><a href="privacy.html" target="_blank" rel="noopener">سياسة الخصوصية</a><a href="data-deletion.html" target="_blank" rel="noopener">حذف البيانات</a></div>
   </div>`;
 }
 function vSetup() {
@@ -578,8 +589,8 @@ function vRound() {
   const pts = S.myGwPts == null ? '—' : N(S.myGwPts);
   const fin = S.boards['gw_' + g] && S.boards['gw_' + g].final;
   return `<div class="h"><div><div class="m">الفانتاسي اليومي</div><b>الجولة ${N(g)}</b><div class="m">الخواص المتبقية ${N(chipsLeft())} من ${N(MAX_CHIPS)}</div></div><div class="ctr"><div class="m">نقطك ${S.myGwPts == null ? '' : (fin ? '(نهائية)' : '(مؤقتة)')}</div><div class="d" style="font-size:24px">${pts}</div></div></div>
-  ${nums.length > 1 ? `<div class="tg">${nums.map(n => `<button class="bt ${n === g ? 'on' : ''}" data-act="gw" data-g="${n}">الجولة ${N(n)}</button>`).join('')}</div>` : ''}
-  <div class="tg">${days.map(d => `<button class="bt ${cur && d.key === cur.key ? 'on' : ''}" data-act="day" data-k="${d.key}">${esc(d.label)}</button>`).join('')}</div>
+  ${nums.length > 1 ? `<div class="tg eq">${nums.map(n => `<button class="bt ${n === g ? 'on' : ''}" data-act="gw" data-g="${n}">الجولة ${N(n)}</button>`).join('')}</div>` : ''}
+  <div class="tg eq">${days.map(d => `<button class="bt dy ${cur && d.key === cur.key ? 'on' : ''}" data-act="day" data-k="${d.key}" aria-label="${esc(d.label)}">${d.ms ? `<span>${esc(fmtWd(d.ms))}</span><small>${esc(fmtDm(d.ms))}</small>` : `<span>${esc(d.label)}</span>`}</button>`).join('')}</div>
   <div class="f">${cur ? cur.list.map(card).join('') : ''}</div>`;
 }
 function card(f) {
@@ -1406,7 +1417,7 @@ async function setInvite(i, patch, msg) {
   render();
 }
 const ACTIONS = {
-  psnd() { setPref('snd', !prefOn('snd')); if (prefOn('snd')) clickSound(); render(); },
+  psnd() { setPref('snd', !prefOn('snd')); if (prefOn('snd')) { loadSound('click'); loadSound('intro'); clickSound(); } render(); },
   pfs() {
     const on = !prefOn('fs'); setPref('fs', on);
     if (on) goFullscreen(true); else if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
@@ -1764,10 +1775,47 @@ function tone(ctx, out, { f, f2, t = 0, d = .12, g = .1, type = 'sine' }) {
   o.connect(v); v.connect(out); o.start(at); o.stop(at + d + 0.02);
   return o;
 }
+/* أصوات من لينك (SOUND_LINKS فوق). بنحمّلها مرة واحدة ونشغّلها فوراً من الذاكرة.
+   لو الموقع اللي عليه الملف مش سامح بالتحميل المباشر (CORS)، بنشغّله بطريقة تانية (Audio).
+   ولو اللينك فاضي أو باظ، بيشتغل الصوت المتولّد بالكود. */
+const sndBuf = {}, sndEl = {};
+async function loadSound(k) {
+  const L = SOUND_LINKS[k]; if (!L || !L.url || sndBuf[k] !== undefined) return;
+  sndBuf[k] = null;
+  const ctx = audio();
+  try {
+    if (!ctx) throw 0;
+    const r = await fetch(L.url, { mode: 'cors', cache: 'force-cache' });
+    if (!r.ok) throw 0;
+    const data = await r.arrayBuffer();
+    sndBuf[k] = await new Promise((res, rej) => ctx.decodeAudioData(data, res, rej));
+  } catch (e) {
+    const a = new Audio(); a.preload = 'auto'; a.src = L.url;
+    a.addEventListener('canplaythrough', () => { sndEl[k] = a; }, { once: true });
+    a.addEventListener('error', () => { console.warn('مقدرتش أحمّل صوت ' + k + ' من: ' + L.url); }, { once: true });
+    a.load();
+  }
+}
+function playFile(k) {
+  const L = SOUND_LINKS[k], ctx = audio(), b = sndBuf[k];
+  if (ctx && b) {
+    const src = ctx.createBufferSource(), g = ctx.createGain();
+    src.buffer = b; g.gain.value = L.vol;
+    src.connect(g); g.connect(ctx.destination); src.start();
+    return true;
+  }
+  if (sndEl[k]) {
+    const a = sndEl[k].cloneNode(); a.volume = Math.min(1, L.vol);
+    a.play().catch(() => {});
+    return true;
+  }
+  return false;
+}
 /* صوت الضغطة: "توك" خفيف وواطي */
 function clickSound() {
   if (!prefOn('snd')) return;
   const ctx = audio(); if (!ctx || ctx.state !== 'running') return;
+  if (playFile('click')) return;
   const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 1800; lp.connect(ctx.destination);
   tone(ctx, lp, { f: 760, f2: 430, d: .075, g: .05 });
   tone(ctx, lp, { f: 1520, f2: 900, d: .04, g: .012 });
@@ -1776,6 +1824,7 @@ function clickSound() {
 function introSound() {
   if (!prefOn('snd')) return;
   const ctx = audio(); if (!ctx) return;
+  if (playFile('intro')) return;
   const m = ctx.createGain(); m.gain.value = .55;
   const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 5200;
   m.connect(lp); lp.connect(ctx.destination);
@@ -1831,6 +1880,7 @@ function showIntro() {
   };
   /* لو المتصفح سامح بالصوت من غير ضغطة، الشاشة بتكمّل لوحدها. غير كده بيظهر زرار "يلا ندخل" والصوت يشتغل معاه */
   const ctx = prefOn('snd') ? audio() : null;
+  if (ctx) { loadSound('click'); loadSound('intro'); }
   const auto = !prefOn('snd') || (ctx && ctx.state === 'running');
   let played = false;
   if (auto && prefOn('snd')) setTimeout(() => { if (!done) { played = true; introSound(); } }, 1350);   // مع نزول الكورة
