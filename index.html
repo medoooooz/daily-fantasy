@@ -7,7 +7,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<title>Mido's Fantasy</title>
+<title>Mido’s Fantasy</title>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" href="icon-192.png">
@@ -86,6 +86,9 @@ button{cursor:pointer}
 .mt{margin-top:8px}
 .mc{display:block;padding:14px;cursor:pointer}
 .tm{font-weight:800;font-size:22px;line-height:1.2}
+.lsc{display:inline-flex;align-items:center;gap:8px;font-weight:800;font-size:24px;line-height:1.2}.lsc i{font-style:normal;opacity:.55}.lsc.sm{font-size:15px;gap:5px}
+.ldot{display:inline-block;width:6px;height:6px;border-radius:50%;background:currentColor;margin-inline-end:5px;vertical-align:middle;animation:ldp 1.2s infinite}
+@keyframes ldp{50%{opacity:.2}}@media (prefers-reduced-motion:reduce){.ldot{animation:none}}
 .sv{font-size:11px}
 #toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%) translateY(20px);background:#0b1f33;border:1px solid rgba(255,255,255,.3);color:#fff;padding:10px 16px;border-radius:12px;opacity:0;pointer-events:none;transition:.25s;z-index:20;max-width:90%;text-align:center}
 #toast.show{opacity:1;transform:translateX(-50%)}
@@ -163,7 +166,7 @@ div.sl{cursor:pointer}
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
 import { getAuth, onAuthStateChanged, GoogleAuthProvider, FacebookAuthProvider, signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail, signOut } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
 import { getMessaging, getToken, onMessage, isSupported } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-messaging.js";
-import { getFirestore, doc, getDoc, getDocs, setDoc, updateDoc, deleteDoc, collection, query, where, writeBatch, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+import { getFirestore, onSnapshot, doc, getDoc, getDocs, setDoc, updateDoc, deleteDoc, collection, query, where, writeBatch, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 
 /* ───────── الإعدادات ───────── */
 const firebaseConfig = {
@@ -179,7 +182,7 @@ const VAPID_KEY = 'BJCvYHRpVeKdXwapyT7aKp0nMnw5Y7ZhTkIv8Dips-sYm9lXHEw96ff3ZloT2
    لو سبته فاضي بيشتغل الصوت المتولّد بالكود. vol من 0 (صامت) لـ 1 (أعلى صوت). */
 const SOUND_LINKS = {
   click: { url: 'https://cdn.pixabay.com/download/audio/2024/01/16/audio_fb4eef1715.mp3', vol: 0.35 },   // صوت الضغط على الأزرار (يفضّل أقل من نص ثانية)
-  intro: { url: 'https://cdn.pixabay.com/download/audio/2025/08/11/audio_6f1914dab5.mp3', vol: 2.8 }     // صوت شاشة الدخول
+  intro: { url: 'https://cdn.pixabay.com/download/audio/2025/08/11/audio_6f1914dab5.mp3', vol: 0.8 }     // صوت شاشة الدخول
 };
 const TZ = 'Africa/Cairo';   // لازم تكون زي TZ في Code.gs
 const CAP_MULT = 2;          // لازم يكون زي CAPTAIN_MULT في Code.gs
@@ -407,7 +410,7 @@ async function bootUser() {
   try { const a = await getDoc(doc(db, 'admins', S.user.uid)); S.admin = a.exists(); } catch (e) { S.admin = false; }
   await loadRound();
   S.view = 'round';
-  refreshPush();
+  pushCheckedAt = Date.now(); refreshPush();
 }
 async function loadFixture(fid, fresh = true) {
   if (!S.fxdocs[fid]) {
@@ -568,14 +571,14 @@ function nav() {
 }
 const vLoading = () => `<div class="login ctr"><img class="logo" src="icon-192.png" alt="" style="margin:0 auto;display:block"><div class="m">جاري التحميل…</div></div>`;
 const vError = () => `<div class="login ctr"><div>حصلت مشكلة في تحميل البيانات</div><button class="bt on" data-act="retry">حاول تاني</button><button class="lnk" data-act="logout">تسجيل الخروج</button></div>`;
-const vExpired = () => `<div class="login ctr"><img class="logo" src="icon-192.png" alt="" style="margin:0 auto;display:block"><b style="font-size:20px">فترة التجربة خلصت</b><div class="m">شكراً إنك جربت الفانتاسي اليومي. لو عايز تكمل معانا كلّم الإدارة.</div><button class="bt" data-act="logout">تسجيل الخروج</button></div>`;
+const vExpired = () => `<div class="login ctr"><img class="logo" src="icon-192.png" alt="" style="margin:0 auto;display:block"><b style="font-size:20px">فترة التجربة خلصت</b><div class="m">شكراً إنك جربت Mido’s Fantasy. لو عايز تكمل معانا كلّم الإدارة.</div><button class="bt" data-act="logout">تسجيل الخروج</button></div>`;
 const vBanned = () => `<div class="login ctr"><div class="logo" style="margin:0 auto;background:#d63a3f;color:#fff">!</div><b style="font-size:20px">حسابك محظور من اللعب</b><div class="m">تواصل مع الإدارة لو شايف إن ده غلط.</div><button class="bt" data-act="logout">تسجيل الخروج</button></div>`;
 
 function vLogin() {
   const signup = S.mode === 'signup';
   return `<div class="login">${lbg()}
     <img class="logo" src="icon-192.png" alt="">
-    <div class="d" style="font-size:32px;line-height:1.1">الفانتاسي اليومي</div>
+    <div class="d" style="font-size:32px;line-height:1.1">Mido’s Fantasy</div>
     <div class="m" style="font-size:15px;margin-bottom:8px">اختار ٤ لاعبين من كل ماتش ونافس واثبتلهم انك التوب</div>
     <button class="bt sbtn gbtn" data-act="google"><span class="si">${GOOGLE_SVG}</span><span>الدخول بحساب جوجل</span></button>
     <button class="bt sbtn fbtn" data-act="facebook"><span class="si">${FB_SVG}</span><span>الدخول بحساب فيسبوك</span></button>
@@ -614,7 +617,7 @@ function vRound() {
   const cur = days.find(d => d.key === S.day) || days[0];
   const pts = S.myGwPts == null ? '—' : N(S.myGwPts);
   const fin = S.boards['gw_' + g] && S.boards['gw_' + g].final;
-  return `<div class="h"><div><div class="m">الفانتاسي اليومي</div><b>الجولة ${N(g)}</b><div class="m">الخواص المتبقية ${N(chipsLeft())} من ${N(MAX_CHIPS)}</div></div><div class="ctr"><div class="m">نقطك ${S.myGwPts == null ? '' : (fin ? '(نهائية)' : '(مؤقتة)')}</div><div class="d" style="font-size:24px">${pts}</div></div></div>
+  return `<div class="h"><div><div class="m">Mido’s Fantasy</div><b>الجولة ${N(g)}</b><div class="m">الخواص المتبقية ${N(chipsLeft())} من ${N(MAX_CHIPS)}</div></div><div class="ctr"><div class="m">نقطك ${S.myGwPts == null ? '' : (fin ? '(نهائية)' : '(مؤقتة)')}</div><div class="d" style="font-size:24px">${pts}</div></div></div>
   ${nums.length > 1 ? `<div class="tg eq">${nums.map(n => `<button class="bt ${n === g ? 'on' : ''}" data-act="gw" data-g="${n}">الجولة ${N(n)}</button>`).join('')}</div>` : ''}
   <div class="tg eq">${days.map(d => `<button class="bt dy ${cur && d.key === cur.key ? 'on' : ''}" data-act="day" data-k="${d.key}" aria-label="${esc(d.label)}">${d.ms ? `<span>${esc(fmtWd(d.ms))}</span><small>${esc(fmtDm(d.ms))}</small>` : `<span>${esc(d.label)}</span>`}</button>`).join('')}</div>
   <div class="f">${cur ? cur.list.map(card).join('') : ''}</div>`;
@@ -625,7 +628,7 @@ function card(f) {
   const status = !k ? '<span class="pl">لسه مش محدد</span>' : locked ? '<span class="pl lv">بدأ</span>' : '<span class="pl ok">مفتوح</span>';
   return `<button class="k mc" data-act="open" data-fid="${f.id}">
     <div class="r j"><div class="t">${crest(f.h)}<span>${esc(teamName(f.h))}</span></div>
-    <div class="ctr"><div class="tm">${k ? fmtTime(k) : '—'}</div>${status}</div>
+    <div class="ctr">${cardMid(f, k, locked, status)}</div>
     <div class="t">${crest(f.a)}<span>${esc(teamName(f.a))}</span></div></div>
     <div class="r j m mt"><span>اختياراتك ${N(n)}/٤${S.picks[f.id] && S.picks[f.id].chip ? ' · <b class="warn">' + CHIPS[S.picks[f.id].chip].n + '</b>' : ''}${S.picks[f.id] && S.picks[f.id].cap != null ? ' · <b class="warn">الكابتن هنا</b>' : ''}${stealMissing(f.id) ? ' · <b class="warn">اختار الفريق!</b>' : ''}</span><span>${locked ? 'عرض اختياراتك' : 'اختار لاعبينك'} ‹</span></div>
   </button>`;
@@ -636,7 +639,7 @@ function vMatch() {
   if (!d) return vLoading();
   const k = d.kickoff, locked = isLocked(fid);
   return `<div class="h"><button class="bt" data-act="back" style="padding:0 14px" aria-label="رجوع">›</button>
-    <div class="g"><b style="font-size:20px">${esc(teamName(d.h))} ضد ${esc(teamName(d.a))}</b><div class="m">${locked ? 'الاختيار مقفول، الماتش بدأ' : 'يقفل الاختيار الساعة ' + fmtTime(k)}</div></div>
+    <div class="g"><b style="font-size:20px">${esc(teamName(d.h))} ضد ${esc(teamName(d.a))}</b><div class="m" id="mlive">${locked ? matchSub(fid) : 'يقفل الاختيار الساعة ' + fmtTime(k)}</div></div>
     <span id="sv" class="pl sv"></span></div>
     <div id="mbody"></div>`;
 }
@@ -731,7 +734,15 @@ function bindForeground() {
 async function loadFcm() {
   try { const r = await getDoc(doc(db, 'fcm', S.user.uid)); S.fcm = r.exists() ? r.data() : null; } catch (e) { S.fcm = null; }
 }
-/* لو التنبيهات مفعّلة، بنجدّد التوكن في الخلفية (بيتغير أحياناً) */
+/* كل جهاز ليه توكن: بنضيف توكن الجهاز ده للقايمة (آخر ٥ أجهزة) بدل ما نمسح توكن الجهاز التاني */
+const MAX_DEVICES = 5;
+async function saveToken(t) {
+  const old = (S.fcm && Array.isArray(S.fcm.toks)) ? S.fcm.toks : (S.fcm && S.fcm.token ? [S.fcm.token] : []);
+  const toks = [...old.filter(x => x && x !== t), t].slice(-MAX_DEVICES);
+  await setDoc(doc(db, 'fcm', S.user.uid), { token: t, toks, on: true, updatedAt: serverTimestamp() });
+  S.fcm = { token: t, toks, on: true };
+}
+/* لو التنبيهات مفعّلة، بنتأكد إن توكن الجهاز ده متسجّل (التوكن بيتغير أحياناً، والسيرفر بيشيل التوكن اللي مات) */
 async function refreshPush() {
   try {
     if (!pushConfigured() || !(await isSupported()) || typeof Notification === 'undefined' || Notification.permission !== 'granted') return;
@@ -739,9 +750,16 @@ async function refreshPush() {
     if (!S.fcm || !S.fcm.on) return;
     bindForeground();
     const t = await pushToken();
-    if (t && t !== S.fcm.token) { await setDoc(doc(db, 'fcm', S.user.uid), { token: t, on: true, updatedAt: serverTimestamp() }); S.fcm = { token: t, on: true }; }
+    const have = Array.isArray(S.fcm.toks) ? S.fcm.toks : [S.fcm.token];
+    if (t && !have.includes(t)) await saveToken(t);
   } catch (e) { console.error(e); }
 }
+/* التطبيق المتثبّت ممكن يفضل مفتوح في الخلفية أيام: نراجع التوكن لما يرجع للشاشة (مرة كل ٦ ساعات بالكتير) */
+var pushCheckedAt = 0;
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState !== 'visible' || !S.user || Date.now() - pushCheckedAt < 6 * 3600000) return;
+  pushCheckedAt = Date.now(); refreshPush();
+});
 async function enablePush() {
   if (!pushConfigured()) return toast('التنبيهات لسه مش جاهزة، الإدارة محتاجة تضيف مفتاح التنبيهات');
   if (isIOS() && !isStandalone()) return toast('على الآيفون ضيف التطبيق للشاشة الرئيسية الأول (مشاركة ثم Add to Home Screen) وافتحه منها');
@@ -751,15 +769,15 @@ async function enablePush() {
     if (perm !== 'granted') return toast('لازم توافق على الإشعارات من إعدادات المتصفح');
     const token = await pushToken();
     if (!token) return toast('مقدرتش أجيب توكن التنبيهات');
-    await setDoc(doc(db, 'fcm', S.user.uid), { token, on: true, updatedAt: serverTimestamp() });
-    S.fcm = { token, on: true };
+    await loadFcm();
+    await saveToken(token);
     bindForeground();
     toast('اتفعّلت التنبيهات ✓');
   } catch (e) { console.error(e); toast('مقدرتش أفعّل التنبيهات: ' + (e.code || e.message)); }
   render();
 }
 async function disablePush() {
-  try { await setDoc(doc(db, 'fcm', S.user.uid), { token: (S.fcm && S.fcm.token) || '', on: false, updatedAt: serverTimestamp() }); S.fcm = { ...(S.fcm || {}), on: false }; toast('اتقفلت التنبيهات'); }
+  try { const toks = (S.fcm && Array.isArray(S.fcm.toks)) ? S.fcm.toks : []; await setDoc(doc(db, 'fcm', S.user.uid), { token: (S.fcm && S.fcm.token) || '', toks, on: false, updatedAt: serverTimestamp() }); S.fcm = { ...(S.fcm || {}), on: false }; toast('اتقفلت التنبيهات'); }
   catch (e) { toast('مقدرتش أقفلها: ' + (e.code || e.message)); }
   render();
 }
@@ -1911,12 +1929,53 @@ document.addEventListener('click', e => { const el = e.target.closest('[data-act
 document.addEventListener('submit', e => { const f = e.target.closest('[data-form]'); if (f) { e.preventDefault(); FORMS[f.dataset.form](f); } });
 document.addEventListener('input', e => { const t = e.target; if (t.dataset && t.dataset.in && INPUTS[t.dataset.in]) INPUTS[t.dataset.in](t); });
 
+/* ───────── النتايج المباشرة ─────────
+   Code.gs بيكتب config/live كل دقيقة وقت الماتشات، والصفحة بتسمع للتغيير وتتحدث لوحدها من غير ريفرش.
+   كل ماتش: r = [أهداف الأرض، أهداف الضيف]، m = الدقيقة، s = 'live' أو 'ft'. */
+S.live = {};
+let liveUnsub = null, liveRetry = null;
+const liveOf = fid => (S.live && S.live[String(fid)]) || null;
+const liveSc = (r, sm) => `<span class="lsc${sm ? ' sm' : ''}"><b>${N(r[0])}</b><i>-</i><b>${N(r[1])}</b></span>`;
+function cardMid(f, k, locked, status) {
+  const lv = k && locked ? liveOf(f.id) : null;
+  if (lv && lv.s === 'ft') return `${liveSc(lv.r)}<span class="pl">انتهت</span>`;
+  if (lv || (k && locked && Date.now() <= k + END_AFTER)) {
+    const r = lv ? lv.r : [0, 0];
+    return `${liveSc(r)}<span class="pl lv"><i class="ldot"></i>مباشر${lv && lv.m ? ' ' + N(lv.m) + "'" : ''}</span>`;
+  }
+  return `<div class="tm">${k ? fmtTime(k) : '—'}</div>${status}`;
+}
+function matchSub(fid) {
+  const lv = liveOf(fid);
+  if (!lv) return 'الاختيار مقفول، الماتش بدأ';
+  return lv.s === 'ft' ? `انتهت ${liveSc(lv.r, 1)}` : `<i class="ldot" style="color:#ff5a5f"></i>مباشر${lv.m ? ' ' + N(lv.m) + "'" : ''} · ${liveSc(lv.r, 1)}`;
+}
+function liveRedraw() {
+  if (S.view === 'round' || (S.view === 'pred' && !(S.pr && (S.pr.sheet || S.pr.dt || S.pr.info)))) render();
+  else if (S.view === 'match') { const el = $('#mlive'); if (el && S.fx != null && isLocked(S.fx)) el.innerHTML = matchSub(S.fx); }
+}
+function startLive() {
+  if (liveUnsub || !S.user) return;
+  clearTimeout(liveRetry);
+  liveUnsub = onSnapshot(doc(db, 'config', 'live'), s => {
+    S.live = (s.exists() && s.data().fx) || {};
+    liveRedraw();
+  }, e => {
+    console.error('live', e);
+    liveUnsub = null;
+    liveRetry = setTimeout(startLive, 60000);
+  });
+}
+function stopLive() { clearTimeout(liveRetry); if (liveUnsub) { liveUnsub(); liveUnsub = null; } S.live = {}; }
+onAuthStateChanged(auth, u => { if (!u) stopLive(); });
+
 /* ───────── البداية ───────── */
 onAuthStateChanged(auth, async u => {
   S.user = u;
   if (!u) { leaveSub(); S.editName = false; S.profile = null; S.admin = false; S.picks = {}; S.stats = {}; S.scores = {}; S.st = newSt(); S.fcm = null; S.tours = []; S.tour = null; S.tn = null; S.invites = {}; S.gone = new Set(); S.userList = []; S.namesAt = 0; S.view = 'login'; render(); return; }
   S.view = 'loading'; render();
   try { await bootUser(); } catch (e) { console.error(e); S.view = 'error'; }
+  if (S.profile && !S.profile.banned) startLive();
   render();
 });
 setInterval(() => { if (S.view === 'round' && lockSig() !== lastSig) render(); }, 30000);
@@ -2039,7 +2098,7 @@ function showIntro() {
   el.id = 'intro'; el.setAttribute('role', 'button'); el.setAttribute('aria-label', 'ادخل');
   el.innerHTML = `<div class="il"></div><svg class="ir" viewBox="0 0 250 250" aria-hidden="true"><circle cx="125" cy="125" r="120"/></svg>
     <div class="iw"></div><div class="ib">${BALL}</div><img class="ilg" src="icon-192.png" alt="">
-    <div class="itx"><div class="itt">Mido's Fantasy</div><div class="its">اختار ٤ لاعبين من كل ماتش ونافس واثبتلهم انك التوب</div><div class="igo"><button class="bt on" type="button">يلا ندخل</button></div></div>`;
+    <div class="itx"><div class="itt">Mido’s Fantasy</div><div class="its">اختار ٤ لاعبين من كل ماتش ونافس واثبتلهم انك التوب</div><div class="igo"><button class="bt on" type="button">يلا ندخل</button></div></div>`;
   document.body.appendChild(el);
   let done = false;
   const go = () => {
