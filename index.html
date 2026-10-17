@@ -68,8 +68,8 @@ button{cursor:pointer}
 .sl.fl{border:1px solid #2fd06b;background:rgba(4,36,20,.55);color:#fff}
 .sl.act{box-shadow:0 0 0 2px rgba(255,255,255,.7)}
 .sl .c{position:absolute;top:-8px;left:-6px}
-.sl .cs{width:26px;height:26px;top:-10px;left:-8px;padding:0;border:1px solid rgba(245,179,1,.85);background:rgba(10,30,50,.9);color:#ffd45c;cursor:pointer;z-index:2}
-.sl .cs.on{background:#f5b301;color:#1a1300}
+.sl .cs{width:26px;height:26px;top:-10px;left:-8px;padding:0;border:1px dashed rgba(255,255,255,.6);background:rgba(10,30,50,.9);color:rgba(255,255,255,.75);cursor:pointer;z-index:2}
+.sl .cs.on{background:#f5b301;color:#1a1300;border:1px solid #f5b301}
 .sl .nm{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:700}
 .av{width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;color:#fff;flex:none;overflow:hidden}
 .bar{height:6px;border-radius:3px;background:rgba(255,255,255,.2)}
@@ -646,13 +646,14 @@ function renderMatchBody() {
   const p = pickOf(fid), locked = isLocked(fid), sc = S.scores[fid] || { pts: {}, st: {}, status: 'ns' };
   const byId = id => d.players.find(x => x.i === id);
   const chosen = p.ids.map(byId).filter(Boolean);
+  const capOff = !locked && capTakenElsewhere(fid);   // الكابتن في ماتش تاني النهارده: مفيش أزرار كابتن هنا
   const btn = (pl, pos, label) => pl
-    ? `<div class="sl fl ${S.pos === pl.p && !locked ? 'act' : ''}" data-act="pos" data-p="${pl.p}" role="button" tabindex="0">${locked ? (p.cap === pl.i ? '<span class="c">C</span>' : '') : `<button class="c cs ${p.cap === pl.i ? 'on' : ''}" data-act="cap" data-pid="${pl.i}" aria-label="${p.cap === pl.i ? 'إلغاء الكابتن' : 'اجعل ' + esc(pl.n) + ' كابتن'}">C</button>`}${locked ? '' : `<button class="rm" data-act="rmp" data-pid="${pl.i}" aria-label="شيل ${esc(pl.n)}">×</button>`}${photo(pl)}<span class="nm">${esc(pl.n)}</span><span class="sub">${POS[pl.p]}${locked ? ' · ' + N(sc.pts[pl.i] || 0) : ''}</span></div>`
+    ? `<div class="sl fl ${S.pos === pl.p && !locked ? 'act' : ''}" data-act="pos" data-p="${pl.p}" role="button" tabindex="0">${locked || (capOff && p.cap !== pl.i) ? (p.cap === pl.i ? '<span class="c">C</span>' : '') : `<button class="c cs ${p.cap === pl.i ? 'on' : ''}" data-act="cap" data-pid="${pl.i}" aria-label="${p.cap === pl.i ? 'إلغاء الكابتن' : 'اجعل ' + esc(pl.n) + ' كابتن'}">C</button>`}${locked ? '' : `<button class="rm" data-act="rmp" data-pid="${pl.i}" aria-label="شيل ${esc(pl.n)}">×</button>`}${photo(pl)}<span class="nm">${esc(pl.n)}</span><span class="sub">${POS[pl.p]}${locked ? ' · ' + N(sc.pts[pl.i] || 0) : ''}</span></div>`
     : `<button class="sl" data-act="pos" data-p="${pos}"><span>${locked ? '—' : '+'}</span><span>${label}</span></button>`;
   const slots = p.chip === 'free_pos'
     ? [0, 1, 2, 3].map(i => btn(chosen[i], S.pos, 'لاعب ' + N(i + 1)))
     : [1, 2, 3, 4].map(pos => btn(chosen.find(x => x.p === pos), pos, POS[pos]));
-  let html = `<div class="pt">${slots.join('')}</div>`;
+  let html = `<div class="pt">${slots.join('')}</div>${capOff && chosen.length ? '<div class="m" style="padding:0 16px 10px;margin-top:-4px">الكابتن بتاعك النهارده في ماتش تاني، علشان كده مفيش كابتن هنا.</div>' : ''}`;
 
   /* الخاصية المستخدمة + بونص هلقط رزقي */
   let stealBonus = 0, stealNote = '';
