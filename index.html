@@ -45,6 +45,10 @@ button{cursor:pointer}
 .tg{display:flex;gap:6px;padding:0 16px 12px;overflow-x:auto;scrollbar-width:none}
 .tg::-webkit-scrollbar{display:none}
 .tg .bt{flex:1 0 auto;padding:0 14px;white-space:nowrap}
+/* أزرار الجولات والأيام: كلها بنفس العرض (تلت السطر)، ولو أكتر من ٣ السطر بيتسحب */
+.tg.eq .bt{flex:0 0 calc((100% - 12px) / 3);min-width:0;padding:0 6px;overflow:hidden;text-overflow:ellipsis}
+.tg.eq .bt.dy{height:52px;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.2}
+.tg.eq .bt.dy small{font-weight:500;font-size:11px;opacity:.85}
 .pl{font-weight:700;font-size:11px;padding:3px 9px;border-radius:6px;background:rgba(255,255,255,.16);color:#e6eef5;white-space:nowrap}
 .pl.lv{background:#d63a3f;color:#fff}
 .pl.ok{background:rgba(47,208,107,.26);color:#8bffb8}
@@ -115,6 +119,38 @@ a.lnk,.lnk{color:#8bffb8;background:none;border:0;padding:6px 0;text-decoration:
 .rm{position:absolute;top:-8px;right:-6px;width:22px;height:22px;border-radius:50%;background:#d63a3f;color:#fff;border:0;padding:0;font-size:15px;line-height:1;display:flex;align-items:center;justify-content:center;z-index:2}
 .rm::after{content:"";position:absolute;inset:-12px}
 div.sl{cursor:pointer}
+/* شاشة الدخول: دايرة نص الملعب بترسم نفسها، الكورة بتنزل على نقطة السنتر وبتتحول للوجو */
+#intro{position:fixed;inset:0;z-index:40;overflow:hidden;background:radial-gradient(circle at 88% 6%,rgba(47,208,107,.38),transparent 42%),radial-gradient(circle at 6% 82%,rgba(80,140,255,.38),transparent 48%),linear-gradient(165deg,#17607a,#0d3554 58%,#152a5c);transition:opacity .5s ease,transform .5s ease;cursor:pointer}
+#intro.out{opacity:0;transform:scale(1.06);pointer-events:none}
+#intro .il{position:absolute;left:0;right:0;top:50%;height:2px;margin-top:-1px;background:rgba(255,255,255,.32);transform:scaleX(0);animation:ilx .7s cubic-bezier(.6,0,.2,1) .05s forwards}
+#intro .ir{position:absolute;left:50%;top:50%;width:250px;height:250px;margin:-125px}
+#intro .ir circle{fill:none;stroke:rgba(255,255,255,.45);stroke-width:2;stroke-dasharray:754;stroke-dashoffset:754;animation:ird 1s cubic-bezier(.5,0,.2,1) .25s forwards}
+#intro .ib{position:absolute;left:50%;top:50%;width:38px;height:38px;margin:-19px;transform:translateY(-62vh);animation:ibd .75s cubic-bezier(.45,0,.9,.5) .7s forwards,ibo .25s ease 1.45s forwards}
+#intro .ib svg{width:100%;height:100%;animation:ibs .75s linear .7s}
+#intro .iw{position:absolute;left:50%;top:50%;width:120px;height:120px;margin:-60px;border-radius:50%;border:3px solid #2fd06b;opacity:0;animation:iwv .9s ease-out 1.42s}
+#intro .ilg{position:absolute;left:50%;top:50%;width:104px;height:104px;margin:-52px;border-radius:26px;opacity:0;transform:scale(.3);box-shadow:0 0 0 0 rgba(47,208,107,.0);animation:ilg .6s cubic-bezier(.3,1.6,.5,1) 1.45s forwards,igl 2.4s ease-in-out 2.1s infinite}
+#intro .itx{position:absolute;left:0;right:0;top:calc(50% + 78px);text-align:center;padding:0 20px}
+#intro .itt{font-weight:800;font-size:34px;line-height:1.1;clip-path:inset(0 0 0 100%);animation:itr .7s cubic-bezier(.6,0,.2,1) 1.75s forwards}
+#intro .its{color:#d0dde8;font-size:14px;margin-top:8px;opacity:0;animation:ifd .5s ease 2.25s forwards}
+#intro .igo{margin-top:22px;opacity:0;transform:translateY(8px);pointer-events:none;transition:.35s ease}
+#intro.tap .igo{opacity:1;transform:none;pointer-events:auto}
+#intro .igo .bt{height:50px;padding:0 34px;font-size:16px}
+@keyframes ilx{to{transform:scaleX(1)}}
+@keyframes ird{to{stroke-dashoffset:0}}
+@keyframes ibd{0%{transform:translateY(-62vh)}100%{transform:translateY(0)}}
+@keyframes ibs{to{transform:rotate(540deg)}}
+@keyframes ibo{to{opacity:0;transform:scale(1.6)}}
+@keyframes iwv{0%{opacity:.9;transform:scale(.2)}100%{opacity:0;transform:scale(3.2)}}
+@keyframes ilg{to{opacity:1;transform:scale(1)}}
+@keyframes igl{0%,100%{box-shadow:0 0 0 0 rgba(47,208,107,.0)}50%{box-shadow:0 0 34px 6px rgba(47,208,107,.45)}}
+@keyframes itr{to{clip-path:inset(0 0 0 0)}}
+@keyframes ifd{to{opacity:1}}
+@media (prefers-reduced-motion:reduce){#intro *{animation-duration:.01s!important;animation-delay:0s!important}#intro .ib{display:none}}
+/* مفتاح تشغيل/إيقاف في الإعدادات */
+.sw{position:relative;width:52px;height:30px;border-radius:15px;border:0;background:rgba(255,255,255,.25);flex:none;padding:0}
+.sw::after{content:"";position:absolute;top:3px;right:3px;width:24px;height:24px;border-radius:50%;background:#fff;transition:transform .2s}
+.sw.on{background:#2fd06b}
+.sw.on::after{transform:translateX(-22px)}
 </style>
 </head>
 <body>
@@ -137,6 +173,12 @@ const firebaseConfig = {
   appId: "1:856010520496:web:526a9ee316e7b4b5f24875"
 };
 const VAPID_KEY = 'BJCvYHRpVeKdXwapyT7aKp0nMnw5Y7ZhTkIv8Dips-sYm9lXHEw96ff3ZloT2pk2xhK-3_PaJj4Oi5UwljnQhW0';   // المفتاح العام من Firebase > Project settings > Cloud Messaging > Web Push certificates
+/* ───── الأصوات: حط لينك الملف بين العلامتين '' (لينك مباشر لملف mp3 أو wav أو ogg) ─────
+   لو سبته فاضي بيشتغل الصوت المتولّد بالكود. vol من 0 (صامت) لـ 1 (أعلى صوت). */
+const SOUND_LINKS = {
+  click: { url: '', vol: 0.35 },   // صوت الضغط على الأزرار (يفضّل أقل من نص ثانية)
+  intro: { url: '', vol: 0.8 }     // صوت شاشة الدخول
+};
 const TZ = 'Africa/Cairo';   // لازم تكون زي TZ في Code.gs
 const CAP_MULT = 2;          // لازم يكون زي CAPTAIN_MULT في Code.gs
 const POS = { 1: 'حارس', 2: 'مدافع', 3: 'وسط', 4: 'مهاجم' };
@@ -159,6 +201,8 @@ const nf = new Intl.NumberFormat('ar-EG');
 const N = v => nf.format(v);
 const fmtTime = ms => new Intl.DateTimeFormat('ar-EG', { hour: 'numeric', minute: '2-digit', hour12: true, timeZone: TZ }).format(ms);
 const fmtDay = ms => new Intl.DateTimeFormat('ar-EG', { weekday: 'long', day: 'numeric', month: 'long', timeZone: TZ }).format(ms);
+const fmtWd = ms => new Intl.DateTimeFormat('ar-EG', { weekday: 'long', timeZone: TZ }).format(ms);
+const fmtDm = ms => new Intl.DateTimeFormat('ar-EG', { day: 'numeric', month: 'long', timeZone: TZ }).format(ms);
 const dayKey = ms => new Intl.DateTimeFormat('en-CA', { timeZone: TZ, year: 'numeric', month: '2-digit', day: '2-digit' }).format(ms);
 const tsMs = t => (t && t.toMillis) ? t.toMillis() : (t ? Date.parse(t) : null);
 const teamName = t => AR[t.name] || t.name;
@@ -305,7 +349,7 @@ function daysOf(g) {
   gwFixtures(g).forEach(f => {
     const k = koOf(f);
     const key = k ? dayKey(k) : 'tbd';
-    (map[key] = map[key] || { key, label: k ? fmtDay(k) : 'مواعيد لسه مش معروفة', list: [] }).list.push(f);
+    (map[key] = map[key] || { key, ms: k, label: k ? fmtDay(k) : 'مواعيد لسه مش معروفة', list: [] }).list.push(f);
   });
   return Object.values(map).sort((a, b) => a.key.localeCompare(b.key)).map(d => {
     d.list.sort((a, b) => (koOf(a) || 9e15) - (koOf(b) || 9e15));
@@ -524,7 +568,6 @@ function vLogin() {
       <button class="bt on" type="submit">${signup ? 'إنشاء حساب' : 'دخول'}</button>
     </form>
     <div class="r j"><button class="lnk" data-act="mode">${signup ? 'عندي حساب، دخول' : 'مفيش عندي حساب، إنشاء حساب'}</button>${signup ? '' : '<button class="lnk" data-act="reset">نسيت كلمة السر</button>'}</div>
-    <div class="legal"><a href="privacy.html" target="_blank" rel="noopener">سياسة الخصوصية</a><a href="data-deletion.html" target="_blank" rel="noopener">حذف البيانات</a></div>
   </div>`;
 }
 function vSetup() {
@@ -553,8 +596,8 @@ function vRound() {
   const pts = S.myGwPts == null ? '—' : N(S.myGwPts);
   const fin = S.boards['gw_' + g] && S.boards['gw_' + g].final;
   return `<div class="h"><div><div class="m">الفانتاسي اليومي</div><b>الجولة ${N(g)}</b><div class="m">الخواص المتبقية ${N(chipsLeft())} من ${N(MAX_CHIPS)}</div></div><div class="ctr"><div class="m">نقطك ${S.myGwPts == null ? '' : (fin ? '(نهائية)' : '(مؤقتة)')}</div><div class="d" style="font-size:24px">${pts}</div></div></div>
-  ${nums.length > 1 ? `<div class="tg">${nums.map(n => `<button class="bt ${n === g ? 'on' : ''}" data-act="gw" data-g="${n}">الجولة ${N(n)}</button>`).join('')}</div>` : ''}
-  <div class="tg">${days.map(d => `<button class="bt ${cur && d.key === cur.key ? 'on' : ''}" data-act="day" data-k="${d.key}">${esc(d.label)}</button>`).join('')}</div>
+  ${nums.length > 1 ? `<div class="tg eq">${nums.map(n => `<button class="bt ${n === g ? 'on' : ''}" data-act="gw" data-g="${n}">الجولة ${N(n)}</button>`).join('')}</div>` : ''}
+  <div class="tg eq">${days.map(d => `<button class="bt dy ${cur && d.key === cur.key ? 'on' : ''}" data-act="day" data-k="${d.key}" aria-label="${esc(d.label)}">${d.ms ? `<span>${esc(fmtWd(d.ms))}</span><small>${esc(fmtDm(d.ms))}</small>` : `<span>${esc(d.label)}</span>`}</button>`).join('')}</div>
   <div class="f">${cur ? cur.list.map(card).join('') : ''}</div>`;
 }
 function card(f) {
@@ -655,7 +698,7 @@ function renderList() {
 /* ───────── تنبيهات الموبايل ───────── */
 const pushConfigured = () => VAPID_KEY && !VAPID_KEY.startsWith('PASTE');
 const isIOS = () => /iPad|iPhone|iPod/.test(navigator.userAgent);
-const isStandalone = () => (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true;
+const isStandalone = () => (window.matchMedia && (matchMedia('(display-mode: standalone)').matches || matchMedia('(display-mode: fullscreen)').matches)) || navigator.standalone === true;
 let fgBound = false;
 async function pushToken() {
   const reg = await navigator.serviceWorker.ready;
@@ -1300,6 +1343,8 @@ function vAccount() {
     ${S.editName ? `<form class="k" data-form="rename" style="display:flex;flex-direction:column;gap:10px"><label class="m" for="u2">اسم المستخدم الجديد</label><input id="u2" class="in" name="u" maxlength="24" autocomplete="off" data-in="uname2" value="${esc(S.profile.username)}" required><div id="uhint2" class="m">أي اسم تحبه، بس مينفعش يكون شبه اسم موجود.</div><div class="r"><button class="bt on g" type="submit">حفظ</button><button class="bt g" type="button" data-act="renameCancel">إلغاء</button></div></form>` : '<button class="bt" data-act="renameOpen">تغيير اسم المستخدم</button>'}
     <div style="display:flex;gap:8px"><div class="k ctr g"><div class="d" style="font-size:26px">${me ? N(me.pts) : '—'}</div><div class="m">إجمالي النقط</div></div><div class="k ctr g"><div class="d" style="font-size:26px">${me ? N(me.rank) : '—'}</div><div class="m">المركز${rows.length ? ' من ' + N(rows.length) : ''}</div></div></div>
     <div class="k"><div class="r j"><div class="g"><b>تنبيهات الماتشات</b><div class="m">${S.fcm && S.fcm.on ? 'مفعّلة: هنبعتلك قبل الماتش بحوالي ساعة لو تشكيلتك ناقصة.' : 'فعّلها علشان يوصلك تنبيه قبل الماتش بساعة لو تشكيلتك ناقصة.'}</div></div><button class="bt ${S.fcm && S.fcm.on ? '' : 'on'}" data-act="push">${S.fcm && S.fcm.on ? 'إيقاف' : 'تفعيل'}</button></div>${isIOS() && !isStandalone() ? '<div class="m warn mt">على الآيفون لازم تضيف التطبيق للشاشة الرئيسية الأول.</div>' : ''}</div>
+    <div class="k"><div class="r j"><div class="g"><b>أصوات الأزرار</b><div class="m">صوت هادي مع كل ضغطة، وصوت الدخول.</div></div><button class="sw ${prefOn('snd') ? 'on' : ''}" data-act="psnd" role="switch" aria-checked="${prefOn('snd')}" aria-label="أصوات الأزرار"></button></div>
+      ${isStandalone() ? '' : `<div class="r j mt" style="padding-top:10px;border-top:1px solid rgba(255,255,255,.18)"><div class="g"><b>ملء الشاشة</b><div class="m">${fsSupported() ? 'يخفي شريط المتصفح أول ما تدوس على الشاشة.' : 'المتصفح ده مش بيدعمه. ضيف التطبيق للشاشة الرئيسية وهيفتح على الشاشة كلها.'}</div></div>${fsSupported() ? `<button class="sw ${prefOn('fs') ? 'on' : ''}" data-act="pfs" role="switch" aria-checked="${prefOn('fs')}" aria-label="ملء الشاشة"></button>` : ''}</div>`}</div>
     ${S.admin ? '<button class="bt" data-act="admin">لوحة الإدارة</button>' : ''}
     <button class="bt red" data-act="logout" style="margin-top:auto">تسجيل الخروج</button></div>`;
 }
@@ -1377,6 +1422,12 @@ async function setInvite(i, patch, msg) {
   render();
 }
 const ACTIONS = {
+  psnd() { setPref('snd', !prefOn('snd')); if (prefOn('snd')) { loadSound('click'); loadSound('intro'); clickSound(); } render(); },
+  pfs() {
+    const on = !prefOn('fs'); setPref('fs', on);
+    if (on) goFullscreen(true); else if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
+    render();
+  },
   async google() {
     try { await signInWithPopup(auth, new GoogleAuthProvider()); }
     catch (e) { if (!['auth/popup-closed-by-user', 'auth/cancelled-popup-request'].includes(e.code)) toast(authMsg(e)); }
@@ -1707,6 +1758,145 @@ onAuthStateChanged(auth, async u => {
   render();
 });
 setInterval(() => { if (S.view === 'round' && lockSig() !== lastSig) render(); }, 30000);
+
+/* ───────── الإعدادات المحلية (على الجهاز ده بس) ───────── */
+const PREF_DEF = { snd: true, fs: true };
+const prefOn = k => { try { const v = localStorage.getItem('fd_' + k); return v == null ? PREF_DEF[k] : v === '1'; } catch (e) { return PREF_DEF[k]; } };
+const setPref = (k, on) => { try { localStorage.setItem('fd_' + k, on ? '1' : '0'); } catch (e) { /* مش مهم */ } };
+
+/* ───────── الأصوات (متولّدة بالكود، من غير ملفات) ───────── */
+let actx = null;
+function audio() {
+  try {
+    if (!actx) actx = new (window.AudioContext || window.webkitAudioContext)();
+    if (actx.state === 'suspended') actx.resume().catch(() => {});
+    return actx;
+  } catch (e) { return null; }
+}
+/* نغمة واحدة ناعمة: بتطلع وتختفي بسرعة من غير "طقّة" */
+function tone(ctx, out, { f, f2, t = 0, d = .12, g = .1, type = 'sine' }) {
+  const o = ctx.createOscillator(), v = ctx.createGain(), at = ctx.currentTime + t;
+  o.type = type; o.frequency.setValueAtTime(f, at);
+  if (f2) o.frequency.exponentialRampToValueAtTime(f2, at + d);
+  v.gain.setValueAtTime(0.0001, at);
+  v.gain.exponentialRampToValueAtTime(g, at + 0.006);
+  v.gain.exponentialRampToValueAtTime(0.0001, at + d);
+  o.connect(v); v.connect(out); o.start(at); o.stop(at + d + 0.02);
+  return o;
+}
+/* أصوات من لينك (SOUND_LINKS فوق). بنحمّلها مرة واحدة ونشغّلها فوراً من الذاكرة.
+   لو الموقع اللي عليه الملف مش سامح بالتحميل المباشر (CORS)، بنشغّله بطريقة تانية (Audio).
+   ولو اللينك فاضي أو باظ، بيشتغل الصوت المتولّد بالكود. */
+const sndBuf = {}, sndEl = {};
+async function loadSound(k) {
+  const L = SOUND_LINKS[k]; if (!L || !L.url || sndBuf[k] !== undefined) return;
+  sndBuf[k] = null;
+  const ctx = audio();
+  try {
+    if (!ctx) throw 0;
+    const r = await fetch(L.url, { mode: 'cors', cache: 'force-cache' });
+    if (!r.ok) throw 0;
+    const data = await r.arrayBuffer();
+    sndBuf[k] = await new Promise((res, rej) => ctx.decodeAudioData(data, res, rej));
+  } catch (e) {
+    const a = new Audio(); a.preload = 'auto'; a.src = L.url;
+    a.addEventListener('canplaythrough', () => { sndEl[k] = a; }, { once: true });
+    a.addEventListener('error', () => { console.warn('مقدرتش أحمّل صوت ' + k + ' من: ' + L.url); }, { once: true });
+    a.load();
+  }
+}
+function playFile(k) {
+  const L = SOUND_LINKS[k], ctx = audio(), b = sndBuf[k];
+  if (ctx && b) {
+    const src = ctx.createBufferSource(), g = ctx.createGain();
+    src.buffer = b; g.gain.value = L.vol;
+    src.connect(g); g.connect(ctx.destination); src.start();
+    return true;
+  }
+  if (sndEl[k]) {
+    const a = sndEl[k].cloneNode(); a.volume = Math.min(1, L.vol);
+    a.play().catch(() => {});
+    return true;
+  }
+  return false;
+}
+/* صوت الضغطة: "توك" خفيف وواطي */
+function clickSound() {
+  if (!prefOn('snd')) return;
+  const ctx = audio(); if (!ctx || ctx.state !== 'running') return;
+  if (playFile('click')) return;
+  const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 1800; lp.connect(ctx.destination);
+  tone(ctx, lp, { f: 760, f2: 430, d: .075, g: .05 });
+  tone(ctx, lp, { f: 1520, f2: 900, d: .04, g: .012 });
+}
+/* صوت الدخول: خبطة كورة، صفارة حكم قصيرة، وأكورد بيعلى مع همهمة جمهور */
+function introSound() {
+  if (!prefOn('snd')) return;
+  const ctx = audio(); if (!ctx) return;
+  if (playFile('intro')) return;
+  const m = ctx.createGain(); m.gain.value = .55;
+  const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 5200;
+  m.connect(lp); lp.connect(ctx.destination);
+  tone(ctx, m, { f: 150, f2: 45, d: .22, g: .5 });                       // الكورة
+  [[.12, .09], [.26, .16]].forEach(([t, d]) => {                          // الصفارة
+    const o = tone(ctx, m, { f: 2650, t, d, g: .07 });
+    const l = ctx.createOscillator(), lg = ctx.createGain();
+    l.frequency.value = 38; lg.gain.value = 70; l.connect(lg); lg.connect(o.frequency);
+    l.start(ctx.currentTime + t); l.stop(ctx.currentTime + t + d + .02);
+  });
+  [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => tone(ctx, m, { f, t: .5 + i * .085, d: .9 - i * .1, g: .12, type: 'triangle' }));   // الأكورد
+  tone(ctx, m, { f: 261.63, t: .5, d: 1.1, g: .1, type: 'triangle' });
+  const len = 1.4, buf = ctx.createBuffer(1, ctx.sampleRate * len, ctx.sampleRate), ch = buf.getChannelData(0);   // الجمهور
+  for (let i = 0; i < ch.length; i++) ch[i] = Math.random() * 2 - 1;
+  const n = ctx.createBufferSource(), bp = ctx.createBiquadFilter(), ng = ctx.createGain(), at = ctx.currentTime + .45;
+  n.buffer = buf; bp.type = 'bandpass'; bp.frequency.value = 900; bp.Q.value = .7;
+  ng.gain.setValueAtTime(0.0001, at); ng.gain.exponentialRampToValueAtTime(.09, at + .5); ng.gain.exponentialRampToValueAtTime(0.0001, at + len - .05);
+  n.connect(bp); bp.connect(ng); ng.connect(m); n.start(at); n.stop(at + len);
+}
+document.addEventListener('click', e => {
+  if (e.target.closest('#intro')) return;
+  const el = e.target.closest('button,[data-act],label.bt,a');
+  if (el && !el.disabled) clickSound();
+}, true);
+
+/* ───────── ملء الشاشة ───────── */
+const fsSupported = () => !!(document.fullscreenEnabled && document.documentElement.requestFullscreen);
+let fsTried = false;
+function goFullscreen(force) {
+  if (!prefOn('fs') || isStandalone() || !fsSupported() || document.fullscreenElement) return;
+  if (fsTried && !force) return;
+  fsTried = true;
+  document.documentElement.requestFullscreen({ navigationUI: 'hide' }).catch(() => {});
+}
+/* المتصفح بيسمح بملء الشاشة بعد ضغطة بس، فبنجربه مع أول ضغطة */
+document.addEventListener('pointerup', () => goFullscreen(false), { once: true });
+
+/* ───────── شاشة الدخول ───────── */
+function showIntro() {
+  const el = document.createElement('div');
+  el.id = 'intro'; el.setAttribute('role', 'button'); el.setAttribute('aria-label', 'ادخل');
+  el.innerHTML = `<div class="il"></div><svg class="ir" viewBox="0 0 250 250" aria-hidden="true"><circle cx="125" cy="125" r="120"/></svg>
+    <div class="iw"></div><div class="ib">${BALL}</div><img class="ilg" src="icon-192.png" alt="">
+    <div class="itx"><div class="itt">الفانتاسي اليومي</div><div class="its">اختار ٤ لاعبين من كل ماتش ونافس واثبتلهم انك التوب</div><div class="igo"><button class="bt on" type="button">يلا ندخل</button></div></div>`;
+  document.body.appendChild(el);
+  let done = false;
+  const go = () => {
+    if (done) return; done = true;
+    goFullscreen(true);
+    if (!played) introSound();
+    el.classList.add('out');
+    setTimeout(() => el.remove(), 550);
+  };
+  /* لو المتصفح سامح بالصوت من غير ضغطة، الشاشة بتكمّل لوحدها. غير كده بيظهر زرار "يلا ندخل" والصوت يشتغل معاه */
+  const ctx = prefOn('snd') ? audio() : null;
+  if (ctx) { loadSound('click'); loadSound('intro'); }
+  const auto = !prefOn('snd') || (ctx && ctx.state === 'running');
+  let played = false;
+  if (auto && prefOn('snd')) setTimeout(() => { if (!done) { played = true; introSound(); } }, 1350);   // مع نزول الكورة
+  setTimeout(() => { if (done) return; if (auto) go(); else el.classList.add('tap'); }, auto ? 2900 : 2300);
+  setTimeout(() => el.addEventListener('click', go), 300);
+}
+showIntro();
 render();
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
 </script>
