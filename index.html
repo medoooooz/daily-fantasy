@@ -45,10 +45,6 @@ button{cursor:pointer}
 .tg{display:flex;gap:6px;padding:0 16px 12px;overflow-x:auto;scrollbar-width:none}
 .tg::-webkit-scrollbar{display:none}
 .tg .bt{flex:1 0 auto;padding:0 14px;white-space:nowrap}
-/* أزرار الجولات والأيام: كلها بنفس العرض (تلت السطر)، ولو أكتر من ٣ السطر بيتسحب */
-.tg.eq .bt{flex:0 0 calc((100% - 12px) / 3);min-width:0;padding:0 6px;overflow:hidden;text-overflow:ellipsis}
-.tg.eq .bt.dy{height:52px;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.2}
-.tg.eq .bt.dy small{font-weight:500;font-size:11px;opacity:.85}
 .pl{font-weight:700;font-size:11px;padding:3px 9px;border-radius:6px;background:rgba(255,255,255,.16);color:#e6eef5;white-space:nowrap}
 .pl.lv{background:#d63a3f;color:#fff}
 .pl.ok{background:rgba(47,208,107,.26);color:#8bffb8}
@@ -119,38 +115,6 @@ a.lnk,.lnk{color:#8bffb8;background:none;border:0;padding:6px 0;text-decoration:
 .rm{position:absolute;top:-8px;right:-6px;width:22px;height:22px;border-radius:50%;background:#d63a3f;color:#fff;border:0;padding:0;font-size:15px;line-height:1;display:flex;align-items:center;justify-content:center;z-index:2}
 .rm::after{content:"";position:absolute;inset:-12px}
 div.sl{cursor:pointer}
-/* شاشة الدخول: دايرة نص الملعب بترسم نفسها، الكورة بتنزل على نقطة السنتر وبتتحول للوجو */
-#intro{position:fixed;inset:0;z-index:40;overflow:hidden;background:radial-gradient(circle at 88% 6%,rgba(47,208,107,.38),transparent 42%),radial-gradient(circle at 6% 82%,rgba(80,140,255,.38),transparent 48%),linear-gradient(165deg,#17607a,#0d3554 58%,#152a5c);transition:opacity .5s ease,transform .5s ease;cursor:pointer}
-#intro.out{opacity:0;transform:scale(1.06);pointer-events:none}
-#intro .il{position:absolute;left:0;right:0;top:50%;height:2px;margin-top:-1px;background:rgba(255,255,255,.32);transform:scaleX(0);animation:ilx .7s cubic-bezier(.6,0,.2,1) .05s forwards}
-#intro .ir{position:absolute;left:50%;top:50%;width:250px;height:250px;margin:-125px}
-#intro .ir circle{fill:none;stroke:rgba(255,255,255,.45);stroke-width:2;stroke-dasharray:754;stroke-dashoffset:754;animation:ird 1s cubic-bezier(.5,0,.2,1) .25s forwards}
-#intro .ib{position:absolute;left:50%;top:50%;width:38px;height:38px;margin:-19px;transform:translateY(-62vh);animation:ibd .75s cubic-bezier(.45,0,.9,.5) .7s forwards,ibo .25s ease 1.45s forwards}
-#intro .ib svg{width:100%;height:100%;animation:ibs .75s linear .7s}
-#intro .iw{position:absolute;left:50%;top:50%;width:120px;height:120px;margin:-60px;border-radius:50%;border:3px solid #2fd06b;opacity:0;animation:iwv .9s ease-out 1.42s}
-#intro .ilg{position:absolute;left:50%;top:50%;width:104px;height:104px;margin:-52px;border-radius:26px;opacity:0;transform:scale(.3);box-shadow:0 0 0 0 rgba(47,208,107,.0);animation:ilg .6s cubic-bezier(.3,1.6,.5,1) 1.45s forwards,igl 2.4s ease-in-out 2.1s infinite}
-#intro .itx{position:absolute;left:0;right:0;top:calc(50% + 78px);text-align:center;padding:0 20px}
-#intro .itt{font-weight:800;font-size:34px;line-height:1.1;clip-path:inset(0 0 0 100%);animation:itr .7s cubic-bezier(.6,0,.2,1) 1.75s forwards}
-#intro .its{color:#d0dde8;font-size:14px;margin-top:8px;opacity:0;animation:ifd .5s ease 2.25s forwards}
-#intro .igo{margin-top:22px;opacity:0;transform:translateY(8px);pointer-events:none;transition:.35s ease}
-#intro.tap .igo{opacity:1;transform:none;pointer-events:auto}
-#intro .igo .bt{height:50px;padding:0 34px;font-size:16px}
-@keyframes ilx{to{transform:scaleX(1)}}
-@keyframes ird{to{stroke-dashoffset:0}}
-@keyframes ibd{0%{transform:translateY(-62vh)}100%{transform:translateY(0)}}
-@keyframes ibs{to{transform:rotate(540deg)}}
-@keyframes ibo{to{opacity:0;transform:scale(1.6)}}
-@keyframes iwv{0%{opacity:.9;transform:scale(.2)}100%{opacity:0;transform:scale(3.2)}}
-@keyframes ilg{to{opacity:1;transform:scale(1)}}
-@keyframes igl{0%,100%{box-shadow:0 0 0 0 rgba(47,208,107,.0)}50%{box-shadow:0 0 34px 6px rgba(47,208,107,.45)}}
-@keyframes itr{to{clip-path:inset(0 0 0 0)}}
-@keyframes ifd{to{opacity:1}}
-@media (prefers-reduced-motion:reduce){#intro *{animation-duration:.01s!important;animation-delay:0s!important}#intro .ib{display:none}}
-/* مفتاح تشغيل/إيقاف في الإعدادات */
-.sw{position:relative;width:52px;height:30px;border-radius:15px;border:0;background:rgba(255,255,255,.25);flex:none;padding:0}
-.sw::after{content:"";position:absolute;top:3px;right:3px;width:24px;height:24px;border-radius:50%;background:#fff;transition:transform .2s}
-.sw.on{background:#2fd06b}
-.sw.on::after{transform:translateX(-22px)}
 </style>
 </head>
 <body>
@@ -173,12 +137,6 @@ const firebaseConfig = {
   appId: "1:856010520496:web:526a9ee316e7b4b5f24875"
 };
 const VAPID_KEY = 'BJCvYHRpVeKdXwapyT7aKp0nMnw5Y7ZhTkIv8Dips-sYm9lXHEw96ff3ZloT2pk2xhK-3_PaJj4Oi5UwljnQhW0';   // المفتاح العام من Firebase > Project settings > Cloud Messaging > Web Push certificates
-/* ───── الأصوات: حط لينك الملف بين العلامتين '' (لينك مباشر لملف mp3 أو wav أو ogg) ─────
-   لو سبته فاضي بيشتغل الصوت المتولّد بالكود. vol من 0 (صامت) لـ 1 (أعلى صوت). */
-const SOUND_LINKS = {
-  click: { url: 'https://cdn.pixabay.com/download/audio/2024/01/16/audio_fb4eef1715.mp3', vol: 0.35 },   // صوت الضغط على الأزرار (يفضّل أقل من نص ثانية)
-  intro: { url: 'https://cdn.pixabay.com/download/audio/2025/08/11/audio_6f1914dab5.mp3', vol: 0.8 }     // صوت شاشة الدخول
-};
 const TZ = 'Africa/Cairo';   // لازم تكون زي TZ في Code.gs
 const CAP_MULT = 2;          // لازم يكون زي CAPTAIN_MULT في Code.gs
 const POS = { 1: 'حارس', 2: 'مدافع', 3: 'وسط', 4: 'مهاجم' };
@@ -188,7 +146,7 @@ const CHIPS = {
   steal: { n: 'هلقط رزقي', d: 'اختار فريق، وبعد نهاية الماتش بتاخد نقط أعلى لاعب فيه كبونص فوق اختياراتك.' }
 };
 const MAX_CHIPS = 2;   // لازم يكون زي MAX_CHIPS_PER_GW في Code.gs
-const AR = { 'Arsenal':'أرسنال','Aston Villa':'أستون فيلا','Bournemouth':'بورنموث','Brentford':'برينتفورد','Brighton':'برايتون','Burnley':'بيرنلي','Chelsea':'تشيلسي','Crystal Palace':'كريستال بالاس','Everton':'إيفرتون','Fulham':'فولهام','Leeds':'ليدز','Liverpool':'ليفربول','Man City':'مان سيتي','Man Utd':'مان يونايتد','Newcastle':'نيوكاسل',"Nott'm Forest":'نوتنجهام فورست','Sunderland':'سندرلاند','Spurs':'توتنهام','West Ham':'وست هام','Wolves':'وولفرهامبتون','Leicester':'ليستر','Ipswich Town':'إبسويتش','Southampton':'ساوثهامبتون','Coventry City':'كوفنتري','Hull City':'هال سيتي' };
+const AR = { 'Arsenal':'أرسنال','Aston Villa':'أستون فيلا','Bournemouth':'بورنموث','Brentford':'برينتفورد','Brighton':'برايتون','Burnley':'بيرنلي','Chelsea':'تشيلسي','Crystal Palace':'كريستال بالاس','Everton':'إيفرتون','Fulham':'فولهام','Leeds':'ليدز','Liverpool':'ليفربول','Man City':'مان سيتي','Man Utd':'مان يونايتد','Newcastle':'نيوكاسل',"Nott'm Forest":'نوتنجهام فورست','Sunderland':'سندرلاند','Spurs':'توتنهام','West Ham':'وست هام','Wolves':'وولفرهامبتون','Leicester':'ليستر','Ipswich':'إبسويتش','Southampton':'ساوثهامبتون','Coventry':'كوفنتري','Hull':'هال سيتي' };
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
@@ -201,8 +159,6 @@ const nf = new Intl.NumberFormat('ar-EG');
 const N = v => nf.format(v);
 const fmtTime = ms => new Intl.DateTimeFormat('ar-EG', { hour: 'numeric', minute: '2-digit', hour12: true, timeZone: TZ }).format(ms);
 const fmtDay = ms => new Intl.DateTimeFormat('ar-EG', { weekday: 'long', day: 'numeric', month: 'long', timeZone: TZ }).format(ms);
-const fmtWd = ms => new Intl.DateTimeFormat('ar-EG', { weekday: 'long', timeZone: TZ }).format(ms);
-const fmtDm = ms => new Intl.DateTimeFormat('ar-EG', { day: 'numeric', month: 'long', timeZone: TZ }).format(ms);
 const dayKey = ms => new Intl.DateTimeFormat('en-CA', { timeZone: TZ, year: 'numeric', month: '2-digit', day: '2-digit' }).format(ms);
 const tsMs = t => (t && t.toMillis) ? t.toMillis() : (t ? Date.parse(t) : null);
 const teamName = t => AR[t.name] || t.name;
@@ -349,7 +305,7 @@ function daysOf(g) {
   gwFixtures(g).forEach(f => {
     const k = koOf(f);
     const key = k ? dayKey(k) : 'tbd';
-    (map[key] = map[key] || { key, ms: k, label: k ? fmtDay(k) : 'مواعيد لسه مش معروفة', list: [] }).list.push(f);
+    (map[key] = map[key] || { key, label: k ? fmtDay(k) : 'مواعيد لسه مش معروفة', list: [] }).list.push(f);
   });
   return Object.values(map).sort((a, b) => a.key.localeCompare(b.key)).map(d => {
     d.list.sort((a, b) => (koOf(a) || 9e15) - (koOf(b) || 9e15));
@@ -367,9 +323,13 @@ const pickOf = fid => (S.picks[fid] = S.picks[fid] || { ids: [], cap: null, chip
 /* ───────── تحميل البيانات ───────── */
 async function loadPicks() {
   await flushSaves();
-  const s = await getDocs(query(collection(db, 'picks'), where('uid', '==', S.user.uid), where('gw', '==', S.gw)));
+  /* بالماتشات مش برقم الجولة: الماتش المؤجل لو اتنقل لجولة تانية، اختياره القديم لسه شايل رقم الجولة القديمة */
+  const fids = [...new Set(gwFixtures(S.gw).map(f => String(f.id)))];
+  const parts = [];
+  for (let i = 0; i < fids.length; i += 30) parts.push(fids.slice(i, i + 30));
+  const snaps = await Promise.all(parts.map(ids => getDocs(query(collection(db, 'picks'), where('uid', '==', S.user.uid), where('fid', 'in', ids)))));
   S.picks = {};
-  s.docs.forEach(d => { const x = d.data(); S.picks[x.fid] = { ids: x.ids || [], cap: x.cap ?? null, chip: x.chip ?? null, team: x.team ?? null }; });
+  snaps.forEach(s => s.docs.forEach(d => { const x = d.data(); S.picks[x.fid] = { ids: x.ids || [], cap: x.cap ?? null, chip: x.chip ?? null, team: x.team ?? null }; }));
 }
 async function loadMyPts() {
   try {
@@ -394,7 +354,10 @@ async function bootUser() {
   if (!ps.exists()) { S.profile = null; S.view = 'setup'; return; }
   S.profile = ps.data();
   if (S.profile.banned) { S.view = 'banned'; return; }
-  if (S.profile.invite) { S.invites = {}; if (!hasAccess(await getInvite(S.profile.invite))) { S.view = 'expired'; return; } }
+  /* كود الدعوة بقى في members/<uid> (خاص). الحسابات اللي لسه ما اتنقلتش كودها في البروفايل */
+  let code = S.profile.invite || null;
+  try { const m = await getDoc(doc(db, 'members', S.user.uid)); if (m.exists()) code = m.data().invite || null; } catch (e) { /* نكمّل باللي عندنا */ }
+  if (code) { S.invites = {}; if (!hasAccess(await getInvite(code))) { S.view = 'expired'; return; } }
   try { const a = await getDoc(doc(db, 'admins', S.user.uid)); S.admin = a.exists(); } catch (e) { S.admin = false; }
   await loadRound();
   S.view = 'round';
@@ -508,28 +471,11 @@ function render() {
   const nonav = ['loading', 'login', 'setup', 'banned', 'expired', 'error', 'match', 'udet'].includes(v);
   root.className = nonav ? 'nonav' : '';
   const views = { loading: vLoading, login: vLogin, setup: vSetup, banned: vBanned, expired: vExpired, error: vError, round: vRound, match: vMatch, board: vBoard, stats: vStats, udet: vUser, tour: vTourList, tdet: vTourDetail, tnew: vTourNew, account: vAccount, admin: vAdmin };
-  /* إعادة الرسم في نفس الشاشة: بنحافظ على مكان سحب صفوف الأزرار (التبويبات/الأيام) ومكان الصفحة */
-  const same = v === lastView, rows = same ? [...root.querySelectorAll('.tg')].map(t => t.scrollLeft) : [], y = window.scrollY;
   root.innerHTML = (views[v] || vLoading)() + (nonav ? '' : nav());
   if (v === 'match') renderMatchBody();
   if (v === 'stats') renderStatsBody();
-  root.querySelectorAll('.tg').forEach((t, i) => {
-    if (same && rows[i] != null) t.scrollLeft = rows[i];
-    showOn(t);
-  });
-  if (same) window.scrollTo(0, Math.max(y, keepY));
-  else { keepY = 0; window.scrollTo(0, 0); }
-  lastView = v;
   lastSig = lockSig();
   syncHistory();
-}
-let lastView = '', keepY = 0;
-/* الزرار المختار في صف الأزرار لازم يبان، من غير ما الصفحة نفسها تتحرك لفوق أو لتحت */
-function showOn(row) {
-  const on = row.querySelector('.bt.on'); if (!on) return;
-  const r = row.getBoundingClientRect(), b = on.getBoundingClientRect();
-  if (b.left < r.left) row.scrollLeft -= (r.left - b.left) + 16;
-  else if (b.right > r.right) row.scrollLeft += (b.right - r.right) + 16;
 }
 /* بصمة حالات القفل: بنعيد رسم شاشة الجولة لما ماتش يتقفل بس */
 let lastSig = '';
@@ -578,6 +524,7 @@ function vLogin() {
       <button class="bt on" type="submit">${signup ? 'إنشاء حساب' : 'دخول'}</button>
     </form>
     <div class="r j"><button class="lnk" data-act="mode">${signup ? 'عندي حساب، دخول' : 'مفيش عندي حساب، إنشاء حساب'}</button>${signup ? '' : '<button class="lnk" data-act="reset">نسيت كلمة السر</button>'}</div>
+    <div class="legal"><a href="privacy.html" target="_blank" rel="noopener">سياسة الخصوصية</a><a href="data-deletion.html" target="_blank" rel="noopener">حذف البيانات</a></div>
   </div>`;
 }
 function vSetup() {
@@ -606,8 +553,8 @@ function vRound() {
   const pts = S.myGwPts == null ? '—' : N(S.myGwPts);
   const fin = S.boards['gw_' + g] && S.boards['gw_' + g].final;
   return `<div class="h"><div><div class="m">الفانتاسي اليومي</div><b>الجولة ${N(g)}</b><div class="m">الخواص المتبقية ${N(chipsLeft())} من ${N(MAX_CHIPS)}</div></div><div class="ctr"><div class="m">نقطك ${S.myGwPts == null ? '' : (fin ? '(نهائية)' : '(مؤقتة)')}</div><div class="d" style="font-size:24px">${pts}</div></div></div>
-  ${nums.length > 1 ? `<div class="tg eq">${nums.map(n => `<button class="bt ${n === g ? 'on' : ''}" data-act="gw" data-g="${n}">الجولة ${N(n)}</button>`).join('')}</div>` : ''}
-  <div class="tg eq">${days.map(d => `<button class="bt dy ${cur && d.key === cur.key ? 'on' : ''}" data-act="day" data-k="${d.key}" aria-label="${esc(d.label)}">${d.ms ? `<span>${esc(fmtWd(d.ms))}</span><small>${esc(fmtDm(d.ms))}</small>` : `<span>${esc(d.label)}</span>`}</button>`).join('')}</div>
+  ${nums.length > 1 ? `<div class="tg">${nums.map(n => `<button class="bt ${n === g ? 'on' : ''}" data-act="gw" data-g="${n}">الجولة ${N(n)}</button>`).join('')}</div>` : ''}
+  <div class="tg">${days.map(d => `<button class="bt ${cur && d.key === cur.key ? 'on' : ''}" data-act="day" data-k="${d.key}">${esc(d.label)}</button>`).join('')}</div>
   <div class="f">${cur ? cur.list.map(card).join('') : ''}</div>`;
 }
 function card(f) {
@@ -708,7 +655,7 @@ function renderList() {
 /* ───────── تنبيهات الموبايل ───────── */
 const pushConfigured = () => VAPID_KEY && !VAPID_KEY.startsWith('PASTE');
 const isIOS = () => /iPad|iPhone|iPod/.test(navigator.userAgent);
-const isStandalone = () => (window.matchMedia && (matchMedia('(display-mode: standalone)').matches || matchMedia('(display-mode: fullscreen)').matches)) || navigator.standalone === true;
+const isStandalone = () => (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true;
 let fgBound = false;
 async function pushToken() {
   const reg = await navigator.serviceWorker.ready;
@@ -810,12 +757,10 @@ async function openTour(id) {
 async function loadNames() {
   if (Date.now() - S.namesAt < 300000 && S.userList.length) return;
   try {
-    const r = await getDocs(collection(db, 'users'));
-    S.userList = r.docs.map(d => ({ id: d.id, name: d.data().username, banned: !!d.data().banned, photo: d.data().photo || null, invite: d.data().invite || null }));
-    S.invites = {};
-    await Promise.all([...new Set(S.userList.map(u => u.invite).filter(Boolean))].map(getInvite));
-    S.userList.forEach(u => { u.gone = !!u.invite && !hasAccess(S.invites[u.invite]); });
-    S.gone = new Set(S.userList.filter(u => u.gone).map(u => u.id));
+    /* أكواد الدعوة مبقتش ظاهرة للاعبين: قايمة اللي تجربتهم خلصت بيكتبها الـ Apps Script في config/players */
+    const [r, pl] = await Promise.all([getDocs(collection(db, 'users')), getDoc(doc(db, 'config', 'players')).catch(() => null)]);
+    S.gone = new Set((pl && pl.exists() && pl.data().gone) || []);
+    S.userList = r.docs.map(d => ({ id: d.id, name: d.data().username, banned: !!d.data().banned, photo: d.data().photo || null, gone: S.gone.has(d.id) }));
     S.names = {}; S.userList.forEach(u => { S.names[u.id] = u.name; });
     S.namesAt = Date.now();
   } catch (e) { /* نستخدم الأسماء المخزنة */ }
@@ -990,7 +935,7 @@ function normStats(sd) {
     Object.keys(sd.byUser || {}).forEach(n => { const uid = (sd.uidOf && sd.uidOf[n]) || ('n:' + n); users[uid] = sd.byUser[n]; names[uid] = n; });
   }
   Object.keys(names).forEach(u => { S.snames[u] = names[u]; });
-  return { users, names, flags: sd.flags || null };
+  return { users, names };
 }
 async function ensureStats(fxs) {
   await Promise.all(fxs.map(async f => {
@@ -1144,135 +1089,43 @@ function searchHtml(A) {
   }).join('');
 }
 
-/* العناية المركزة: مين نسي إيه، ومين وقع في إيه */
-const CARE = { badCap: 2, weakSteal: 2 };   // كابتن فاشل: نقطتين أو أقل · هلقط رزقي ضعيف: بونص نقطتين أو أقل
-const FLAG_N = { i: 'مصاب', s: 'موقوف', u: 'غير متاح', n: 'غير متاح' };
+/* العناية المركزة: مين نسي إيه */
 function careHtml() {
   const roster = activeIds(), w = scopeWord();
   if (!roster.length) return '<div class="k ctr">مفيش لاعبين لسه.</div>';
   const fxs = scopeFx().filter(f => S.stats[f.id] && S.fxdocs[f.id]);
-  /* الاختيارات الفعلية بعد قواعد الحساب (الكابتن والخواص المحسوبة بس) */
-  const allFx = startedFx(S.gw), eff = {};
-  roster.forEach(u => { eff[u] = {}; effPicks(u, allFx).forEach(it => { eff[u][it.f.id] = it; }); });
-  const tmpPill = live => live ? ' <span class="pl" style="font-size:10px">مؤقت</span>' : '';
-  const row = (key, label, uids, notes, live) => `<div data-act="sx" data-k="${key}" style="cursor:pointer;padding:8px 0;border-top:1px solid rgba(255,255,255,.18)"><div class="r j"><span class="g nm" style="font-size:13px">${label}${tmpPill(live)}</span><span class="pl bad">${N(uids.length)}</span></div>${S.st.ex[key] ? nameList(uids, notes) : ''}</div>`;
-  const group = (title, rows) => { rows = rows.filter(Boolean); return rows.length ? `<div class="m" style="margin-top:10px;font-weight:700;color:#ffd45c">${title}</div>${rows.join('')}` : ''; };
-  let html = `<div class="m">مين نسي إيه ومين وقع في إيه في ${w} (بعد بداية الماتش). اضغط على أي سطر تشوف الأسماء.</div>`;
-
+  const row = (key, label, uids, notes) => `<div data-act="sx" data-k="${key}" style="cursor:pointer;padding:8px 0;border-top:1px solid rgba(255,255,255,.18)"><div class="r j"><span class="g nm" style="font-size:13px">${label}</span><span class="pl bad">${N(uids.length)}</span></div>${S.st.ex[key] ? nameList(uids, notes) : ''}</div>`;
+  let html = `<div class="m">مين نسي إيه في ${w} (بعد بداية الماتش)</div>`;
   fxs.forEach(f => {
-    const sd = S.stats[f.id], d = S.fxdocs[f.id], sc = S.scores[f.id] || { pts: {}, st: {}, status: 'ns' };
-    const ft = sc.status === 'ft', live = !ft, pts = id => (sc.pts && sc.pts[id]) || 0;
-    const pl = id => d.players.find(x => x.i === id);
-    const pn = id => { const o = pl(id); return o ? o.n : '؟'; };
-    const per = {};
+    const sd = S.stats[f.id], d = S.fxdocs[f.id], per = {};
     roster.forEach(uid => {
       const p = sd.users[uid], ids = p ? p.ids : [];
       if (!ids.length) { per[uid] = { none: true, miss: [1, 2, 3, 4] }; return; }
       if (p.chip === 'free_pos') { per[uid] = { none: false, miss: Array(Math.max(0, 4 - ids.length)).fill(0) }; return; }
-      const have = new Set(ids.map(id => (pl(id) || {}).p));
+      const have = new Set(ids.map(id => (d.players.find(x => x.i === id) || {}).p));
       per[uid] = { none: false, miss: [1, 2, 3, 4].filter(pos => !have.has(pos)) };
     });
-    const played = roster.filter(u => !per[u].none);
     const label = pos => POS[pos] || 'لاعب (أي مركز)';
     const notesFor = uids => { const o = {}; uids.forEach(u => { o[u] = per[u].miss.map(p => POS[p] || 'لاعب').join('، '); }); return o; };
-    const byPos = [1, 2, 3, 4, 0].map(pos => ({ pos, uids: played.filter(u => per[u].miss.includes(pos)) })).filter(x => x.uids.length);
-    const grp = n => played.filter(u => per[u].miss.length === n);
+    const byPos = [1, 2, 3, 4, 0].map(pos => ({ pos, uids: roster.filter(u => !per[u].none && per[u].miss.includes(pos)) })).filter(x => x.uids.length);
+    const grp = n => roster.filter(u => !per[u].none && per[u].miss.length === n);
     const none = roster.filter(u => per[u].none), g2 = grp(2), g3 = grp(3);
-    const K = x => x + f.id;
-
-    /* اللعيبة: مصاب/موقوف، دكة، سالب */
-    const inj = {}, bench = {}, neg = {};
-    played.forEach(u => {
-      const ids = sd.users[u].ids;
-      if (sd.flags) { const l = ids.filter(id => sd.flags[id]).map(id => pn(id) + ' (' + FLAG_N[sd.flags[id]] + ')'); if (l.length) inj[u] = l.join('، '); }
-      if (ft && sc.st && Object.keys(sc.st).length) { const l = ids.filter(id => sc.st[id] !== 1 && pts(id) === 0).map(pn); if (l.length) bench[u] = l.join('، '); }
-      const ng = ids.filter(id => pts(id) < 0).map(id => pn(id) + ' ' + N(pts(id))); if (ng.length) neg[u] = ng.join('، ');
-    });
-
-    /* الكابتن: فاشل، وغلط (فيه لاعب في تشكيلته جاب أكتر) */
-    const badCap = {}, wrongCap = {};
-    played.forEach(u => {
-      const it = eff[u][f.id]; if (!it || it.invalid || it.p.cap == null) return;
-      const cp = pts(it.p.cap);
-      if (cp <= CARE.badCap) badCap[u] = pn(it.p.cap) + ' جاب ' + N(cp);
-      const best = it.p.ids.reduce((b, id) => pts(id) > pts(b) ? id : b, it.p.cap);
-      if (pts(best) > cp) wrongCap[u] = 'كبّن ' + pn(it.p.cap) + ' بدل ' + pn(best) + ' · خسر ' + N((pts(best) - cp) * (CAP_MULT - 1));
-    });
-
-    /* هلقط رزقي: بونص ضعيف، والفريق الغلط */
-    const weak = {}, wrongTeam = {};
-    if (ft) played.forEach(u => {
-      const it = eff[u][f.id]; if (!it || it.invalid || it.p.chip !== 'steal' || it.p.team == null) return;
-      const topOf = tid => Math.max(0, ...d.players.filter(x => x.t === tid).map(x => pts(x.i)));
-      const mine = topOf(it.p.team), other = it.p.team === d.h.id ? d.a : d.h, theirs = topOf(other.id);
-      if (mine <= CARE.weakSteal) weak[u] = 'البونص ' + N(mine);
-      if (theirs > mine) wrongTeam[u] = 'كان ' + teamName(other) + ' هيجيب ' + N(theirs) + ' بدل ' + N(mine) + ' · خسر ' + N(theirs - mine);
-    });
-
-    /* قاع الماتش، والنجم اللي محدش شافه */
-    const tot = {}; played.forEach(u => { const it = eff[u][f.id]; tot[u] = it ? it.c.total : 0; });
-    const vals = [...new Set(Object.values(tot))].sort((a, b) => a - b);
-    /* أقل واحد أو اتنين: لو الأقل لوحده بنضيف اللي بعده، ولو كله نفس النقط مفيش قاع */
-    let bottom = [];
-    if (vals.length > 1) { bottom = played.filter(u => tot[u] === vals[0]); if (bottom.length === 1 && vals.length > 2) bottom = played.filter(u => tot[u] <= vals[1]); }
-    const bottomNotes = {}; bottom.forEach(u => { bottomNotes[u] = N(tot[u]) + ' نقطة'; });
-    const top = Math.max(0, ...d.players.map(x => pts(x.i)));
-    const stars = top > 0 ? d.players.filter(x => pts(x.i) === top) : [];
-    const missedStar = stars.length ? played.filter(u => !stars.some(x => sd.users[u].ids.includes(x.i))) : [];
-    const starName = stars.map(x => x.n).join(' و');
-
-    const ks = o => Object.keys(o);
-    const body = [
-      group('التشكيلة', [
-        ...byPos.map(x => row(K('cp' + x.pos + ':'), 'نسوا ' + label(x.pos), x.uids)),
-        g2.length ? row(K('c2'), 'نسوا مركزين', g2, notesFor(g2)) : '',
-        g3.length ? row(K('c3'), 'نسوا ٣ مراكز', g3, notesFor(g3)) : '',
-        none.length ? row(K('c4'), 'ما اختاروش خالص', none) : ''
-      ]),
-      group('اللعيبة', [
-        ks(inj).length ? row(K('ci'), 'اختاروا لاعب مصاب أو موقوف', ks(inj), inj) : '',
-        ks(bench).length ? row(K('cb'), 'لعيبة قعدوا دكة وجابوا صفر', ks(bench), bench) : '',
-        ks(neg).length ? row(K('cn'), 'لاعب جاب سالب', ks(neg), neg, live) : ''
-      ]),
-      group('الكابتن', [
-        ks(badCap).length ? row(K('cf'), 'كابتن فاشل (' + N(CARE.badCap) + ' نقط أو أقل)', ks(badCap), badCap, live) : '',
-        ks(wrongCap).length ? row(K('cw'), 'كبّن غلط', ks(wrongCap), wrongCap, live) : ''
-      ]),
-      group('هلقط رزقي', [
-        ks(weak).length ? row(K('sw'), 'البونص كان ضعيف', ks(weak), weak) : '',
-        ks(wrongTeam).length ? row(K('st'), 'لقط من الفريق الغلط', ks(wrongTeam), wrongTeam) : ''
-      ]),
-      group('النتيجة', [
-        bottom.length ? row(K('bt'), 'قاع الماتش', bottom, bottomNotes, live) : '',
-        missedStar.length ? row(K('ms'), 'النجم اللي محدش شافه: ' + esc(starName) + ' (' + N(top) + ')', missedStar, null, live) : ''
-      ])
-    ].join('');
-    html += `<div class="k"><div class="r j"><b>${esc(fxTitle(f))}</b><span class="m">${ft ? 'انتهى' : 'شغال'}</span></div>${body || '<div class="m mt">الكل تمام في الماتش ده ✓</div>'}${!ft ? '<div class="m mt">الدكة وهلقط رزقي بيظهروا بعد نهاية الماتش.</div>' : ''}</div>`;
+    const rows = [
+      ...byPos.map(x => row('cp' + f.id + ':' + x.pos, 'نسوا ' + label(x.pos), x.uids)),
+      g2.length ? row('c2' + f.id, 'نسوا مركزين', g2, notesFor(g2)) : '',
+      g3.length ? row('c3' + f.id, 'نسوا ٣ مراكز', g3, notesFor(g3)) : '',
+      none.length ? row('c4' + f.id, 'ما اختاروش خالص', none) : ''
+    ].filter(Boolean);
+    html += `<div class="k"><b>${esc(fxTitle(f))}</b>${rows.length ? rows.join('') : '<div class="m mt">الكل كمّل تشكيلته ✓</div>'}</div>`;
   });
   if (!fxs.length) html += '<div class="k ctr">لسه مفيش إحصائيات جاهزة في النطاق ده.</div>';
-
-  /* نسوا الكابتن: لكل يوم ماتشاته كلها بدأت */
-  const capRows = [...new Set(fxs.map(f => dayKey(koOf(f))))].sort().map(dk => {
-    const dayAll = gwFixtures(S.gw).filter(f => koOf(f) && dayKey(koOf(f)) === dk);
-    const started = dayAll.every(f => allFx.some(x => String(x.id) === String(f.id)));
-    const label = 'يوم ' + fmtDay(Date.parse(dk + 'T12:00:00Z'));
-    if (!started) return `<div class="m" style="padding:8px 0;border-top:1px solid rgba(255,255,255,.18)">${esc(label)}: بيظهر بعد ما كل ماتشات اليوم تبدأ.</div>`;
-    const forgot = roster.filter(u => {
-      const had = dayAll.some(f => S.stats[f.id] && S.stats[f.id].users[u] && S.stats[f.id].users[u].ids.length);
-      const cap = dayAll.some(f => S.stats[f.id] && S.stats[f.id].users[u] && S.stats[f.id].users[u].cap != null);
-      return had && !cap;
-    });
-    return forgot.length ? row('cc' + dk, esc(label), forgot) : `<div class="m" style="padding:8px 0;border-top:1px solid rgba(255,255,255,.18)">${esc(label)}: الكل اختار كابتن ✓</div>`;
-  });
-  if (capRows.length) html += `<div class="k"><b>نسوا الكابتن</b>${capRows.join('')}</div>`;
-
   /* الخواص المنسية: بتظهر في آخر الجولة */
   const gwAll = gwFixtures(S.gw), done = gwAll.length > 0 && gwAll.every(f => koOf(f) && Date.now() > koOf(f) + END_AFTER);
   if (!done) html += '<div class="k"><b>الخواص المنسية</b><div class="m mt">بتظهر في آخر الجولة، بعد ما كل الماتشات تخلص.</div></div>';
   else {
     /* بنعدّ الخواص اللي اتحسبت فعلاً (مثلاً هلقط رزقي من غير فريق تعتبر منسية) */
-    const used = {};
-    roster.forEach(u => { used[u] = new Set(Object.values(eff[u]).filter(it => it.p.chip && !it.invalid).map(it => it.p.chip)); });
+    const used = {}, all = startedFx(S.gw);
+    roster.forEach(u => { used[u] = new Set(effPicks(u, all).filter(it => it.p.chip && !it.invalid).map(it => it.p.chip)); });
     const z = roster.filter(u => used[u].size === 0), o1 = roster.filter(u => used[u].size === 1);
     html += `<div class="k"><b>الخواص المنسية في الجولة ${N(S.gw)}</b>${z.length ? row('cz', 'نسوا الخاصيتين', z) : ''}${o1.length ? row('co', 'نسوا خاصية واحدة', o1) : ''}${!z.length && !o1.length ? '<div class="m mt">الكل استخدم خاصيتين ✓</div>' : ''}</div>`;
   }
@@ -1447,8 +1300,6 @@ function vAccount() {
     ${S.editName ? `<form class="k" data-form="rename" style="display:flex;flex-direction:column;gap:10px"><label class="m" for="u2">اسم المستخدم الجديد</label><input id="u2" class="in" name="u" maxlength="24" autocomplete="off" data-in="uname2" value="${esc(S.profile.username)}" required><div id="uhint2" class="m">أي اسم تحبه، بس مينفعش يكون شبه اسم موجود.</div><div class="r"><button class="bt on g" type="submit">حفظ</button><button class="bt g" type="button" data-act="renameCancel">إلغاء</button></div></form>` : '<button class="bt" data-act="renameOpen">تغيير اسم المستخدم</button>'}
     <div style="display:flex;gap:8px"><div class="k ctr g"><div class="d" style="font-size:26px">${me ? N(me.pts) : '—'}</div><div class="m">إجمالي النقط</div></div><div class="k ctr g"><div class="d" style="font-size:26px">${me ? N(me.rank) : '—'}</div><div class="m">المركز${rows.length ? ' من ' + N(rows.length) : ''}</div></div></div>
     <div class="k"><div class="r j"><div class="g"><b>تنبيهات الماتشات</b><div class="m">${S.fcm && S.fcm.on ? 'مفعّلة: هنبعتلك قبل الماتش بحوالي ساعة لو تشكيلتك ناقصة.' : 'فعّلها علشان يوصلك تنبيه قبل الماتش بساعة لو تشكيلتك ناقصة.'}</div></div><button class="bt ${S.fcm && S.fcm.on ? '' : 'on'}" data-act="push">${S.fcm && S.fcm.on ? 'إيقاف' : 'تفعيل'}</button></div>${isIOS() && !isStandalone() ? '<div class="m warn mt">على الآيفون لازم تضيف التطبيق للشاشة الرئيسية الأول.</div>' : ''}</div>
-    <div class="k"><div class="r j"><div class="g"><b>أصوات الأزرار</b><div class="m">صوت هادي مع كل ضغطة، وصوت الدخول.</div></div><button class="sw ${prefOn('snd') ? 'on' : ''}" data-act="psnd" role="switch" aria-checked="${prefOn('snd')}" aria-label="أصوات الأزرار"></button></div>
-      ${isStandalone() ? '' : `<div class="r j mt" style="padding-top:10px;border-top:1px solid rgba(255,255,255,.18)"><div class="g"><b>ملء الشاشة</b><div class="m">${fsSupported() ? 'يخفي شريط المتصفح أول ما تدوس على الشاشة.' : 'المتصفح ده مش بيدعمه. ضيف التطبيق للشاشة الرئيسية وهيفتح على الشاشة كلها.'}</div></div>${fsSupported() ? `<button class="sw ${prefOn('fs') ? 'on' : ''}" data-act="pfs" role="switch" aria-checked="${prefOn('fs')}" aria-label="ملء الشاشة"></button>` : ''}</div>`}</div>
     ${S.admin ? '<button class="bt" data-act="admin">لوحة الإدارة</button>' : ''}
     <button class="bt red" data-act="logout" style="margin-top:auto">تسجيل الخروج</button></div>`;
 }
@@ -1488,7 +1339,7 @@ function vAdmin() {
 function adminRows() {
   const q = S.uq.trim().toLowerCase();
   const list = S.users.filter(u => !q || (u.username || '').toLowerCase().includes(q)).sort((a, b) => byName(a.username || '', b.username || ''));
-  return list.map(u => `<div class="k r ${u.banned ? 'dz' : ''}">${avatar(u.photo, u.username)}<div class="g"><div class="nm">${esc(u.username)}</div><div class="sub">${u.createdAt ? 'من ' + fmtDay(tsMs(u.createdAt)) : ''}</div>${u.invite && S.invites[u.invite] && S.invites[u.invite].kind === 'test' ? `<div class="r" style="gap:6px;margin-top:3px"><span class="pl ${hasAccess(S.invites[u.invite]) ? '' : 'bad'}">${hasAccess(S.invites[u.invite]) ? 'تجربة' : 'تجربته خلصت'}</span><button class="lnk" style="font-size:12px;padding:2px 0" data-act="keep" data-uid="${esc(u.id)}">ثبّته لاعب دايم</button></div>` : ''}${u.photo && u.photo.startsWith('data:') ? `<button class="lnk" style="font-size:12px;padding:2px 0" data-act="rmphoto" data-uid="${esc(u.id)}">مسح الصورة</button>` : ''}</div><span class="pl ${u.banned ? 'bad' : 'ok'}">${u.banned ? 'محظور' : 'نشط'}</span><button class="bt ${u.banned ? '' : 'red'}" style="height:36px;padding:0 12px" data-act="ban" data-uid="${esc(u.id)}">${u.banned ? 'فك الحظر' : 'حظر'}</button></div>`).join('') || '<div class="k ctr">مفيش نتايج.</div>';
+  return list.map(u => `<div class="k r ${u.banned ? 'dz' : ''}">${avatar(u.photo, u.username)}<div class="g"><div class="nm">${esc(u.username)}</div><div class="sub">${u.createdAt ? 'من ' + fmtDay(tsMs(u.createdAt)) : ''}</div>${u.invite && S.invites[u.invite] && S.invites[u.invite].kind === 'test' ? `<div class="r" style="gap:6px;margin-top:3px"><span class="pl ${hasAccess(S.invites[u.invite]) ? '' : 'bad'}">${hasAccess(S.invites[u.invite]) ? 'تجربة' : 'تجربته خلصت'}</span><button class="lnk" style="font-size:12px;padding:2px 0" data-act="keep" data-uid="${esc(u.id)}">ثبّته لاعب دايم</button></div>` : ''}${u.photo ? `<button class="lnk" style="font-size:12px;padding:2px 0" data-act="rmphoto" data-uid="${esc(u.id)}">مسح الصورة</button>` : ''}</div><span class="pl ${u.banned ? 'bad' : 'ok'}">${u.banned ? 'محظور' : 'نشط'}</span><button class="bt ${u.banned ? '' : 'red'}" style="height:36px;padding:0 12px" data-act="ban" data-uid="${esc(u.id)}">${u.banned ? 'فك الحظر' : 'حظر'}</button></div>`).join('') || '<div class="k ctr">مفيش نتايج.</div>';
 }
 
 /* ───────── الأحداث ───────── */
@@ -1526,12 +1377,6 @@ async function setInvite(i, patch, msg) {
   render();
 }
 const ACTIONS = {
-  psnd() { setPref('snd', !prefOn('snd')); if (prefOn('snd')) { loadSound('click'); loadSound('intro'); clickSound(); } render(); },
-  pfs() {
-    const on = !prefOn('fs'); setPref('fs', on);
-    if (on) goFullscreen(true); else if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
-    render();
-  },
   async google() {
     try { await signInWithPopup(auth, new GoogleAuthProvider()); }
     catch (e) { if (!['auth/popup-closed-by-user', 'auth/cancelled-popup-request'].includes(e.code)) toast(authMsg(e)); }
@@ -1633,8 +1478,8 @@ const ACTIONS = {
   sday(el) { S.st.kind = 'day'; S.st.day = el.dataset.k; refreshStats(); },
   async stab(el) {
     S.st.tab = el.dataset.k; S.st.q = '';
-    if (S.st.tab === 'care') { keepY = window.scrollY; S.st.loading = true; render(); await loadStatsScope(); S.st.loading = false; }
-    render(); keepY = 0;
+    if (S.st.tab === 'care') { S.st.loading = true; render(); await loadStatsScope(); S.st.loading = false; }
+    render();
   },
   ssort(el) { S.st.sort = el.dataset.k; renderStatsBody(); },
   udet(el) { openUser(el.dataset.uid, el.dataset.mode || 'gw', el.dataset.fid); },
@@ -1717,8 +1562,9 @@ const ACTIONS = {
   async admin() {
     S.view = 'admin'; S.uq = ''; render();
     try {
-      const [s, iv] = await Promise.all([getDocs(collection(db, 'users')), getDocs(collection(db, 'invites'))]);
-      S.users = s.docs.map(d => ({ id: d.id, ...d.data() }));
+      const [s, iv, mb] = await Promise.all([getDocs(collection(db, 'users')), getDocs(collection(db, 'invites')), getDocs(collection(db, 'members'))]);
+      const mem = {}; mb.docs.forEach(d => { mem[d.id] = d.data(); });
+      S.users = s.docs.map(d => ({ id: d.id, ...d.data(), ...(mem[d.id] ? { invite: mem[d.id].invite || null, inMembers: true } : {}) }));
       S.invites = {}; iv.docs.forEach(d => { S.invites[d.id] = { id: d.id, ...d.data() }; });
     }
     catch (e) { console.error(e); toast('مقدرتش أحمّل المستخدمين'); }
@@ -1758,7 +1604,7 @@ const ACTIONS = {
   async keep(el) {
     const u = S.users.find(x => x.id === el.dataset.uid); if (!u) return;
     if (!confirm('تثبّت ' + u.username + ' لاعب دايم؟ مش هيتأثر بنهاية التجربة.')) return;
-    try { await updateDoc(doc(db, 'users', u.id), { invite: null }); u.invite = null; S.namesAt = 0; toast('اتثبّت ✓'); }
+    try { await updateDoc(doc(db, u.inMembers ? 'members' : 'users', u.id), { invite: null }); u.invite = null; S.namesAt = 0; toast('اتثبّت ✓'); }
     catch (e) { toast('مقدرتش: ' + (e.code || e.message)); }
     render();
   },
@@ -1809,8 +1655,11 @@ const FORMS = {
       const t = await getDoc(doc(db, 'usernames', key));
       if (t.exists()) return toast('الاسم ده مستخدم أو شبه اسم تاني، اختار اسم مختلف');
       const b = writeBatch(db);
+      /* صورة جوجل بس لو رابطها بالشكل اللي الـ rules بتقبله */
+      const gp = S.user.photoURL && /^https:\/\/lh[0-9]\.googleusercontent\.com\/[A-Za-z0-9_=\/.~-]+$/.test(S.user.photoURL) && S.user.photoURL.length < 60000 ? S.user.photoURL : null;
+      b.set(doc(db, 'members', S.user.uid), { invite: code });
       b.set(doc(db, 'usernames', key), { uid: S.user.uid });
-      b.set(doc(db, 'users', S.user.uid), { username: name, usernameLower: key, photo: S.user.photoURL || null, banned: false, invite: code, createdAt: serverTimestamp() });
+      b.set(doc(db, 'users', S.user.uid), { username: name, usernameLower: key, photo: gp, banned: false, createdAt: serverTimestamp() });
       await b.commit();
       S.view = 'loading'; render();
       await bootUser();
@@ -1858,145 +1707,6 @@ onAuthStateChanged(auth, async u => {
   render();
 });
 setInterval(() => { if (S.view === 'round' && lockSig() !== lastSig) render(); }, 30000);
-
-/* ───────── الإعدادات المحلية (على الجهاز ده بس) ───────── */
-const PREF_DEF = { snd: true, fs: true };
-const prefOn = k => { try { const v = localStorage.getItem('fd_' + k); return v == null ? PREF_DEF[k] : v === '1'; } catch (e) { return PREF_DEF[k]; } };
-const setPref = (k, on) => { try { localStorage.setItem('fd_' + k, on ? '1' : '0'); } catch (e) { /* مش مهم */ } };
-
-/* ───────── الأصوات (متولّدة بالكود، من غير ملفات) ───────── */
-let actx = null;
-function audio() {
-  try {
-    if (!actx) actx = new (window.AudioContext || window.webkitAudioContext)();
-    if (actx.state === 'suspended') actx.resume().catch(() => {});
-    return actx;
-  } catch (e) { return null; }
-}
-/* نغمة واحدة ناعمة: بتطلع وتختفي بسرعة من غير "طقّة" */
-function tone(ctx, out, { f, f2, t = 0, d = .12, g = .1, type = 'sine' }) {
-  const o = ctx.createOscillator(), v = ctx.createGain(), at = ctx.currentTime + t;
-  o.type = type; o.frequency.setValueAtTime(f, at);
-  if (f2) o.frequency.exponentialRampToValueAtTime(f2, at + d);
-  v.gain.setValueAtTime(0.0001, at);
-  v.gain.exponentialRampToValueAtTime(g, at + 0.006);
-  v.gain.exponentialRampToValueAtTime(0.0001, at + d);
-  o.connect(v); v.connect(out); o.start(at); o.stop(at + d + 0.02);
-  return o;
-}
-/* أصوات من لينك (SOUND_LINKS فوق). بنحمّلها مرة واحدة ونشغّلها فوراً من الذاكرة.
-   لو الموقع اللي عليه الملف مش سامح بالتحميل المباشر (CORS)، بنشغّله بطريقة تانية (Audio).
-   ولو اللينك فاضي أو باظ، بيشتغل الصوت المتولّد بالكود. */
-const sndBuf = {}, sndEl = {};
-async function loadSound(k) {
-  const L = SOUND_LINKS[k]; if (!L || !L.url || sndBuf[k] !== undefined) return;
-  sndBuf[k] = null;
-  const ctx = audio();
-  try {
-    if (!ctx) throw 0;
-    const r = await fetch(L.url, { mode: 'cors', cache: 'force-cache' });
-    if (!r.ok) throw 0;
-    const data = await r.arrayBuffer();
-    sndBuf[k] = await new Promise((res, rej) => ctx.decodeAudioData(data, res, rej));
-  } catch (e) {
-    const a = new Audio(); a.preload = 'auto'; a.src = L.url;
-    a.addEventListener('canplaythrough', () => { sndEl[k] = a; }, { once: true });
-    a.addEventListener('error', () => { console.warn('مقدرتش أحمّل صوت ' + k + ' من: ' + L.url); }, { once: true });
-    a.load();
-  }
-}
-function playFile(k) {
-  const L = SOUND_LINKS[k], ctx = audio(), b = sndBuf[k];
-  if (ctx && b) {
-    const src = ctx.createBufferSource(), g = ctx.createGain();
-    src.buffer = b; g.gain.value = L.vol;
-    src.connect(g); g.connect(ctx.destination); src.start();
-    return true;
-  }
-  if (sndEl[k]) {
-    const a = sndEl[k].cloneNode(); a.volume = Math.min(1, L.vol);
-    a.play().catch(() => {});
-    return true;
-  }
-  return false;
-}
-/* صوت الضغطة: "توك" خفيف وواطي */
-function clickSound() {
-  if (!prefOn('snd')) return;
-  const ctx = audio(); if (!ctx || ctx.state !== 'running') return;
-  if (playFile('click')) return;
-  const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 1800; lp.connect(ctx.destination);
-  tone(ctx, lp, { f: 760, f2: 430, d: .075, g: .05 });
-  tone(ctx, lp, { f: 1520, f2: 900, d: .04, g: .012 });
-}
-/* صوت الدخول: خبطة كورة، صفارة حكم قصيرة، وأكورد بيعلى مع همهمة جمهور */
-function introSound() {
-  if (!prefOn('snd')) return;
-  const ctx = audio(); if (!ctx) return;
-  if (playFile('intro')) return;
-  const m = ctx.createGain(); m.gain.value = .55;
-  const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 5200;
-  m.connect(lp); lp.connect(ctx.destination);
-  tone(ctx, m, { f: 150, f2: 45, d: .22, g: .5 });                       // الكورة
-  [[.12, .09], [.26, .16]].forEach(([t, d]) => {                          // الصفارة
-    const o = tone(ctx, m, { f: 2650, t, d, g: .07 });
-    const l = ctx.createOscillator(), lg = ctx.createGain();
-    l.frequency.value = 38; lg.gain.value = 70; l.connect(lg); lg.connect(o.frequency);
-    l.start(ctx.currentTime + t); l.stop(ctx.currentTime + t + d + .02);
-  });
-  [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => tone(ctx, m, { f, t: .5 + i * .085, d: .9 - i * .1, g: .12, type: 'triangle' }));   // الأكورد
-  tone(ctx, m, { f: 261.63, t: .5, d: 1.1, g: .1, type: 'triangle' });
-  const len = 1.4, buf = ctx.createBuffer(1, ctx.sampleRate * len, ctx.sampleRate), ch = buf.getChannelData(0);   // الجمهور
-  for (let i = 0; i < ch.length; i++) ch[i] = Math.random() * 2 - 1;
-  const n = ctx.createBufferSource(), bp = ctx.createBiquadFilter(), ng = ctx.createGain(), at = ctx.currentTime + .45;
-  n.buffer = buf; bp.type = 'bandpass'; bp.frequency.value = 900; bp.Q.value = .7;
-  ng.gain.setValueAtTime(0.0001, at); ng.gain.exponentialRampToValueAtTime(.09, at + .5); ng.gain.exponentialRampToValueAtTime(0.0001, at + len - .05);
-  n.connect(bp); bp.connect(ng); ng.connect(m); n.start(at); n.stop(at + len);
-}
-document.addEventListener('click', e => {
-  if (e.target.closest('#intro')) return;
-  const el = e.target.closest('button,[data-act],label.bt,a');
-  if (el && !el.disabled) clickSound();
-}, true);
-
-/* ───────── ملء الشاشة ───────── */
-const fsSupported = () => !!(document.fullscreenEnabled && document.documentElement.requestFullscreen);
-let fsTried = false;
-function goFullscreen(force) {
-  if (!prefOn('fs') || isStandalone() || !fsSupported() || document.fullscreenElement) return;
-  if (fsTried && !force) return;
-  fsTried = true;
-  document.documentElement.requestFullscreen({ navigationUI: 'hide' }).catch(() => {});
-}
-/* المتصفح بيسمح بملء الشاشة بعد ضغطة بس، فبنجربه مع أول ضغطة */
-document.addEventListener('pointerup', () => goFullscreen(false), { once: true });
-
-/* ───────── شاشة الدخول ───────── */
-function showIntro() {
-  const el = document.createElement('div');
-  el.id = 'intro'; el.setAttribute('role', 'button'); el.setAttribute('aria-label', 'ادخل');
-  el.innerHTML = `<div class="il"></div><svg class="ir" viewBox="0 0 250 250" aria-hidden="true"><circle cx="125" cy="125" r="120"/></svg>
-    <div class="iw"></div><div class="ib">${BALL}</div><img class="ilg" src="icon-192.png" alt="">
-    <div class="itx"><div class="itt">الفانتاسي اليومي</div><div class="its">اختار ٤ لاعبين من كل ماتش ونافس واثبتلهم انك التوب</div><div class="igo"><button class="bt on" type="button">يلا ندخل</button></div></div>`;
-  document.body.appendChild(el);
-  let done = false;
-  const go = () => {
-    if (done) return; done = true;
-    goFullscreen(true);
-    if (!played) introSound();
-    el.classList.add('out');
-    setTimeout(() => el.remove(), 550);
-  };
-  /* لو المتصفح سامح بالصوت من غير ضغطة، الشاشة بتكمّل لوحدها. غير كده بيظهر زرار "يلا ندخل" والصوت يشتغل معاه */
-  const ctx = prefOn('snd') ? audio() : null;
-  if (ctx) { loadSound('click'); loadSound('intro'); }
-  const auto = !prefOn('snd') || (ctx && ctx.state === 'running');
-  let played = false;
-  if (auto && prefOn('snd')) setTimeout(() => { if (!done) { played = true; introSound(); } }, 1350);   // مع نزول الكورة
-  setTimeout(() => { if (done) return; if (auto) go(); else el.classList.add('tap'); }, auto ? 2900 : 2300);
-  setTimeout(() => el.addEventListener('click', go), 300);
-}
-showIntro();
 render();
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
 </script>
