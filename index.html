@@ -648,7 +648,7 @@ function renderMatchBody() {
   const chosen = p.ids.map(byId).filter(Boolean);
   const capOff = !locked && capTakenElsewhere(fid);   // الكابتن في ماتش تاني النهارده: مفيش أزرار كابتن هنا
   const btn = (pl, pos, label) => pl
-    ? `<div class="sl fl ${S.pos === pl.p && !locked ? 'act' : ''}" data-act="pos" data-p="${pl.p}" role="button" tabindex="0">${locked || (capOff && p.cap !== pl.i) ? (p.cap === pl.i ? '<span class="c">C</span>' : '') : `<button class="c cs ${p.cap === pl.i ? 'on' : ''}" data-act="cap" data-pid="${pl.i}" aria-label="${p.cap === pl.i ? 'إلغاء الكابتن' : 'اجعل ' + esc(pl.n) + ' كابتن'}">C</button>`}${locked ? '' : `<button class="rm" data-act="rmp" data-pid="${pl.i}" aria-label="شيل ${esc(pl.n)}">×</button>`}${photo(pl)}<span class="nm">${esc(pl.n)}</span><span class="sub">${POS[pl.p]}${locked ? ' · ' + N(sc.pts[pl.i] || 0) : ''}</span></div>`
+    ? `<div class="sl fl ${S.pos === pl.p && !locked ? 'act' : ''}" data-act="pos" data-p="${pl.p}" role="button" tabindex="0">${p.cap !== pl.i ? '' : locked ? '<span class="c">C</span>' : `<button class="c cs on" data-act="cap" data-pid="${pl.i}" aria-label="إلغاء الكابتن">C</button>`}${locked ? '' : `<button class="rm" data-act="rmp" data-pid="${pl.i}" aria-label="شيل ${esc(pl.n)}">×</button>`}${photo(pl)}<span class="nm">${esc(pl.n)}</span><span class="sub">${POS[pl.p]}${locked ? ' · ' + N(sc.pts[pl.i] || 0) : ''}</span></div>`
     : `<button class="sl" data-act="pos" data-p="${pos}"><span>${locked ? '—' : '+'}</span><span>${label}</span></button>`;
   const slots = p.chip === 'free_pos'
     ? [0, 1, 2, 3].map(i => btn(chosen[i], S.pos, 'لاعب ' + N(i + 1)))
