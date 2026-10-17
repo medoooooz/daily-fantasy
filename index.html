@@ -627,7 +627,7 @@ function card(f) {
     <div class="r j"><div class="t">${crest(f.h)}<span>${esc(teamName(f.h))}</span></div>
     <div class="ctr"><div class="tm">${k ? fmtTime(k) : '—'}</div>${status}</div>
     <div class="t">${crest(f.a)}<span>${esc(teamName(f.a))}</span></div></div>
-    <div class="r j m mt"><span>اختياراتك ${N(n)}/٤${S.picks[f.id] && S.picks[f.id].chip ? ' · <b class="warn">' + CHIPS[S.picks[f.id].chip].n + '</b>' : ''}${S.picks[f.id] && S.picks[f.id].cap != null ? ' · <b class="warn">مكبتن هنا</b>' : ''}${stealMissing(f.id) ? ' · <b class="warn">اختار الفريق!</b>' : ''}</span><span>${locked ? 'عرض اختياراتك' : 'اختار لاعبينك'} ‹</span></div>
+    <div class="r j m mt"><span>اختياراتك ${N(n)}/٤${S.picks[f.id] && S.picks[f.id].chip ? ' · <b class="warn">' + CHIPS[S.picks[f.id].chip].n + '</b>' : ''}${S.picks[f.id] && S.picks[f.id].cap != null ? ' · <b class="warn">الكابتن هنا</b>' : ''}${stealMissing(f.id) ? ' · <b class="warn">اختار الفريق!</b>' : ''}</span><span>${locked ? 'عرض اختياراتك' : 'اختار لاعبينك'} ‹</span></div>
   </button>`;
 }
 
@@ -1018,9 +1018,9 @@ const tsn = (fid, p) => { const d = S.fxdocs[fid]; return d && p ? (p.t === d.h.
 const ptsOf = (fid, pid) => { const sc = S.scores[fid]; return (sc && sc.pts && sc.pts[pid]) || 0; };
 
 /* قايمة أسماء (أبجدياً)، وتقدر تحط ملاحظة جنب كل اسم */
-function nameList(uids, notes) {
+function nameList(uids, notes, keepOrder) {
   const me = S.user.uid;
-  return `<div style="display:flex;flex-direction:column;margin-top:8px">${[...uids].sort((a, b) => byName(nm(a), nm(b))).map(u => `<div class="r" style="padding:8px 0;border-top:1px solid rgba(255,255,255,.18)">${avatar(photoOf(u), nm(u), 28)}<span class="g">${esc(nm(u))}${u === me ? ' (أنت)' : ''}</span>${notes && notes[u] ? `<span class="sub">${esc(notes[u])}</span>` : ''}</div>`).join('')}</div>`;
+  return `<div style="display:flex;flex-direction:column;margin-top:8px">${(keepOrder ? [...uids] : [...uids].sort((a, b) => byName(nm(a), nm(b)))).map(u => `<div class="r" style="padding:8px 0;border-top:1px solid rgba(255,255,255,.18)">${avatar(photoOf(u), nm(u), 28)}<span class="g">${esc(nm(u))}${u === me ? ' (أنت)' : ''}</span>${notes && notes[u] ? `<span class="sub">${esc(notes[u])}</span>` : ''}</div>`).join('')}</div>`;
 }
 
 /* حساب نقط اختيار واحد في ماتش */
@@ -1099,7 +1099,7 @@ function plCard(r, kind, mx) {
   const pct = own ? (mx.n ? r.n / mx.n : 0) : (mx.p > 0 ? Math.max(0, r.pts) / mx.p : 0);
   let more = '';
   if (open) {
-    if (kind === 'cap') more = `<div class="m mt">مين كبّنه</div>${nameList(r.users)}`;
+    if (kind === 'cap') more = `<div class="m mt">مين اختاره كابتن</div>${nameList(r.users)}`;
     else {
       const partners = Object.values(S.agg.pairs).filter(x => x.fid === r.fid && (x.a === r.id || x.b === r.id)).sort((a, b) => b.users.length - a.users.length).slice(0, 8);
       more = `<div class="m mt">مين اختاره</div>${nameList(r.users)}${partners.length ? `<div class="m mt">اتاخد مع</div>${partners.map(x => { const o = ppl(r.fid, x.a === r.id ? x.b : x.a); return `<div class="r j" style="padding:6px 0;border-top:1px solid rgba(255,255,255,.18)"><span>${esc(o ? o.n : '؟')}</span><span class="pl">${N(x.users.length)}</span></div>`; }).join('')}` : ''}`;
@@ -1146,14 +1146,15 @@ function searchHtml(A) {
     const partners = Object.values(A.pairs).filter(x => x.fid === fid && (x.a === p.i || x.b === p.i)).sort((a, b) => b.users.length - a.users.length).slice(0, 5);
     const k1 = 'sp' + fid + ':' + p.i, k2 = 'sk' + fid + ':' + p.i;
     const tog = (key, label, users) => `<div data-act="sx" data-k="${key}" style="cursor:pointer;padding:8px 0;border-top:1px solid rgba(255,255,255,.18)"><div class="r j"><span>${label}</span><span class="m">${S.st.ex[key] ? 'إخفاء' : 'الأسماء'}</span></div>${S.st.ex[key] ? nameList(users) : ''}</div>`;
-    return `<div class="k"><div class="r">${photo(p)}<div class="g"><div class="nm">${esc(p.n)} <span class="sub">${esc(tsn(fid, p))}</span></div><div class="sub">اختاره ${N(pk ? pk.users.length : 0)} · كبّنه ${N(cp ? cp.users.length : 0)} · نقاطه ${N(ptsOf(fid, p.i))}</div></div></div>
-      ${pk ? tog(k1, 'مين اختاره', pk.users) : ''}${cp ? tog(k2, 'مين كبّنه', cp.users) : ''}
+    return `<div class="k"><div class="r">${photo(p)}<div class="g"><div class="nm">${esc(p.n)} <span class="sub">${esc(tsn(fid, p))}</span></div><div class="sub">اختاره ${N(pk ? pk.users.length : 0)} · كابتن ${N(cp ? cp.users.length : 0)} · نقاطه ${N(ptsOf(fid, p.i))}</div></div></div>
+      ${pk ? tog(k1, 'مين اختاره', pk.users) : ''}${cp ? tog(k2, 'مين اختاره كابتن', cp.users) : ''}
       ${partners.length ? `<div style="padding:8px 0;border-top:1px solid rgba(255,255,255,.18)"><div class="m">اتاخد معاه</div>${partners.map(x => { const o = ppl(fid, x.a === p.i ? x.b : x.a); return `<div class="r j" style="padding:4px 0"><span>${esc(o ? o.n : '؟')}</span><span class="pl">${N(x.users.length)}</span></div>`; }).join('')}</div>` : ''}</div>`;
   }).join('');
 }
 
 /* العناية المركزة: مين نسي إيه، ومين وقع في إيه */
-const CARE = { badCap: 2, weakSteal: 2 };   // كابتن فاشل: نقطتين أو أقل · هلقط رزقي ضعيف: بونص نقطتين أو أقل
+const CARE = { badCap: 2, weakSteal: 5, wrongTeamMin: 3 };   // كابتن فاشل: نقطتين أو أقل · هلقط رزقي ضعيف: بونص ٥ نقط أو أقل · الفريق الغلط: الفرق ٣ نقط أو أكتر
+const timesAr = c => c === 1 ? 'مرة واحدة' : c === 2 ? 'مرتين' : N(c) + (c <= 10 ? ' مرات' : ' مرة');
 const FLAG_N = { i: 'مصاب', s: 'موقوف', u: 'غير متاح', n: 'غير متاح' };
 function careHtml() {
   const roster = activeIds(), w = scopeWord();
@@ -1163,9 +1164,16 @@ function careHtml() {
   const allFx = startedFx(S.gw), eff = {};
   roster.forEach(u => { eff[u] = {}; effPicks(u, allFx).forEach(it => { eff[u][it.f.id] = it; }); });
   const tmpPill = live => live ? ' <span class="pl" style="font-size:10px">مؤقت</span>' : '';
-  const row = (key, label, uids, notes, live) => `<div data-act="sx" data-k="${key}" style="cursor:pointer;padding:8px 0;border-top:1px solid rgba(255,255,255,.18)"><div class="r j"><span class="g nm" style="font-size:13px">${label}${tmpPill(live)}</span><span class="pl bad">${N(uids.length)}</span></div>${S.st.ex[key] ? nameList(uids, notes) : ''}</div>`;
+  /* hits: كل واحد ظهر في كام سطر غلط (للملخص اللي فوق) */
+  const hits = {}; let counting = true;
+  const capLoss = {}; let capLossLive = false;   // مجموع النقط اللي ضاعت من الكابتن الغلط
+  const rep = {};   // rep[يوم][لاعب][مركز] = عدد الماتشات اللي نسي فيها المركز ده
+  const count = (uids, good) => { if (counting && !good) uids.forEach(u => { hits[u] = (hits[u] || 0) + 1; }); };
+  /* noCount: سطر بيكرر غلطة اتعدت في سطر تاني (زي «نسوا مركزين») */
+  const row = (key, label, uids, notes, live, good, noCount) => (count(uids, good || noCount), '') + `<div data-act="sx" data-k="${key}" style="cursor:pointer;padding:8px 0;border-top:1px solid rgba(255,255,255,.18)"><div class="r j"><span class="g nm" style="font-size:13px">${label}${tmpPill(live)}</span><span class="pl${good ? '' : ' bad'}">${N(uids.length)}</span></div>${S.st.ex[key] ? nameList(uids, notes) : ''}</div>`;
   const group = (title, rows) => { rows = rows.filter(Boolean); return rows.length ? `<div class="m" style="margin-top:10px;font-weight:700;color:#ffd45c">${title}</div>${rows.join('')}` : ''; };
-  let html = `<div class="m">مين نسي إيه ومين وقع في إيه في ${w} (بعد بداية الماتش). اضغط على أي سطر تشوف الأسماء.</div>`;
+  const intro = `<div class="m">مين نسي إيه ومين وقع في إيه في ${w} (بعد بداية الماتش). اضغط على أي سطر تشوف الأسماء.</div>`;
+  let html = '';
 
   fxs.forEach(f => {
     const sd = S.stats[f.id], d = S.fxdocs[f.id], sc = S.scores[f.id] || { pts: {}, st: {}, status: 'ns' };
@@ -1187,6 +1195,8 @@ function careHtml() {
     const grp = n => played.filter(u => per[u].miss.length === n);
     const none = roster.filter(u => per[u].none), g2 = grp(2), g3 = grp(3);
     const K = x => x + f.id;
+    const dk = dayKey(koOf(f)); rep[dk] = rep[dk] || {};
+    played.forEach(u => per[u].miss.filter(pos => pos > 0).forEach(pos => { const r = rep[dk][u] = rep[dk][u] || {}; r[pos] = (r[pos] || 0) + 1; }));
 
     /* اللعيبة: مصاب/موقوف، دكة، سالب */
     const inj = {}, bench = {}, neg = {};
@@ -1204,7 +1214,9 @@ function careHtml() {
       const cp = pts(it.p.cap);
       if (cp <= CARE.badCap) badCap[u] = pn(it.p.cap) + ' جاب ' + N(cp);
       const best = it.p.ids.reduce((b, id) => pts(id) > pts(b) ? id : b, it.p.cap);
-      if (pts(best) > cp) wrongCap[u] = 'كبّن ' + pn(it.p.cap) + ' بدل ' + pn(best) + ' · خسر ' + N((pts(best) - cp) * (CAP_MULT - 1));
+      if (pts(best) > cp) { const loss = (pts(best) - cp) * (CAP_MULT - 1);
+        wrongCap[u] = 'اختار ' + pn(it.p.cap) + ' كابتن بدل ' + pn(best) + ' · خسر ' + N(loss);
+        capLoss[u] = (capLoss[u] || 0) + loss; if (live) capLossLive = true; }
     });
 
     /* هلقط رزقي: بونص ضعيف، والفريق الغلط */
@@ -1214,7 +1226,7 @@ function careHtml() {
       const topOf = tid => Math.max(0, ...d.players.filter(x => x.t === tid).map(x => pts(x.i)));
       const mine = topOf(it.p.team), other = it.p.team === d.h.id ? d.a : d.h, theirs = topOf(other.id);
       if (mine <= CARE.weakSteal) weak[u] = 'البونص ' + N(mine);
-      if (theirs > mine) wrongTeam[u] = 'كان ' + teamName(other) + ' هيجيب ' + N(theirs) + ' بدل ' + N(mine) + ' · خسر ' + N(theirs - mine);
+      if (theirs - mine >= CARE.wrongTeamMin) wrongTeam[u] = 'كان ' + teamName(other) + ' هيجيب ' + N(theirs) + ' بدل ' + N(mine) + ' · خسر ' + N(theirs - mine);
     });
 
     /* قاع الماتش، والنجم اللي محدش شافه */
@@ -1226,15 +1238,16 @@ function careHtml() {
     const bottomNotes = {}; bottom.forEach(u => { bottomNotes[u] = N(tot[u]) + ' نقطة'; });
     const top = Math.max(0, ...d.players.map(x => pts(x.i)));
     const stars = top > 0 ? d.players.filter(x => pts(x.i) === top) : [];
-    const missedStar = stars.length ? played.filter(u => !stars.some(x => sd.users[u].ids.includes(x.i))) : [];
+    const sawStar = stars.length ? played.filter(u => stars.some(x => sd.users[u].ids.includes(x.i))) : [];
     const starName = stars.map(x => x.n).join(' و');
+    const capStar = played.filter(u => { const it = eff[u][f.id]; return it && !it.invalid && it.p.cap != null && stars.some(x => x.i === it.p.cap); });
 
     const ks = o => Object.keys(o);
     const body = [
       group('التشكيلة', [
         ...byPos.map(x => row(K('cp' + x.pos + ':'), 'نسوا ' + label(x.pos), x.uids)),
-        g2.length ? row(K('c2'), 'نسوا مركزين', g2, notesFor(g2)) : '',
-        g3.length ? row(K('c3'), 'نسوا ٣ مراكز', g3, notesFor(g3)) : '',
+        g2.length ? row(K('c2'), 'نسوا مركزين', g2, notesFor(g2), false, false, true) : '',
+        g3.length ? row(K('c3'), 'نسوا ٣ مراكز', g3, notesFor(g3), false, false, true) : '',
         none.length ? row(K('c4'), 'ما اختاروش خالص', none) : ''
       ]),
       group('اللعيبة', [
@@ -1244,15 +1257,16 @@ function careHtml() {
       ]),
       group('الكابتن', [
         ks(badCap).length ? row(K('cf'), 'كابتن فاشل (' + N(CARE.badCap) + ' نقط أو أقل)', ks(badCap), badCap, live) : '',
-        ks(wrongCap).length ? row(K('cw'), 'كبّن غلط', ks(wrongCap), wrongCap, live) : ''
+        ks(wrongCap).length ? row(K('cw'), 'كابتن غلط', ks(wrongCap), wrongCap, live) : ''
       ]),
       group('هلقط رزقي', [
-        ks(weak).length ? row(K('sw'), 'البونص كان ضعيف', ks(weak), weak) : '',
+        ks(weak).length ? row(K('sw'), 'البونص كان ضعيف (' + N(CARE.weakSteal) + ' نقط أو أقل)', ks(weak), weak) : '',
         ks(wrongTeam).length ? row(K('st'), 'لقط من الفريق الغلط', ks(wrongTeam), wrongTeam) : ''
       ]),
       group('النتيجة', [
         bottom.length ? row(K('bt'), 'قاع الماتش', bottom, bottomNotes, live) : '',
-        missedStar.length ? row(K('ms'), 'النجم اللي محدش شافه: ' + esc(starName) + ' (' + N(top) + ')', missedStar, null, live) : ''
+        stars.length ? (sawStar.length ? row(K('ms'), 'شافوا النجم: ' + esc(starName) + ' (' + N(top) + ')', sawStar, null, live, true) : `<div class="m" style="padding:8px 0;border-top:1px solid rgba(255,255,255,.18)">النجم ${esc(starName)} (${N(top)}): محدش شافه</div>`) : '',
+        capStar.length ? row(K('mc'), 'اختاروا النجم كابتن', capStar, null, live, true) : ''
       ])
     ].join('');
     html += `<div class="k"><div class="r j"><b>${esc(fxTitle(f))}</b><span class="m">${ft ? 'انتهى' : 'شغال'}</span></div>${body || '<div class="m mt">الكل تمام في الماتش ده ✓</div>'}${!ft ? '<div class="m mt">الدكة وهلقط رزقي بيظهروا بعد نهاية الماتش.</div>' : ''}</div>`;
@@ -1284,7 +1298,43 @@ function careHtml() {
     const z = roster.filter(u => used[u].size === 0), o1 = roster.filter(u => used[u].size === 1);
     html += `<div class="k"><b>الخواص المنسية في الجولة ${N(S.gw)}</b>${z.length ? row('cz', 'نسوا الخاصيتين', z) : ''}${o1.length ? row('co', 'نسوا خاصية واحدة', o1) : ''}${!z.length && !o1.length ? '<div class="m mt">الكل استخدم خاصيتين ✓</div>' : ''}</div>`;
   }
-  return html;
+
+  /* الكروت اللي جاية بتلخص اللي فوق، فمش بتتعد تاني في الملخص */
+  counting = false;
+
+  /* سطر ترتيب: الأسماء مترتبة من الأكتر للأقل */
+  const rankRow = (key, label, map, fmt, live) => {
+    const uids = Object.keys(map).sort((a, b) => map[b] - map[a] || byName(nm(a), nm(b)));
+    const notes = {}; uids.forEach(u => { notes[u] = fmt(map[u]); });
+    return `<div data-act="sx" data-k="${key}" style="cursor:pointer;padding:8px 0;border-top:1px solid rgba(255,255,255,.18)"><div class="r j"><span class="g nm" style="font-size:13px">${label}${tmpPill(live)}</span><span class="m">${S.st.ex[key] ? 'إخفاء' : 'الأسماء'}</span></div>${S.st.ex[key] ? nameList(uids, notes, true) : ''}</div>`;
+  };
+
+  /* نفس الغلطة اتكررت: نسي نفس المركز في أكتر من ماتش في نفس اليوم */
+  const repRows = Object.keys(rep).sort().map(dk => {
+    const notes = {};
+    Object.entries(rep[dk]).forEach(([u, m]) => {
+      const l = Object.entries(m).filter(([, c]) => c > 1).map(([pos, c]) => POS[pos] + ' ×' + N(c));
+      if (l.length) notes[u] = l.join('، ');
+    });
+    const uids = Object.keys(notes);
+    return uids.length ? row('cr' + dk, 'يوم ' + esc(fmtDay(Date.parse(dk + 'T12:00:00Z'))), uids, notes) : '';
+  }).filter(Boolean);
+  if (repRows.length) html += `<div class="k"><b>نفس الغلطة اتكررت</b><div class="m mt">نسوا نفس المركز في أكتر من ماتش في نفس اليوم.</div>${repRows.join('')}</div>`;
+
+  /* خسارة الكابتن الغلط على مدار النطاق كله */
+  if (Object.keys(capLoss).length) {
+    const totalLoss = Object.values(capLoss).reduce((a, b) => a + b, 0);
+    html += `<div class="k"><div class="r j"><b>خسارة الكابتن الغلط في ${w}</b><span class="pl bad">${N(totalLoss)}</span></div><div class="m mt">مجموع النقط اللي ضاعت عشان الكابتن ماكانش أحسن لاعب في التشكيلة.</div>${rankRow('closs', 'مين خسر أكتر', capLoss, v => 'خسر ' + N(v) + ' نقطة', capLossLive)}</div>`;
+  }
+
+  /* الملخص: زبون العناية */
+  let summary = '';
+  const hitIds = Object.keys(hits);
+  if (hitIds.length) {
+    const mx = Math.max(...Object.values(hits)), kings = hitIds.filter(u => hits[u] === mx);
+    summary = `<div class="k"><div class="r j"><b>زبون العناية في ${w}</b><span class="pl bad">${timesAr(mx)}</span></div><div class="nm mt">${kings.map(u => esc(nm(u)) + (u === S.user.uid ? ' (أنت)' : '')).join('، ')}</div>${rankRow('csum', 'ترتيب الكل', hits, timesAr)}</div>`;
+  }
+  return intro + summary + html;
 }
 
 function oppRows(others) {
