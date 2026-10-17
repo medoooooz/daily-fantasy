@@ -1938,17 +1938,17 @@ const liveOf = fid => (S.live && S.live[String(fid)]) || null;
 const liveSc = (r, sm) => `<span class="lsc${sm ? ' sm' : ''}"><b>${N(r[0])}</b><i>-</i><b>${N(r[1])}</b></span>`;
 function cardMid(f, k, locked, status) {
   const lv = k && locked ? liveOf(f.id) : null;
-  if (lv && lv.s === 'ft') return `${liveSc(lv.r)}<span class="pl">انتهت</span>`;
+  if (lv && lv.s === 'ft') return `<div class="tm">${liveSc(lv.r)}</div><span class="pl">انتهت</span>`;
   if (lv || (k && locked && Date.now() <= k + END_AFTER)) {
     const r = lv ? lv.r : [0, 0];
-    return `${liveSc(r)}<span class="pl lv"><i class="ldot"></i>مباشر${lv && lv.m ? ' ' + N(lv.m) + "'" : ''}</span>`;
+    return `<div class="tm">${liveSc(r)}</div><span class="pl lv"><i class="ldot"></i>مباشر${lv && lv.m ? ' ' + N(lv.m) + "'" : ''}</span>`;
   }
   return `<div class="tm">${k ? fmtTime(k) : '—'}</div>${status}`;
 }
 function matchSub(fid) {
   const lv = liveOf(fid);
   if (!lv) return 'الاختيار مقفول، الماتش بدأ';
-  return lv.s === 'ft' ? `انتهت ${liveSc(lv.r, 1)}` : `<i class="ldot" style="color:#ff5a5f"></i>مباشر${lv.m ? ' ' + N(lv.m) + "'" : ''} · ${liveSc(lv.r, 1)}`;
+  return lv.s === 'ft' ? `<div>${liveSc(lv.r, 1)}</div><div>انتهت</div>` : `<div>${liveSc(lv.r, 1)}</div><div><i class="ldot" style="color:#ff5a5f"></i>مباشر${lv.m ? ' ' + N(lv.m) + "'" : ''}</div>`;
 }
 function liveRedraw() {
   if (S.view === 'round' || (S.view === 'pred' && !(S.pr && (S.pr.sheet || S.pr.dt || S.pr.info)))) render();
