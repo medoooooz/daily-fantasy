@@ -176,8 +176,8 @@ const VAPID_KEY = 'BJCvYHRpVeKdXwapyT7aKp0nMnw5Y7ZhTkIv8Dips-sYm9lXHEw96ff3ZloT2
 /* ───── الأصوات: حط لينك الملف بين العلامتين '' (لينك مباشر لملف mp3 أو wav أو ogg) ─────
    لو سبته فاضي بيشتغل الصوت المتولّد بالكود. vol من 0 (صامت) لـ 1 (أعلى صوت). */
 const SOUND_LINKS = {
-  click: { url: '', vol: 0.35 },   // صوت الضغط على الأزرار (يفضّل أقل من نص ثانية)
-  intro: { url: '', vol: 0.8 }     // صوت شاشة الدخول
+  click: { url: 'https://cdn.pixabay.com/download/audio/2024/01/16/audio_fb4eef1715.mp3', vol: 0.35 },   // صوت الضغط على الأزرار (يفضّل أقل من نص ثانية)
+  intro: { url: 'https://cdn.pixabay.com/download/audio/2025/08/11/audio_6f1914dab5.mp3', vol: 0.8 }     // صوت شاشة الدخول
 };
 const TZ = 'Africa/Cairo';   // لازم تكون زي TZ في Code.gs
 const CAP_MULT = 2;          // لازم يكون زي CAPTAIN_MULT في Code.gs
@@ -188,7 +188,7 @@ const CHIPS = {
   steal: { n: 'هلقط رزقي', d: 'اختار فريق، وبعد نهاية الماتش بتاخد نقط أعلى لاعب فيه كبونص فوق اختياراتك.' }
 };
 const MAX_CHIPS = 2;   // لازم يكون زي MAX_CHIPS_PER_GW في Code.gs
-const AR = { 'Arsenal':'أرسنال','Aston Villa':'أستون فيلا','Bournemouth':'بورنموث','Brentford':'برينتفورد','Brighton':'برايتون','Burnley':'بيرنلي','Chelsea':'تشيلسي','Crystal Palace':'كريستال بالاس','Everton':'إيفرتون','Fulham':'فولهام','Leeds':'ليدز','Liverpool':'ليفربول','Man City':'مان سيتي','Man Utd':'مان يونايتد','Newcastle':'نيوكاسل',"Nott'm Forest":'نوتنجهام فورست','Sunderland':'سندرلاند','Spurs':'توتنهام','West Ham':'وست هام','Wolves':'وولفرهامبتون','Leicester':'ليستر','Ipswich':'إبسويتش','Southampton':'ساوثهامبتون','Coventry':'كوفنتري','Hull':'هال سيتي' };
+const AR = { 'Arsenal':'أرسنال','Aston Villa':'أستون فيلا','Bournemouth':'بورنموث','Brentford':'برينتفورد','Brighton':'برايتون','Burnley':'بيرنلي','Chelsea':'تشيلسي','Crystal Palace':'كريستال بالاس','Everton':'إيفرتون','Fulham':'فولهام','Leeds':'ليدز','Liverpool':'ليفربول','Man City':'مان سيتي','Man Utd':'مان يونايتد','Newcastle':'نيوكاسل',"Nott'm Forest":'نوتنجهام فورست','Sunderland':'سندرلاند','Spurs':'توتنهام','West Ham':'وست هام','Wolves':'وولفرهامبتون','Leicester':'ليستر','Ipswich Town':'إبسويتش','Southampton':'ساوثهامبتون','Coventry City':'كوفنتري','Hull City':'هال سيتي' };
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
@@ -515,11 +515,28 @@ function render() {
   const nonav = ['loading', 'login', 'setup', 'banned', 'expired', 'error', 'match', 'udet'].includes(v);
   root.className = nonav ? 'nonav' : '';
   const views = { loading: vLoading, login: vLogin, setup: vSetup, banned: vBanned, expired: vExpired, error: vError, round: vRound, match: vMatch, board: vBoard, stats: vStats, udet: vUser, tour: vTourList, tdet: vTourDetail, tnew: vTourNew, account: vAccount, admin: vAdmin };
+  /* إعادة الرسم في نفس الشاشة: بنحافظ على مكان سحب صفوف الأزرار (التبويبات/الأيام) ومكان الصفحة */
+  const same = v === lastView, rows = same ? [...root.querySelectorAll('.tg')].map(t => t.scrollLeft) : [], y = window.scrollY;
   root.innerHTML = (views[v] || vLoading)() + (nonav ? '' : nav());
   if (v === 'match') renderMatchBody();
   if (v === 'stats') renderStatsBody();
+  root.querySelectorAll('.tg').forEach((t, i) => {
+    if (same && rows[i] != null) t.scrollLeft = rows[i];
+    showOn(t);
+  });
+  if (same) window.scrollTo(0, Math.max(y, keepY));
+  else { keepY = 0; window.scrollTo(0, 0); }
+  lastView = v;
   lastSig = lockSig();
   syncHistory();
+}
+let lastView = '', keepY = 0;
+/* الزرار المختار في صف الأزرار لازم يبان، من غير ما الصفحة نفسها تتحرك لفوق أو لتحت */
+function showOn(row) {
+  const on = row.querySelector('.bt.on'); if (!on) return;
+  const r = row.getBoundingClientRect(), b = on.getBoundingClientRect();
+  if (b.left < r.left) row.scrollLeft -= (r.left - b.left) + 16;
+  else if (b.right > r.right) row.scrollLeft += (b.right - r.right) + 16;
 }
 /* بصمة حالات القفل: بنعيد رسم شاشة الجولة لما ماتش يتقفل بس */
 let lastSig = '';
@@ -978,7 +995,7 @@ function normStats(sd) {
     Object.keys(sd.byUser || {}).forEach(n => { const uid = (sd.uidOf && sd.uidOf[n]) || ('n:' + n); users[uid] = sd.byUser[n]; names[uid] = n; });
   }
   Object.keys(names).forEach(u => { S.snames[u] = names[u]; });
-  return { users, names };
+  return { users, names, flags: sd.flags || null };
 }
 async function ensureStats(fxs) {
   await Promise.all(fxs.map(async f => {
@@ -1132,43 +1149,135 @@ function searchHtml(A) {
   }).join('');
 }
 
-/* العناية المركزة: مين نسي إيه */
+/* العناية المركزة: مين نسي إيه، ومين وقع في إيه */
+const CARE = { badCap: 2, weakSteal: 2 };   // كابتن فاشل: نقطتين أو أقل · هلقط رزقي ضعيف: بونص نقطتين أو أقل
+const FLAG_N = { i: 'مصاب', s: 'موقوف', u: 'غير متاح', n: 'غير متاح' };
 function careHtml() {
   const roster = activeIds(), w = scopeWord();
   if (!roster.length) return '<div class="k ctr">مفيش لاعبين لسه.</div>';
   const fxs = scopeFx().filter(f => S.stats[f.id] && S.fxdocs[f.id]);
-  const row = (key, label, uids, notes) => `<div data-act="sx" data-k="${key}" style="cursor:pointer;padding:8px 0;border-top:1px solid rgba(255,255,255,.18)"><div class="r j"><span class="g nm" style="font-size:13px">${label}</span><span class="pl bad">${N(uids.length)}</span></div>${S.st.ex[key] ? nameList(uids, notes) : ''}</div>`;
-  let html = `<div class="m">مين نسي إيه في ${w} (بعد بداية الماتش)</div>`;
+  /* الاختيارات الفعلية بعد قواعد الحساب (الكابتن والخواص المحسوبة بس) */
+  const allFx = startedFx(S.gw), eff = {};
+  roster.forEach(u => { eff[u] = {}; effPicks(u, allFx).forEach(it => { eff[u][it.f.id] = it; }); });
+  const tmpPill = live => live ? ' <span class="pl" style="font-size:10px">مؤقت</span>' : '';
+  const row = (key, label, uids, notes, live) => `<div data-act="sx" data-k="${key}" style="cursor:pointer;padding:8px 0;border-top:1px solid rgba(255,255,255,.18)"><div class="r j"><span class="g nm" style="font-size:13px">${label}${tmpPill(live)}</span><span class="pl bad">${N(uids.length)}</span></div>${S.st.ex[key] ? nameList(uids, notes) : ''}</div>`;
+  const group = (title, rows) => { rows = rows.filter(Boolean); return rows.length ? `<div class="m" style="margin-top:10px;font-weight:700;color:#ffd45c">${title}</div>${rows.join('')}` : ''; };
+  let html = `<div class="m">مين نسي إيه ومين وقع في إيه في ${w} (بعد بداية الماتش). اضغط على أي سطر تشوف الأسماء.</div>`;
+
   fxs.forEach(f => {
-    const sd = S.stats[f.id], d = S.fxdocs[f.id], per = {};
+    const sd = S.stats[f.id], d = S.fxdocs[f.id], sc = S.scores[f.id] || { pts: {}, st: {}, status: 'ns' };
+    const ft = sc.status === 'ft', live = !ft, pts = id => (sc.pts && sc.pts[id]) || 0;
+    const pl = id => d.players.find(x => x.i === id);
+    const pn = id => { const o = pl(id); return o ? o.n : '؟'; };
+    const per = {};
     roster.forEach(uid => {
       const p = sd.users[uid], ids = p ? p.ids : [];
       if (!ids.length) { per[uid] = { none: true, miss: [1, 2, 3, 4] }; return; }
       if (p.chip === 'free_pos') { per[uid] = { none: false, miss: Array(Math.max(0, 4 - ids.length)).fill(0) }; return; }
-      const have = new Set(ids.map(id => (d.players.find(x => x.i === id) || {}).p));
+      const have = new Set(ids.map(id => (pl(id) || {}).p));
       per[uid] = { none: false, miss: [1, 2, 3, 4].filter(pos => !have.has(pos)) };
     });
+    const played = roster.filter(u => !per[u].none);
     const label = pos => POS[pos] || 'لاعب (أي مركز)';
     const notesFor = uids => { const o = {}; uids.forEach(u => { o[u] = per[u].miss.map(p => POS[p] || 'لاعب').join('، '); }); return o; };
-    const byPos = [1, 2, 3, 4, 0].map(pos => ({ pos, uids: roster.filter(u => !per[u].none && per[u].miss.includes(pos)) })).filter(x => x.uids.length);
-    const grp = n => roster.filter(u => !per[u].none && per[u].miss.length === n);
+    const byPos = [1, 2, 3, 4, 0].map(pos => ({ pos, uids: played.filter(u => per[u].miss.includes(pos)) })).filter(x => x.uids.length);
+    const grp = n => played.filter(u => per[u].miss.length === n);
     const none = roster.filter(u => per[u].none), g2 = grp(2), g3 = grp(3);
-    const rows = [
-      ...byPos.map(x => row('cp' + f.id + ':' + x.pos, 'نسوا ' + label(x.pos), x.uids)),
-      g2.length ? row('c2' + f.id, 'نسوا مركزين', g2, notesFor(g2)) : '',
-      g3.length ? row('c3' + f.id, 'نسوا ٣ مراكز', g3, notesFor(g3)) : '',
-      none.length ? row('c4' + f.id, 'ما اختاروش خالص', none) : ''
-    ].filter(Boolean);
-    html += `<div class="k"><b>${esc(fxTitle(f))}</b>${rows.length ? rows.join('') : '<div class="m mt">الكل كمّل تشكيلته ✓</div>'}</div>`;
+    const K = x => x + f.id;
+
+    /* اللعيبة: مصاب/موقوف، دكة، سالب */
+    const inj = {}, bench = {}, neg = {};
+    played.forEach(u => {
+      const ids = sd.users[u].ids;
+      if (sd.flags) { const l = ids.filter(id => sd.flags[id]).map(id => pn(id) + ' (' + FLAG_N[sd.flags[id]] + ')'); if (l.length) inj[u] = l.join('، '); }
+      if (ft && sc.st && Object.keys(sc.st).length) { const l = ids.filter(id => sc.st[id] !== 1 && pts(id) === 0).map(pn); if (l.length) bench[u] = l.join('، '); }
+      const ng = ids.filter(id => pts(id) < 0).map(id => pn(id) + ' ' + N(pts(id))); if (ng.length) neg[u] = ng.join('، ');
+    });
+
+    /* الكابتن: فاشل، وغلط (فيه لاعب في تشكيلته جاب أكتر) */
+    const badCap = {}, wrongCap = {};
+    played.forEach(u => {
+      const it = eff[u][f.id]; if (!it || it.invalid || it.p.cap == null) return;
+      const cp = pts(it.p.cap);
+      if (cp <= CARE.badCap) badCap[u] = pn(it.p.cap) + ' جاب ' + N(cp);
+      const best = it.p.ids.reduce((b, id) => pts(id) > pts(b) ? id : b, it.p.cap);
+      if (pts(best) > cp) wrongCap[u] = 'كبّن ' + pn(it.p.cap) + ' بدل ' + pn(best) + ' · خسر ' + N((pts(best) - cp) * (CAP_MULT - 1));
+    });
+
+    /* هلقط رزقي: بونص ضعيف، والفريق الغلط */
+    const weak = {}, wrongTeam = {};
+    if (ft) played.forEach(u => {
+      const it = eff[u][f.id]; if (!it || it.invalid || it.p.chip !== 'steal' || it.p.team == null) return;
+      const topOf = tid => Math.max(0, ...d.players.filter(x => x.t === tid).map(x => pts(x.i)));
+      const mine = topOf(it.p.team), other = it.p.team === d.h.id ? d.a : d.h, theirs = topOf(other.id);
+      if (mine <= CARE.weakSteal) weak[u] = 'البونص ' + N(mine);
+      if (theirs > mine) wrongTeam[u] = 'كان ' + teamName(other) + ' هيجيب ' + N(theirs) + ' بدل ' + N(mine) + ' · خسر ' + N(theirs - mine);
+    });
+
+    /* قاع الماتش، والنجم اللي محدش شافه */
+    const tot = {}; played.forEach(u => { const it = eff[u][f.id]; tot[u] = it ? it.c.total : 0; });
+    const vals = [...new Set(Object.values(tot))].sort((a, b) => a - b);
+    /* أقل واحد أو اتنين: لو الأقل لوحده بنضيف اللي بعده، ولو كله نفس النقط مفيش قاع */
+    let bottom = [];
+    if (vals.length > 1) { bottom = played.filter(u => tot[u] === vals[0]); if (bottom.length === 1 && vals.length > 2) bottom = played.filter(u => tot[u] <= vals[1]); }
+    const bottomNotes = {}; bottom.forEach(u => { bottomNotes[u] = N(tot[u]) + ' نقطة'; });
+    const top = Math.max(0, ...d.players.map(x => pts(x.i)));
+    const stars = top > 0 ? d.players.filter(x => pts(x.i) === top) : [];
+    const missedStar = stars.length ? played.filter(u => !stars.some(x => sd.users[u].ids.includes(x.i))) : [];
+    const starName = stars.map(x => x.n).join(' و');
+
+    const ks = o => Object.keys(o);
+    const body = [
+      group('التشكيلة', [
+        ...byPos.map(x => row(K('cp' + x.pos + ':'), 'نسوا ' + label(x.pos), x.uids)),
+        g2.length ? row(K('c2'), 'نسوا مركزين', g2, notesFor(g2)) : '',
+        g3.length ? row(K('c3'), 'نسوا ٣ مراكز', g3, notesFor(g3)) : '',
+        none.length ? row(K('c4'), 'ما اختاروش خالص', none) : ''
+      ]),
+      group('اللعيبة', [
+        ks(inj).length ? row(K('ci'), 'اختاروا لاعب مصاب أو موقوف', ks(inj), inj) : '',
+        ks(bench).length ? row(K('cb'), 'لعيبة قعدوا دكة وجابوا صفر', ks(bench), bench) : '',
+        ks(neg).length ? row(K('cn'), 'لاعب جاب سالب', ks(neg), neg, live) : ''
+      ]),
+      group('الكابتن', [
+        ks(badCap).length ? row(K('cf'), 'كابتن فاشل (' + N(CARE.badCap) + ' نقط أو أقل)', ks(badCap), badCap, live) : '',
+        ks(wrongCap).length ? row(K('cw'), 'كبّن غلط', ks(wrongCap), wrongCap, live) : ''
+      ]),
+      group('هلقط رزقي', [
+        ks(weak).length ? row(K('sw'), 'البونص كان ضعيف', ks(weak), weak) : '',
+        ks(wrongTeam).length ? row(K('st'), 'لقط من الفريق الغلط', ks(wrongTeam), wrongTeam) : ''
+      ]),
+      group('النتيجة', [
+        bottom.length ? row(K('bt'), 'قاع الماتش', bottom, bottomNotes, live) : '',
+        missedStar.length ? row(K('ms'), 'النجم اللي محدش شافه: ' + esc(starName) + ' (' + N(top) + ')', missedStar, null, live) : ''
+      ])
+    ].join('');
+    html += `<div class="k"><div class="r j"><b>${esc(fxTitle(f))}</b><span class="m">${ft ? 'انتهى' : 'شغال'}</span></div>${body || '<div class="m mt">الكل تمام في الماتش ده ✓</div>'}${!ft ? '<div class="m mt">الدكة وهلقط رزقي بيظهروا بعد نهاية الماتش.</div>' : ''}</div>`;
   });
   if (!fxs.length) html += '<div class="k ctr">لسه مفيش إحصائيات جاهزة في النطاق ده.</div>';
+
+  /* نسوا الكابتن: لكل يوم ماتشاته كلها بدأت */
+  const capRows = [...new Set(fxs.map(f => dayKey(koOf(f))))].sort().map(dk => {
+    const dayAll = gwFixtures(S.gw).filter(f => koOf(f) && dayKey(koOf(f)) === dk);
+    const started = dayAll.every(f => allFx.some(x => String(x.id) === String(f.id)));
+    const label = 'يوم ' + fmtDay(Date.parse(dk + 'T12:00:00Z'));
+    if (!started) return `<div class="m" style="padding:8px 0;border-top:1px solid rgba(255,255,255,.18)">${esc(label)}: بيظهر بعد ما كل ماتشات اليوم تبدأ.</div>`;
+    const forgot = roster.filter(u => {
+      const had = dayAll.some(f => S.stats[f.id] && S.stats[f.id].users[u] && S.stats[f.id].users[u].ids.length);
+      const cap = dayAll.some(f => S.stats[f.id] && S.stats[f.id].users[u] && S.stats[f.id].users[u].cap != null);
+      return had && !cap;
+    });
+    return forgot.length ? row('cc' + dk, esc(label), forgot) : `<div class="m" style="padding:8px 0;border-top:1px solid rgba(255,255,255,.18)">${esc(label)}: الكل اختار كابتن ✓</div>`;
+  });
+  if (capRows.length) html += `<div class="k"><b>نسوا الكابتن</b>${capRows.join('')}</div>`;
+
   /* الخواص المنسية: بتظهر في آخر الجولة */
   const gwAll = gwFixtures(S.gw), done = gwAll.length > 0 && gwAll.every(f => koOf(f) && Date.now() > koOf(f) + END_AFTER);
   if (!done) html += '<div class="k"><b>الخواص المنسية</b><div class="m mt">بتظهر في آخر الجولة، بعد ما كل الماتشات تخلص.</div></div>';
   else {
     /* بنعدّ الخواص اللي اتحسبت فعلاً (مثلاً هلقط رزقي من غير فريق تعتبر منسية) */
-    const used = {}, all = startedFx(S.gw);
-    roster.forEach(u => { used[u] = new Set(effPicks(u, all).filter(it => it.p.chip && !it.invalid).map(it => it.p.chip)); });
+    const used = {};
+    roster.forEach(u => { used[u] = new Set(Object.values(eff[u]).filter(it => it.p.chip && !it.invalid).map(it => it.p.chip)); });
     const z = roster.filter(u => used[u].size === 0), o1 = roster.filter(u => used[u].size === 1);
     html += `<div class="k"><b>الخواص المنسية في الجولة ${N(S.gw)}</b>${z.length ? row('cz', 'نسوا الخاصيتين', z) : ''}${o1.length ? row('co', 'نسوا خاصية واحدة', o1) : ''}${!z.length && !o1.length ? '<div class="m mt">الكل استخدم خاصيتين ✓</div>' : ''}</div>`;
   }
@@ -1529,8 +1638,8 @@ const ACTIONS = {
   sday(el) { S.st.kind = 'day'; S.st.day = el.dataset.k; refreshStats(); },
   async stab(el) {
     S.st.tab = el.dataset.k; S.st.q = '';
-    if (S.st.tab === 'care') { S.st.loading = true; render(); await loadStatsScope(); S.st.loading = false; }
-    render();
+    if (S.st.tab === 'care') { keepY = window.scrollY; S.st.loading = true; render(); await loadStatsScope(); S.st.loading = false; }
+    render(); keepY = 0;
   },
   ssort(el) { S.st.sort = el.dataset.k; renderStatsBody(); },
   udet(el) { openUser(el.dataset.uid, el.dataset.mode || 'gw', el.dataset.fid); },
