@@ -30,6 +30,32 @@ button{cursor:pointer}
 .m{color:#d0dde8;font-size:12px}
 .f{flex:1;padding:0 16px 16px;display:flex;flex-direction:column;gap:8px}
 .k{background:rgba(255,255,255,.11);border:1px solid rgba(255,255,255,.24);border-radius:14px;padding:12px;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);box-shadow:0 8px 24px rgba(0,0,0,.16);color:#fff;text-align:start;width:100%}
+/* التوقعات */
+.pk{padding:16px 14px;overflow:hidden}
+.pkr{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:6px}
+.pkr .t{width:auto;justify-self:center;gap:8px}
+.pft{margin:16px -14px -16px;overflow:hidden}
+.pk.ex{border:2px solid #2fd06b}
+.sb{width:60px;height:60px;border-radius:14px;border:2px solid #2fd06b;background:rgba(4,36,20,.45);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:28px;color:#fff}
+.sc{display:inline-flex;gap:5px;font-weight:700;direction:rtl}
+.sc i{font-style:normal;opacity:.7}
+.pc{display:inline-flex;padding:3px 11px;border-radius:999px;border:1.5px solid #2fd06b;font-size:13px}
+.ib{width:40px;height:40px;border:0;background:none;color:#d0dde8;display:flex;align-items:center;justify-content:center;padding:0}
+.pf{display:flex;align-items:center;justify-content:space-between;width:100%;margin:0;height:46px;font-size:15px;padding:0 12px;border:0;border-top:1px solid rgba(255,255,255,.16);background:rgba(0,0,0,.16);color:#fff;font-weight:700}
+.pf.bo{background:#f5b301;color:#1a1300}
+.pf.bo .m,.pf.bo .pl{color:#1a1300}
+.pd{margin:0;padding:12px 14px;background:rgba(8,28,48,.5);border-top:1px solid rgba(255,255,255,.12);display:flex;flex-direction:column}
+.ov{position:fixed;inset:0;z-index:30;display:flex;align-items:flex-end;justify-content:center;background:rgba(3,15,28,.72)}
+.sh{width:100%;max-width:520px;max-height:92dvh;overflow-y:auto;box-sizing:border-box;background:#0b2a45;border-radius:22px 22px 0 0;border-top:1px solid rgba(255,255,255,.2);padding:10px 16px calc(18px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:14px;color:#fff;cursor:auto}
+.sh .hd{align-self:center;width:40px;height:4px;border-radius:2px;background:rgba(255,255,255,.7);flex:none}
+.wh{display:flex;flex-direction:column;align-items:center;touch-action:none;user-select:none}
+.wh .nb{width:60px;height:44px;border:0;background:none;color:rgba(255,255,255,.4);font-weight:800;font-size:26px}
+.wh .nv2{width:62px;height:62px;border-radius:14px;border:2px solid #2fd06b;background:rgba(4,36,20,.45);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:32px}
+.chp{display:flex;flex-direction:column;align-items:center;gap:3px;border:0;background:none;color:#fff;padding:0}
+.chp>span:first-child{display:inline-flex;padding:5px 14px;border-radius:999px;border:1.5px solid #2fd06b}
+.chp.on>span:first-child{background:#2fd06b;color:#04150a}
+.fm{width:22px;height:22px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:800}
+.fm.W{background:#2fbf5b;color:#04150a}.fm.D{background:#9fb0c0;color:#0d3554}.fm.L{background:#d63a3f;color:#fff}
 .r{display:flex;align-items:center;gap:10px}
 .j{justify-content:space-between}
 .g{flex:1;min-width:0}
@@ -85,6 +111,10 @@ button{cursor:pointer}
 .ctr{text-align:center}
 .mt{margin-top:8px}
 .mc{display:block;padding:14px;cursor:pointer}
+.evs{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px}.evs>div{display:flex;flex-wrap:wrap;gap:6px;align-content:flex-start}
+.evp{font-size:13px;padding:3px 9px;border-radius:999px;background:rgba(255,255,255,.14)}.evp.me{background:rgba(245,179,1,.42);font-weight:800}
+button.evp{color:#fff;border:0;font:inherit;font-size:13px;line-height:1.5}
+.evt+.evt{margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,.16)}
 .tm{font-weight:800;font-size:22px;line-height:1.2}
 .lsc{display:inline-flex;align-items:center;gap:8px;font-weight:800;font-size:24px;line-height:1.2}.lsc i{font-style:normal;opacity:.55}.lsc.sm{font-size:15px;gap:5px}
 .ldot{display:inline-block;width:6px;height:6px;border-radius:50%;background:currentColor;margin-inline-end:5px;vertical-align:middle;animation:ldp 1.2s infinite}
@@ -156,6 +186,8 @@ div.sl{cursor:pointer}
 .sw::after{content:"";position:absolute;top:3px;right:3px;width:24px;height:24px;border-radius:50%;background:#fff;transition:transform .2s}
 .sw.on{background:#2fd06b}
 .sw.on::after{transform:translateX(-22px)}
+/* المحل */
+.coin{color:#ffd45c}
 </style>
 </head>
 <body>
@@ -279,7 +311,7 @@ const S = {
   invites: {}, gone: new Set(), inv: { kind: 'test', days: 7, name: '' },
   stealAsk: null   // ماتش مستني اختيار فريق هلقط رزقي (الخاصية مش بتتفعّل غير مع الفريق)
 };
-const newSt = () => ({ kind: 'gw', fid: null, day: null, tab: 'caps', q: '', opp: null, oq: '', ex: {}, loading: false, sort: 'own' });
+const newSt = () => ({ kind: 'gw', fid: null, day: null, tab: 'caps', q: '', opp: null, oq: '', ex: {}, loading: false, sort: 'own', mc: [] });
 S.st = newSt();
 
 /* ───────── مكونات صغيرة ───────── */
@@ -367,7 +399,7 @@ function chooseDay() {
   const open = days.find(d => d.list.some(f => koOf(f) && koOf(f) + END_AFTER > now));
   S.day = (open || days[days.length - 1]).key;
 }
-const pickOf = fid => (S.picks[fid] = S.picks[fid] || { ids: [], cap: null, chip: null, team: null });
+const pickOf = fid => (S.picks[fid] = S.picks[fid] || { ids: [], cap: null, chip: null, team: null, sub: null });
 
 /* ───────── تحميل البيانات ───────── */
 async function loadPicks() {
@@ -378,7 +410,7 @@ async function loadPicks() {
   for (let i = 0; i < fids.length; i += 30) parts.push(fids.slice(i, i + 30));
   const snaps = await Promise.all(parts.map(ids => getDocs(query(collection(db, 'picks'), where('uid', '==', S.user.uid), where('fid', 'in', ids)))));
   S.picks = {};
-  snaps.forEach(s => s.docs.forEach(d => { const x = d.data(); S.picks[x.fid] = { ids: x.ids || [], cap: x.cap ?? null, chip: x.chip ?? null, team: x.team ?? null }; }));
+  snaps.forEach(s => s.docs.forEach(d => { const x = d.data(); S.picks[x.fid] = { ids: x.ids || [], cap: x.cap ?? null, chip: x.chip ?? null, team: x.team ?? null, sub: x.sub ?? null }; }));
 }
 async function loadMyPts() {
   try {
@@ -409,6 +441,8 @@ async function bootUser() {
   if (code) { S.invites = {}; if (!hasAccess(await getInvite(code))) { S.view = 'expired'; return; } }
   try { const a = await getDoc(doc(db, 'admins', S.user.uid)); S.admin = a.exists(); } catch (e) { S.admin = false; }
   await loadRound();
+  try { await loadShop(); } catch (e) { console.error(e); }
+  watchLook();
   S.view = 'round';
   pushCheckedAt = Date.now(); refreshPush();
 }
@@ -431,32 +465,37 @@ async function loadBoard(id) {
 
 /* ───────── الاختيارات ───────── */
 function canPick(fx, p, pl) {
-  if (p.ids.length >= 4) return 'اخترت ٤ لاعبين بالفعل';
+  const five = p5On(S.fx);   // لاعب خامس (المحل): ٥ لاعبين، مركز واحد يتكرر، و٣ من فريق
+  if (p.ids.length >= (five ? 5 : 4)) return five ? 'اخترت ٥ لاعبين بالفعل' : 'اخترت ٤ لاعبين بالفعل';
   const of = id => fx.players.find(x => x.i === id);
-  if (p.chip !== 'free_pos' && p.ids.some(id => { const o = of(id); return o && o.p === pl.p; })) return 'مركز ' + POS[pl.p] + ' مختار بالفعل، شيله الأول';
+  if (p.chip !== 'free_pos' && p.ids.some(id => { const o = of(id); return o && o.p === pl.p; })) {
+    const pos = {}; p.ids.forEach(id => { const o = of(id); if (o) pos[o.p] = (pos[o.p] || 0) + 1; });
+    if (!five || Object.values(pos).some(n => n > 1)) return five ? 'كررت مركز قبل كده، مركز واحد بس ممكن يتكرر' : 'مركز ' + POS[pl.p] + ' مختار بالفعل، شيله الأول';
+  }
   const same = p.ids.filter(id => { const o = of(id); return o && o.t === pl.t; }).length;
-  if (p.chip !== 'free_team' && same >= 2) return 'مينفعش أكتر من لاعبين من نفس الفريق';
+  if (p.chip !== 'free_team' && same >= (five ? 3 : 2)) return five ? 'مينفعش أكتر من ٣ من نفس الفريق' : 'مينفعش أكتر من لاعبين من نفس الفريق';
   return null;
 }
 /* الاختيار سليم بقواعد الخاصية دي؟ (chip = null يعني القواعد العادية) */
-function validIds(fx, ids, chip) {
+function validIds(fx, ids, chip, five) {
   if (new Set(ids).size !== ids.length) return false;   // نفس اللاعب مرتين ممنوع
   const pos = {}, team = {};
+  let dup = 0;
   for (const id of ids) {
     const o = fx.players.find(x => x.i === id);
     if (!o) return false;
     pos[o.p] = (pos[o.p] || 0) + 1; team[o.t] = (team[o.t] || 0) + 1;
-    if (chip !== 'free_pos' && pos[o.p] > 1) return false;
-    if (chip !== 'free_team' && team[o.t] > 2) return false;
+    if (chip !== 'free_pos' && pos[o.p] > 1) dup++;
+    if (chip !== 'free_team' && team[o.t] > (five ? 3 : 2)) return false;
   }
-  return ids.length <= 4;
+  return dup <= (five ? 1 : 0) && ids.length <= (five ? 5 : 4);
 }
 const chipsUsedElsewhere = fid => { const u = {}; Object.keys(S.picks).forEach(k => { if (String(k) !== String(fid) && S.picks[k].chip) u[S.picks[k].chip] = k; }); return u; };
 const chipsLeft = () => MAX_CHIPS - new Set(Object.values(S.picks).map(p => p.chip).filter(Boolean)).size;
 function canUseChip(fid, c) {
-  const u = chipsUsedElsewhere(fid);
-  if (u[c]) return 'الخاصية دي مستخدمة في ماتش تاني في الجولة دي';
-  if (Object.keys(u).length >= MAX_CHIPS) return 'استخدمت خاصيتين في الجولة دي بالفعل';
+  const u = chipsUsedElsewhere(fid), it = myItemCode('f', fid);
+  if (u[c]) return it === 'dup' ? null : 'الخاصية دي مستخدمة في ماتش تاني في الجولة دي';   // خاصية مكررة (المحل)
+  if (Object.keys(u).length >= MAX_CHIPS && it !== 'chip3') return 'استخدمت خاصيتين في الجولة دي بالفعل';   // خاصية تالتة (المحل)
   return null;
 }
 function toggleChip(c) {
@@ -464,7 +503,7 @@ function toggleChip(c) {
   if (isLocked(fid)) return toast('الماتش بدأ، الاختيار مقفول');
   if (c === 'steal' && S.stealAsk === fid && p.chip !== 'steal') { S.stealAsk = null; return renderMatchBody(); }   // إلغاء قبل اختيار الفريق
   if (p.chip === c) {
-    if (!validIds(d, p.ids, null)) return toast('شيل اللاعبين الزيادة الأول، من غير الخاصية لازم تلتزم بالقواعد العادية');
+    if (!validIds(d, p.ids, null, p5On(fid))) return toast('شيل اللاعبين الزيادة الأول، من غير الخاصية لازم تلتزم بالقواعد العادية');
     p.chip = null; p.team = null; S.stealAsk = null;
   } else {
     if (p.chip) return toast('ألغِ الخاصية الحالية الأول');
@@ -480,7 +519,8 @@ function toggleChip(c) {
 const stealMissing = fid => { const p = S.picks[fid]; return !!(p && p.chip === 'steal' && p.team == null && !isLocked(fid)); };
 function capTakenElsewhere(fid) {
   const day = dayOfFx(fid);
-  return Object.keys(S.picks).some(k => k !== String(fid) && S.picks[k].cap != null && dayOfFx(k) === day);
+  const n = Object.keys(S.picks).filter(k => k !== String(fid) && S.picks[k].cap != null && dayOfFx(k) === day).length;
+  return n >= (myItemCode('f', fid) === 'dcap' ? 2 : 1);   // كابتن مزدوج (المحل): كابتنين في اليوم
 }
 const saveTimers = {};
 function setSave(s) { S.save = s; const el = $('#sv'); if (el) { el.textContent = s === 'saving' ? 'جاري الحفظ…' : s === 'saved' ? 'تم الحفظ' : s === 'error' ? 'فشل الحفظ' : ''; el.className = 'pl sv ' + (s === 'saved' ? 'ok' : s === 'error' ? 'bad' : ''); } }
@@ -503,7 +543,7 @@ async function doSave(fid) {
   if (!S.user || !p || !fx) return;
   if (p.chip === 'steal' && p.team == null) { if (S.fx === fid) setSave('error'); return toast('اختار فريق هلقط رزقي علشان التعديل يتحفظ'); }
   try {
-    await setDoc(doc(db, 'picks', fid + '_' + S.user.uid), { uid: S.user.uid, gw: fx.gw, fid: String(fid), ids: p.ids, cap: p.cap, chip: p.chip || null, team: p.team ?? null, updatedAt: serverTimestamp() });
+    await setDoc(doc(db, 'picks', fid + '_' + S.user.uid), { uid: S.user.uid, gw: fx.gw, fid: String(fid), ids: p.ids, cap: p.cap, chip: p.chip || null, team: p.team ?? null, sub: p.sub ?? null, updatedAt: serverTimestamp() });
     if (S.fx === fid) setSave('saved');
   } catch (e) {
     console.error(e);
@@ -517,14 +557,16 @@ function changed(fid) { queueSave(fid); renderMatchBody(); }
 function render() {
   const root = $('#app');
   const v = S.view;
-  const nonav = ['loading', 'login', 'setup', 'banned', 'expired', 'error', 'match', 'udet'].includes(v);
+  const nonav = ['loading', 'login', 'setup', 'banned', 'expired', 'error', 'match', 'udet', 'ppl'].includes(v);
   root.className = nonav ? 'nonav' : '';
-  const views = { loading: vLoading, login: vLogin, setup: vSetup, banned: vBanned, expired: vExpired, error: vError, round: vRound, match: vMatch, board: vBoard, stats: vStats, udet: vUser, tour: vTourList, tdet: vTourDetail, tnew: vTourNew, account: vAccount, admin: vAdmin };
+  const views = { loading: vLoading, login: vLogin, setup: vSetup, banned: vBanned, expired: vExpired, error: vError, round: vRound, match: vMatch, board: vBoard, stats: vStats, udet: vUser, tour: vTourList, tdet: vTourDetail, tnew: vTourNew, account: vAccount, admin: vAdmin, shop: vShop, pred: vPred, ppl: vPpl };
   /* إعادة الرسم في نفس الشاشة: بنحافظ على مكان سحب صفوف الأزرار (التبويبات/الأيام) ومكان الصفحة */
   const same = v === lastView, rows = same ? [...root.querySelectorAll('.tg')].map(t => t.scrollLeft) : [], y = window.scrollY;
   root.innerHTML = (views[v] || vLoading)() + (nonav ? '' : nav());
   if (v === 'match') renderMatchBody();
   if (v === 'stats') renderStatsBody();
+  if (v === 'shop') renderShopSheet();
+  if (v === 'pred') renderSheet();
   root.querySelectorAll('.tg').forEach((t, i) => {
     if (same && rows[i] != null) t.scrollLeft = rows[i];
     showOn(t);
@@ -534,6 +576,7 @@ function render() {
   lastView = v;
   lastSig = lockSig();
   syncHistory();
+  syncScoreWatch();
 }
 let lastView = '', keepY = 0;
 /* الزرار المختار في صف الأزرار لازم يبان، من غير ما الصفحة نفسها تتحرك لفوق أو لتحت */
@@ -546,11 +589,11 @@ function showOn(row) {
 /* بصمة حالات القفل: بنعيد رسم شاشة الجولة لما ماتش يتقفل بس */
 let lastSig = '';
 function lockSig() {
-  if (S.view !== 'round' || S.gw == null) return '';
+  if ((S.view !== 'round' && S.view !== 'pred') || S.gw == null) return '';
   return gwFixtures(S.gw).map(f => (koOf(f) && Date.now() >= koOf(f)) ? 1 : 0).join('');
 }
 /* زرار الرجوع في الموبايل بيرجع خطوة جوه التطبيق بدل ما يخرج منه */
-const PARENT = { match: 'round', admin: 'account', tdet: 'tour', tnew: 'tour', udet: 'board' };
+const PARENT = { match: 'round', admin: 'account', tdet: 'tour', tnew: 'tour', udet: 'board', ppl: 'pred' };
 let histSub = false, ignorePop = false;
 function syncHistory() { if (PARENT[S.view] && !histSub) { history.pushState({ sub: 1 }, ''); histSub = true; } }
 function leaveSub() { if (histSub) { histSub = false; ignorePop = true; history.back(); setTimeout(() => { ignorePop = false; }, 600); } }
@@ -567,7 +610,7 @@ try { history.replaceState(null, ''); } catch (e) { /* مش مهم */ }
 function nav() {
   const t = S.view === 'admin' ? 'account' : (S.view === 'tdet' || S.view === 'tnew') ? 'tour' : S.view;
   const b = (k, label, svg) => `<button class="n ${t === k ? 'on' : ''}" data-act="nav" data-v="${k}"><svg viewBox="0 0 24 24">${svg}</svg>${label}</button>`;
-  return `<nav class="nv">${b('round', 'الجولة', '<path d="M3 5h18v14H3zM3 10h18"/>')}${b('board', 'الترتيب', '<path d="M6 20v-9M12 20V4M18 20v-6"/>')}${b('tour', 'البطولات', '<path d="M8 4h8v5a4 4 0 01-8 0zM8 6H4v2a3 3 0 003 3M16 6h4v2a3 3 0 01-3 3M12 13v4M8 20h8"/>')}${b('stats', 'الإحصائيات', '<path d="M12 3v9h9M20 15a9 9 0 11-11-11"/>')}${b('account', 'حسابي', '<circle cx="12" cy="8" r="4"/><path d="M4 21c1-6 15-6 16 0"/>')}</nav>`;
+  return `<nav class="nv">${b('round', 'الجولة', '<path d="M3 5h18v14H3zM3 10h18"/>')}${b('pred', 'التوقعات', '<rect x="3" y="6" width="7" height="12" rx="2"/><rect x="14" y="6" width="7" height="12" rx="2"/>')}${b('board', 'الترتيب', '<path d="M6 20v-9M12 20V4M18 20v-6"/>')}${b('tour', 'البطولات', '<path d="M8 4h8v5a4 4 0 01-8 0zM8 6H4v2a3 3 0 003 3M16 6h4v2a3 3 0 01-3 3M12 13v4M8 20h8"/>')}${b('stats', 'الإحصائيات', '<path d="M12 3v9h9M20 15a9 9 0 11-11-11"/>')}${b('shop', 'المحل', '<path d="M5 8h14l-1 12H6zM9 8V6a3 3 0 016 0v2"/>')}${b('account', 'حسابي', '<circle cx="12" cy="8" r="4"/><path d="M4 21c1-6 15-6 16 0"/>')}</nav>`;
 }
 const vLoading = () => `<div class="login ctr"><img class="logo" src="icon-192.png" alt="" style="margin:0 auto;display:block"><div class="m">جاري التحميل…</div></div>`;
 const vError = () => `<div class="login ctr"><div>حصلت مشكلة في تحميل البيانات</div><button class="bt on" data-act="retry">حاول تاني</button><button class="lnk" data-act="logout">تسجيل الخروج</button></div>`;
@@ -630,7 +673,7 @@ function card(f) {
     <div class="r j"><div class="t">${crest(f.h)}<span>${esc(teamName(f.h))}</span></div>
     <div class="ctr">${cardMid(f, k, locked, status)}</div>
     <div class="t">${crest(f.a)}<span>${esc(teamName(f.a))}</span></div></div>
-    <div class="r j m mt"><span>اختياراتك ${N(n)}/٤${S.picks[f.id] && S.picks[f.id].chip ? ' · <b class="warn">' + CHIPS[S.picks[f.id].chip].n + '</b>' : ''}${S.picks[f.id] && S.picks[f.id].cap != null ? ' · <b class="warn">الكابتن هنا</b>' : ''}${stealMissing(f.id) ? ' · <b class="warn">اختار الفريق!</b>' : ''}</span><span>${locked ? 'عرض اختياراتك' : 'اختار لاعبينك'} ‹</span></div>
+    <div class="r j m mt"><span>اختياراتك ${N(n)}/${N(maxIds(f.id))}${myItemCode('f', f.id) ? ' · <b class="warn">' + esc(itemDef('f', myItemCode('f', f.id)).n) + '</b>' : ''}${S.picks[f.id] && S.picks[f.id].chip ? ' · <b class="warn">' + CHIPS[S.picks[f.id].chip].n + '</b>' : ''}${S.picks[f.id] && S.picks[f.id].cap != null ? ' · <b class="warn">الكابتن هنا</b>' : ''}${stealMissing(f.id) ? ' · <b class="warn">اختار الفريق!</b>' : ''}</span><span>${locked ? 'عرض اختياراتك' : 'اختار لاعبينك'} ‹</span></div>
   </button>`;
 }
 
@@ -653,10 +696,12 @@ function renderMatchBody() {
   const btn = (pl, pos, label) => pl
     ? `<div class="sl fl ${S.pos === pl.p && !locked ? 'act' : ''}" data-act="pos" data-p="${pl.p}" role="button" tabindex="0">${p.cap !== pl.i ? '' : locked ? '<span class="c">C</span>' : `<button class="c cs on" data-act="cap" data-pid="${pl.i}" aria-label="إلغاء الكابتن">C</button>`}${locked ? '' : `<button class="rm" data-act="rmp" data-pid="${pl.i}" aria-label="شيل ${esc(pl.n)}">×</button>`}${photo(pl)}<span class="nm">${esc(pl.n)}</span><span class="sub">${POS[pl.p]}${locked ? ' · ' + N(sc.pts[pl.i] || 0) : ''}</span></div>`
     : `<button class="sl" data-act="pos" data-p="${pos}"><span>${locked ? '—' : '+'}</span><span>${label}</span></button>`;
-  const slots = p.chip === 'free_pos'
-    ? [0, 1, 2, 3].map(i => btn(chosen[i], S.pos, 'لاعب ' + N(i + 1)))
+  const five = p5On(fid), item = myItem('f', fid);
+  const slots = p.chip === 'free_pos' || five
+    ? [...Array(five ? 5 : 4).keys()].map(i => btn(chosen[i], S.pos, 'لاعب ' + N(i + 1)))
     : [1, 2, 3, 4].map(pos => btn(chosen.find(x => x.p === pos), pos, POS[pos]));
-  let html = `<div class="pt">${slots.join('')}</div>${capOff && chosen.length ? '<div class="m" style="padding:0 16px 10px;margin-top:-4px">الكابتن بتاعك النهارده في ماتش تاني، علشان كده مفيش كابتن هنا.</div>' : ''}`;
+  const subPl = item && item.item === 'bench' && p.sub != null ? byId(p.sub) : null;
+  let html = `${item ? `<div class="k r j" style="margin:0 16px 10px;width:auto;border-color:#f5b301;background:rgba(245,179,1,.16)"><span>${itemPill('f', item.item)}</span><span class="m">${DAY_ITEMS.includes(item.item) ? 'على اليوم كله' : 'على الماتش ده'}</span></div>` : ''}<div class="pt">${slots.join('')}</div>${item && item.item === 'bench' ? `<div class="k r j" style="margin:0 16px 10px;width:auto"><div class="g"><b>الاحتياطي</b><div class="m">${subPl ? esc(subPl.n) + ' · ' + POS[subPl.p] : locked ? 'مختارتش احتياطي' : 'اضغط "احتياطي" جنب أي لاعب في القايمة'}</div></div>${subPl && !locked ? `<button class="bt" style="height:36px;padding:0 10px" data-act="psub" data-pid="${subPl.i}">شيله</button>` : ''}</div>` : ''}${capOff && chosen.length ? '<div class="m" style="padding:0 16px 10px;margin-top:-4px">الكابتن بتاعك النهارده في ماتش تاني، علشان كده مفيش كابتن هنا.</div>' : ''}`;
 
   /* الخاصية المستخدمة + بونص هلقط رزقي */
   let stealBonus = 0, stealNote = '';
@@ -668,7 +713,9 @@ function renderMatchBody() {
   if (locked) {
     const base = p.ids.reduce((s, id) => s + (sc.pts[id] || 0), 0);
     const bonus = p.cap != null ? (sc.pts[p.cap] || 0) * (CAP_MULT - 1) : 0;
-    html += `<div class="f"><div class="k r j"><div><b>مجموع الماتش</b><div class="m">${p.cap != null ? 'شامل الكابتن ×' + N(CAP_MULT) + ' · ' : ''}${sc.status === 'ft' ? 'انتهى' : sc.status === 'live' ? 'مباشر (نقط مؤقتة)' : 'لسه مفيش نقط'}</div></div><span class="d" style="font-size:28px">${N(base + bonus + stealBonus)}</span></div>`;
+    const xb = (sc.xb && sc.xb[S.user.uid]) || 0;   // نقط المحل الزيادة (بيحسبها Code.gs)
+    html += `<div class="f"><div class="k r j"><div><b>مجموع الماتش</b><div class="m">${p.cap != null ? 'شامل الكابتن ×' + N(CAP_MULT) + ' · ' : ''}${sc.status === 'ft' ? 'انتهى' : sc.status === 'live' ? 'مباشر (نقط مؤقتة)' : 'لسه مفيش نقط'}</div></div><span class="d" style="font-size:28px">${N(base + bonus + stealBonus + xb)}</span></div>`;
+    if (xb) html += `<div class="k r j" style="border-color:#f5b301"><b>${item ? esc(itemDef('f', item.item).n) : 'المحل'}</b><span class="d" style="font-size:20px">${xb > 0 ? '+' : ''}${N(xb)}</span></div>`;
     if (p.chip) {
       const tm = p.team != null ? (p.team === d.h.id ? d.h : d.a) : null;
       html += `<div class="k r j"><div><b>الخاصية: ${CHIPS[p.chip].n}</b>${p.chip === 'steal' ? `<div class="m">${tm ? 'فريق ' + esc(teamName(tm)) : 'مختارتش فريق'}${stealNote ? ' · ' + stealNote : ''}</div>` : ''}</div>${p.chip === 'steal' && !stealNote ? `<span class="d" style="font-size:20px">+${N(stealBonus)}</span>` : ''}</div>`;
@@ -677,6 +724,7 @@ function renderMatchBody() {
       const st = sc.st && sc.st[pl.i] === 1 ? 'أساسي' : (sc.status !== 'ns' ? 'دكة' : '');
       return `<div class="k r">${photo(pl)}<div class="g"><div class="nm">${esc(pl.n)} ${p.cap === pl.i ? '<span class="c" style="display:inline-flex">C</span>' : ''}</div><div class="sub">${POS[pl.p]} · ${esc(teamName(pl.t === d.h.id ? d.h : d.a))}</div></div>${st ? `<span class="pl ${st === 'أساسي' ? 'ok' : ''}">${st}</span>` : ''}<span class="d" style="font-size:20px">${N(sc.pts[pl.i] || 0)}</span></div>`;
     }).join('') : '<div class="k ctr">مختارتش لاعبين في الماتش ده.</div>';
+    html += evBlock(d, sc, p);
     el.innerHTML = html + '</div>';
     return;
   }
@@ -697,6 +745,38 @@ function renderMatchBody() {
   el.innerHTML = html;
   renderList();
 }
+/* ───────── مجريات الماتش (تحت لعيبتك في شاشة الماتش) ─────────
+   Code.gs بيكتب ev في scores/<fid>: لكل نوع { رقم اللاعب: العدد }. FPL مش بيدّي دقيقة الأحداث. */
+const EV_TYPES = [['g', '⚽', 'الأهداف'], ['a', '👟', 'الأسيستات'], ['og', '🤦', 'جون في نفسه'], ['y', '🟨', 'الكروت الصفرا'], ['r', '🟥', 'الكروت الحمرا'], ['dc', '🛡️', 'نقط الديفكون (+٢)'], ['ps', '🧤', 'صد ضربة جزا'], ['pm', '❌', 'ضيّع ضربة جزا']];
+function evBlock(d, sc, p) {
+  const ev = sc.ev || {}, mine = new Set(p.ids), open = !!S.evOpen;
+  const byId = id => d.players.find(x => x.i === Number(id));
+  let n = 0;
+  const rows = EV_TYPES.map(([k, ic, lab]) => {
+    const m = ev[k] || {}, list = Object.keys(m).map(id => ({ pl: byId(id), c: m[id] })).filter(x => x.pl);
+    if (!list.length) return '';
+    n += list.reduce((s, x) => s + x.c, 0);
+    const col = t => list.filter(x => x.pl.t === t.id).map(x => `<span class="evp ${mine.has(x.pl.i) ? 'me' : ''}">${esc(x.pl.n)}${x.c > 1 ? ' ×' + N(x.c) : ''}</span>`).join('') || '<span class="m">—</span>';
+    return `<div class="evt"><b>${ic} ${lab}</b><div class="evs"><div>${col(d.h)}</div><div>${col(d.a)}</div></div></div>`;
+  }).join('');
+  const head = `<button class="k r j" data-act="evtog"><b>مجريات الماتش</b><span class="m">${n ? N(n) + ' حدث ' : ''}${open ? '▴' : '▾'}</span></button>`;
+  if (!open) return head;
+  return head + `<div class="k"><div class="evs" style="margin:0 0 8px"><b>${esc(teamName(d.h))}</b><b>${esc(teamName(d.a))}</b></div>${rows || '<div class="m">لسه مفيش أحداث.</div>'}<div class="m mt">لعيبتك متعلّم عليهم بالأصفر. FPL مش بيدّي دقيقة الأحداث، علشان كده مترتبة حسب النوع.</div></div>`;
+}
+/* شاشة الماتش بتسمع لـ scores/<fid>: نقط اللعيبة والمجريات بتتحدث كل دقيقة مع النتيجة */
+let scUnsub = null, scFid = null;
+function syncScoreWatch() {
+  const want = S.user && S.view === 'match' && S.fx != null && isLocked(S.fx) ? String(S.fx) : null;
+  if (want === scFid) return;
+  if (scUnsub) { scUnsub(); scUnsub = null; }
+  scFid = want;
+  if (!want) return;
+  scUnsub = onSnapshot(doc(db, 'scores', want), s => {
+    if (!s.exists()) return;
+    S.scores[want] = s.data();
+    if (S.view === 'match' && String(S.fx) === want) renderMatchBody();
+  }, e => { console.error('scores', e); scUnsub = null; scFid = null; });
+}
 function renderList() {
   const el = $('#plist'); if (!el) return;
   const fid = S.fx, d = S.fxdocs[fid], p = pickOf(fid);
@@ -708,11 +788,12 @@ function renderList() {
     const sel = p.ids.includes(x.i);
     const why = sel ? null : canPick(d, p, x);
     const team = x.t === d.h.id ? d.h : d.a;
+    const bench = myItemCode('f', fid) === 'bench';
     const right = sel
       ? (p.cap === x.i ? `<button class="cb on" data-act="cap" data-pid="${x.i}" aria-label="إلغاء الكابتن">C</button>`
         : (capLocked ? '<span class="pl ok">مختار</span>' : `<button class="cb" data-act="cap" data-pid="${x.i}" aria-label="اجعله كابتن">C</button>`))
-      : '';
-    return `<div class="k r pr ${sel ? 'sel' : ''} ${why ? 'dz' : ''}" data-act="tp" data-pid="${x.i}">${photo(x)}
+      : bench ? `<button class="bt ${p.sub === x.i ? 'on' : ''}" style="height:36px;padding:0 10px;font-size:12px;flex:none" data-act="psub" data-pid="${x.i}">احتياطي</button>` : '';
+    return `<div class="k r pr ${sel ? 'sel' : ''} ${why && !bench ? 'dz' : ''}" data-act="tp" data-pid="${x.i}">${photo(x)}
       <div class="g"><div class="nm">${esc(x.n)} <span class="sub">${esc(team.sn)}</span> ${flag[x.s] ? `<span class="pl bad">${flag[x.s]}</span>` : ''}</div>
       <div class="sub">${N(x.g)} أهداف · ${N(x.a)} أسيست · ${N(x.tp)} نقطة</div>${x.nw ? `<div class="sub warn">${esc(x.nw)}</div>` : ''}</div>${right}</div>`;
   }).join('') : '<div class="k ctr">مفيش لاعبين بالاسم ده.</div>';
@@ -736,18 +817,20 @@ async function loadFcm() {
 }
 /* كل جهاز ليه توكن: بنضيف توكن الجهاز ده للقايمة (آخر ٥ أجهزة) بدل ما نمسح توكن الجهاز التاني */
 const MAX_DEVICES = 5;
-async function saveToken(t) {
+/* on = تنبيه التشكيلة الناقصة، ev = تنبيهات لعيبتي. flags بيغيّر واحد فيهم والتاني بيفضل زي ما هو */
+async function saveToken(t, flags = {}) {
   const old = (S.fcm && Array.isArray(S.fcm.toks)) ? S.fcm.toks : (S.fcm && S.fcm.token ? [S.fcm.token] : []);
   const toks = [...old.filter(x => x && x !== t), t].slice(-MAX_DEVICES);
-  await setDoc(doc(db, 'fcm', S.user.uid), { token: t, toks, on: true, updatedAt: serverTimestamp() });
-  S.fcm = { token: t, toks, on: true };
+  const on = flags.on != null ? flags.on : !!(S.fcm && S.fcm.on), ev = flags.ev != null ? flags.ev : !!(S.fcm && S.fcm.ev);
+  await setDoc(doc(db, 'fcm', S.user.uid), { token: t, toks, on, ev, updatedAt: serverTimestamp() });
+  S.fcm = { token: t, toks, on, ev };
 }
 /* لو التنبيهات مفعّلة، بنتأكد إن توكن الجهاز ده متسجّل (التوكن بيتغير أحياناً، والسيرفر بيشيل التوكن اللي مات) */
 async function refreshPush() {
   try {
     if (!pushConfigured() || !(await isSupported()) || typeof Notification === 'undefined' || Notification.permission !== 'granted') return;
     await loadFcm();
-    if (!S.fcm || !S.fcm.on) return;
+    if (!S.fcm || !(S.fcm.on || S.fcm.ev)) return;
     bindForeground();
     const t = await pushToken();
     const have = Array.isArray(S.fcm.toks) ? S.fcm.toks : [S.fcm.token];
@@ -760,7 +843,7 @@ document.addEventListener('visibilitychange', () => {
   if (document.visibilityState !== 'visible' || !S.user || Date.now() - pushCheckedAt < 6 * 3600000) return;
   pushCheckedAt = Date.now(); refreshPush();
 });
-async function enablePush() {
+async function enablePush(k = 'on') {
   if (!pushConfigured()) return toast('التنبيهات لسه مش جاهزة، الإدارة محتاجة تضيف مفتاح التنبيهات');
   if (isIOS() && !isStandalone()) return toast('على الآيفون ضيف التطبيق للشاشة الرئيسية الأول (مشاركة ثم Add to Home Screen) وافتحه منها');
   try {
@@ -770,14 +853,19 @@ async function enablePush() {
     const token = await pushToken();
     if (!token) return toast('مقدرتش أجيب توكن التنبيهات');
     await loadFcm();
-    await saveToken(token);
+    await saveToken(token, { [k]: true });
     bindForeground();
-    toast('اتفعّلت التنبيهات ✓');
+    toast(k === 'ev' ? 'اتفعّلت تنبيهات لعيبتك ✓' : 'اتفعّلت التنبيهات ✓');
   } catch (e) { console.error(e); toast('مقدرتش أفعّل التنبيهات: ' + (e.code || e.message)); }
   render();
 }
-async function disablePush() {
-  try { const toks = (S.fcm && Array.isArray(S.fcm.toks)) ? S.fcm.toks : []; await setDoc(doc(db, 'fcm', S.user.uid), { token: (S.fcm && S.fcm.token) || '', toks, on: false, updatedAt: serverTimestamp() }); S.fcm = { ...(S.fcm || {}), on: false }; toast('اتقفلت التنبيهات'); }
+async function disablePush(k = 'on') {
+  try {
+    const toks = (S.fcm && Array.isArray(S.fcm.toks)) ? S.fcm.toks : [];
+    const on = k === 'on' ? false : !!(S.fcm && S.fcm.on), ev = k === 'ev' ? false : !!(S.fcm && S.fcm.ev);
+    await setDoc(doc(db, 'fcm', S.user.uid), { token: (S.fcm && S.fcm.token) || '', toks, on, ev, updatedAt: serverTimestamp() });
+    S.fcm = { ...(S.fcm || {}), on, ev }; toast(k === 'ev' ? 'اتقفلت تنبيهات لعيبتك' : 'اتقفلت التنبيهات');
+  }
   catch (e) { toast('مقدرتش أقفلها: ' + (e.code || e.message)); }
   render();
 }
@@ -1049,7 +1137,8 @@ function calcPick(fid, p) {
   const cap = p.cap != null ? (sc.pts[p.cap] || 0) * (CAP_MULT - 1) : 0;
   let steal = 0;
   if (p.chip === 'steal' && p.team != null && sc.status === 'ft') steal = Math.max(0, ...d.players.filter(x => x.t === p.team).map(x => sc.pts[x.i] || 0));
-  return { d, sc, list, base, cap, steal, total: base + cap + steal };
+  const xb = p.xb || 0;   // نقط المحل الزيادة (من Code.gs)
+  return { d, sc, list, base, cap, steal, xb, total: base + cap + steal + xb };
 }
 
 function aggStats() {
@@ -1145,12 +1234,34 @@ function chipsHtml(A) {
     }).join('') : '<div class="m mt">محدش استخدمها.</div>'}</div>`;
   }).join('');
 }
+/* كومبو يدوي: تختار لعيبة (من أي ماتش في النطاق) وتشوف كام واحد اختارهم كلهم مع بعض */
+const MC_MAX = 6;
+function manualCombo(A) {
+  const multi = scopeFx().length > 1;
+  const name = k => { const r = A.picks[k], p = r && ppl(r.fid, r.id); return p ? esc(p.n) + (multi ? ' <span class="sub">' + esc(tsn(r.fid, p)) + '</span>' : '') : '؟'; };
+  const sel = (S.st.mc || []).filter(k => A.picks[k]);
+  let res = '';
+  if (sel.length) {
+    const users = [...A.picks[sel[0]].users].filter(u => sel.every(k => A.picks[k].users.includes(u)));
+    const key = 'mc:' + sel.join(',');
+    res = `<div data-act="sx" data-k="${key}" style="cursor:pointer;padding:10px 0;border-top:1px solid rgba(255,255,255,.18)"><div class="r j"><span class="g">${sel.length > 1 ? 'اختاروهم كلهم مع بعض' : 'اختاروه'}</span><span class="pl ${users.length ? 'ok' : ''}">${N(users.length)} من ${N(A.users.size)}</span></div>${S.st.ex[key] && users.length ? nameList(users) : users.length ? '<div class="m">دوس علشان تشوف الأسماء</div>' : ''}</div>`;
+  }
+  const q = S.st.q.trim().toLowerCase();
+  const opts = Object.keys(A.picks).filter(k => !sel.includes(k)).map(k => ({ k, r: A.picks[k], p: ppl(A.picks[k].fid, A.picks[k].id) }))
+    .filter(x => x.p && (!q || x.p.n.toLowerCase().includes(q))).sort((a, b) => b.r.users.length - a.r.users.length).slice(0, 30);
+  return `<div class="k"><div class="r j"><b>كومبو يدوي</b>${sel.length ? '<button class="lnk" data-act="mcclr">مسح</button>' : ''}</div>
+    <div class="m">اختار لعيبة (لحد ${N(MC_MAX)}) وشوف كام واحد اختارهم كلهم في ${scopeWord()}.${q ? '' : ' تقدر تدوّر بالاسم من خانة البحث فوق.'}</div>
+    ${sel.length ? `<div class="evs" style="grid-template-columns:1fr;margin-top:8px"><div>${sel.map(k => `<button class="evp me" data-act="mcx" data-k="${k}">${name(k)} ×</button>`).join('')}</div></div>` : ''}
+    ${res}
+    ${sel.length < MC_MAX ? `<div class="m mt">${sel.length ? 'زوّد لاعب' : 'اختار لاعب'}</div><div class="evs" style="grid-template-columns:1fr"><div>${opts.length ? opts.map(x => `<button class="evp" data-act="mca" data-k="${x.k}">${name(x.k)} <span class="sub">${N(x.r.users.length)}</span></button>`).join('') : '<span class="m">مفيش لعيبة بالاسم ده.</span>'}</div></div>` : ''}
+  </div>`;
+}
 function comboHtml(A) {
   const lab = (fid, ids) => ids.map(id => { const p = ppl(fid, id); return p ? esc(p.n) : '؟'; }).join(' + ');
   const row = (key, label, users) => `<div data-act="sx" data-k="${key}" style="cursor:pointer;padding:8px 0;border-top:1px solid rgba(255,255,255,.18)"><div class="r j"><span class="g nm" style="font-size:13px">${label}</span><span class="pl">${N(users.length)} لاعبين</span></div>${S.st.ex[key] ? nameList(users) : ''}</div>`;
   const pairs = Object.values(A.pairs).filter(x => x.users.length >= 2).sort((a, b) => b.users.length - a.users.length).slice(0, 15);
   const combos = A.combos.filter(x => x.users.length >= 2).sort((a, b) => b.users.length - a.users.length);
-  return `<div class="k"><b>أكتر لاعبين اتاخدوا مع بعض في ${scopeWord()}</b>${pairs.length ? pairs.map(x => row('p' + x.fid + ':' + x.a + '_' + x.b, lab(x.fid, [x.a, x.b]), x.users)).join('') : '<div class="m mt">مفيش ثنائي اتكرر عند أكتر من لاعب.</div>'}</div>
+  return manualCombo(A) + `<div class="k"><b>أكتر لاعبين اتاخدوا مع بعض في ${scopeWord()}</b>${pairs.length ? pairs.map(x => row('p' + x.fid + ':' + x.a + '_' + x.b, lab(x.fid, [x.a, x.b]), x.users)).join('') : '<div class="m mt">مفيش ثنائي اتكرر عند أكتر من لاعب.</div>'}</div>
   <div class="k"><b>نفس التشكيلة بالظبط</b>${combos.length ? combos.map(x => row('k' + x.k, lab(x.fid, x.ids), x.users)).join('') : '<div class="m mt">مفيش تشكيلتين متطابقتين.</div>'}</div>`;
 }
 function searchHtml(A) {
@@ -1402,9 +1513,11 @@ const nameOfRow = r => S.names[r.uid] || r.name;
 function rankRow(r, tap, sub, attrs) {
   const me = r.uid === S.user.uid;
   const style = me ? 'border-color:#2fd06b;background:rgba(47,208,107,.26)' : '';
-  const nmv = nameOfRow(r);
-  const inner = `<span class="d" style="width:30px;font-size:18px;color:${r.rank <= 3 ? '#f5b301' : '#d0dde8'}">${N(r.rank)}</span>${avatar(photoOf(r.uid), nmv)}<div class="g"><div class="nm">${esc(nmv)}${me ? ' (أنت)' : ''}</div>${sub ? `<div class="sub" style="margin-top:3px">${sub}</div>` : ''}</div><span class="d" style="font-size:20px">${N(r.pts)}</span>`;
-  return tap ? `<button class="k r" data-act="udet" ${attrs || ''} data-uid="${esc(r.uid)}" style="${style}">${inner}</button>` : `<div class="k r" style="${style}">${inner}</div>`;
+  const nmv = nameOfRow(r), deco = decoSub('f', r.uid), bg = bgCss('f', r.uid);
+  const style2 = bg ? bg + (me ? 'border-color:#2fd06b' : '') : style;
+  const sub2 = [deco, sub].filter(Boolean).join(' ');
+  const inner = `<span class="d" style="width:30px;font-size:18px;color:${r.rank <= 3 ? '#f5b301' : '#d0dde8'}">${N(r.rank)}</span>${avatarL('f', r.uid, nmv)}<div class="g"><div class="nm">${decoName('f', r.uid, nmv)}${me ? ' (أنت)' : ''}</div>${sub2 ? `<div class="sub" style="margin-top:3px">${sub2}</div>` : ''}</div><span class="d" style="font-size:20px">${N(r.pts)}</span>`;
+  return tap ? `<button class="k r" data-act="udet" ${attrs || ''} data-uid="${esc(r.uid)}" style="${style2}">${inner}</button>` : `<div class="k r" style="${style2}">${inner}</div>`;
 }
 /* ترتيب ماتش واحد بنفس قواعد الحساب الرسمية (أول خاصيتين في الجولة، وكابتن واحد في اليوم) */
 function matchRanking(fid) {
@@ -1451,7 +1564,7 @@ function vBoard() {
   const note = S.bt === 'gw' ? (b ? (b.final ? 'نقط نهائية' : 'نقط مؤقتة لحد ما الجولة تخلص') + ' · اضغط على أي لاعب تشوف تشكيلته' : '') : 'الإجمالي بيتثبت بعد نهاية كل جولة';
   return `<div class="h"><b>الترتيب</b><span class="m">${when}</span></div>${tabs}
   <div class="f"><div class="m">${note}</div>
-  ${b ? rows.map(r => rankRow(r, tap)).join('') || '<div class="k ctr">مفيش لاعبين لسه.</div>' : '<div class="k ctr">الترتيب لسه ما اتحسبش. بيظهر بعد أول ماتش.</div>'}</div>`;
+  ${b ? rows.map(r => rankRow(r, tap, S.bt === 'gw' && b.it && b.it[r.uid] ? itemPill('f', b.it[r.uid]) : '')).join('') || '<div class="k ctr">مفيش لاعبين لسه.</div>' : '<div class="k ctr">الترتيب لسه ما اتحسبش. بيظهر بعد أول ماتش.</div>'}</div>`;
 }
 
 /* تشكيلة لاعب في الجولة أو في ماتش: بنطبّق نفس قواعد الحساب (أول خاصيتين، وكابتن واحد في اليوم) */
@@ -1460,18 +1573,21 @@ function effPicks(uid, fxs) {
   const used = {}; let nUsed = 0; const capDay = {};
   return list.map(f => {
     const p = { ...S.stats[f.id].users[uid] };
-    let chip = p.chip, dc = false, dcap = false;
+    const sc0 = S.scores[f.id];
+    p.xb = (sc0 && sc0.xb && sc0.xb[uid]) || 0;   // نقط المحل الزيادة
+    let chip = p.chip, dc = false, dcap = false, wasNew = false;
     if (chip) {
-      if (used[chip] || nUsed >= MAX_CHIPS || (chip === 'steal' && p.team !== f.h.id && p.team !== f.a.id)) { chip = null; dc = true; }
-      else { used[chip] = true; nUsed++; }
+      const extra = (p.it === 'chip3' && !used[chip]) || (p.it === 'dup' && used[chip]);   // خاصية تالتة / مكررة (المحل)
+      if ((!extra && (used[chip] || nUsed >= MAX_CHIPS)) || (chip === 'steal' && p.team !== f.h.id && p.team !== f.a.id)) { chip = null; dc = true; }
+      else { wasNew = !used[chip]; if (wasNew) nUsed++; used[chip] = true; }
     }
     let cap = p.cap;
-    if (cap != null) { const dk = dayKey(koOf(f)); if (capDay[dk]) { cap = null; dcap = true; } else capDay[dk] = true; }
+    if (cap != null) { const dk = dayKey(koOf(f)); if ((capDay[dk] || 0) >= (p.it === 'dcap' ? 2 : 1)) { cap = null; dcap = true; } else capDay[dk] = (capDay[dk] || 0) + 1; }
     const eff = { ...p, chip, cap, team: chip ? p.team : null };
     /* زي Code.gs: لو الخاصية اتشالت والتشكيلة مخالفة للقواعد العادية، الماتش كله ما يتحسبش */
-    if (!validIds(S.fxdocs[f.id], p.ids, chip)) {
-      if (chip) { used[chip] = false; nUsed--; }
-      if (cap != null && !dcap) delete capDay[dayKey(koOf(f))];
+    if (!validIds(S.fxdocs[f.id], p.ids, chip, p.it === 'p5')) {
+      if (chip && wasNew) { used[chip] = false; nUsed--; }
+      if (cap != null && !dcap) capDay[dayKey(koOf(f))]--;
       const z = calcPick(f.id, { ...eff, ids: [], cap: null, chip: null });
       return { f, p: eff, c: { ...z, list: calcPick(f.id, eff).list }, droppedChip: dc, droppedCap: dcap, invalid: true };
     }
@@ -1522,7 +1638,8 @@ function vAccount() {
     <div class="k"><div class="r j"><div class="g"><b>صورة البروفايل</b><div class="m">${left ? 'تقدر تغيّرها بعد ' + N(Math.ceil(left / 86400000)) + ' يوم' : 'ارفع صورتك. بعد ما ترفعها مش هتقدر تغيّرها لمدة ٣٠ يوم.'}</div></div>${left ? '<button class="bt" disabled>رفع صورة</button>' : '<label class="bt on" for="pf" style="display:flex;align-items:center;cursor:pointer">رفع صورة</label>'}</div><input id="pf" type="file" accept="image/*" hidden data-in="pfile"></div>
     ${S.editName ? `<form class="k" data-form="rename" style="display:flex;flex-direction:column;gap:10px"><label class="m" for="u2">اسم المستخدم الجديد</label><input id="u2" class="in" name="u" maxlength="24" autocomplete="off" data-in="uname2" value="${esc(S.profile.username)}" required><div id="uhint2" class="m">أي اسم تحبه، بس مينفعش يكون شبه اسم موجود.</div><div class="r"><button class="bt on g" type="submit">حفظ</button><button class="bt g" type="button" data-act="renameCancel">إلغاء</button></div></form>` : '<button class="bt" data-act="renameOpen">تغيير اسم المستخدم</button>'}
     <div style="display:flex;gap:8px"><div class="k ctr g"><div class="d" style="font-size:26px">${me ? N(me.pts) : '—'}</div><div class="m">إجمالي النقط</div></div><div class="k ctr g"><div class="d" style="font-size:26px">${me ? N(me.rank) : '—'}</div><div class="m">المركز${rows.length ? ' من ' + N(rows.length) : ''}</div></div></div>
-    <div class="k"><div class="r j"><div class="g"><b>تنبيهات الماتشات</b><div class="m">${S.fcm && S.fcm.on ? 'مفعّلة: هنبعتلك قبل الماتش بحوالي ساعة لو تشكيلتك ناقصة.' : 'فعّلها علشان يوصلك تنبيه قبل الماتش بساعة لو تشكيلتك ناقصة.'}</div></div><button class="bt ${S.fcm && S.fcm.on ? '' : 'on'}" data-act="push">${S.fcm && S.fcm.on ? 'إيقاف' : 'تفعيل'}</button></div>${isIOS() && !isStandalone() ? '<div class="m warn mt">على الآيفون لازم تضيف التطبيق للشاشة الرئيسية الأول.</div>' : ''}</div>
+    <div class="k"><div class="r j"><div class="g"><b>تنبيهات الماتشات</b><div class="m">${S.fcm && S.fcm.on ? 'مفعّلة: قبل الماتش بساعة ومع بدايته لو تشكيلتك ناقصة، وبعد آخر ماتش في اليوم وفي الجولة.' : 'فعّلها علشان يوصلك تنبيه قبل الماتش بساعة ومع بدايته لو تشكيلتك ناقصة، وبعد آخر ماتش في اليوم وفي الجولة.'}</div></div><button class="bt ${S.fcm && S.fcm.on ? '' : 'on'}" data-act="push">${S.fcm && S.fcm.on ? 'إيقاف' : 'تفعيل'}</button></div>${isIOS() && !isStandalone() ? '<div class="m warn mt">على الآيفون لازم تضيف التطبيق للشاشة الرئيسية الأول.</div>' : ''}</div>
+    <div class="k"><div class="r j"><div class="g"><b>تنبيهات لعيبتي</b><div class="m">${S.fcm && S.fcm.ev ? 'مفعّلة: هيوصلك مع كل جون في ماتشاتك، ولما لاعب من اختياراتك يسجل أو يعمل أسيست أو ياخد كارت أو ديفكون، ولما الكلين يروح.' : 'فعّلها علشان يوصلك تنبيه مع كل جون في ماتشاتك، ولما لاعب من اختياراتك يسجل أو يعمل أسيست أو ياخد كارت أو ديفكون.'}</div></div><button class="bt ${S.fcm && S.fcm.ev ? '' : 'on'}" data-act="pushev">${S.fcm && S.fcm.ev ? 'إيقاف' : 'تفعيل'}</button></div></div>
     <div class="k"><div class="r j"><div class="g"><b>أصوات الأزرار</b><div class="m">صوت هادي مع كل ضغطة، وصوت الدخول.</div></div><button class="sw ${prefOn('snd') ? 'on' : ''}" data-act="psnd" role="switch" aria-checked="${prefOn('snd')}" aria-label="أصوات الأزرار"></button></div>
       ${isStandalone() ? '' : `<div class="r j mt" style="padding-top:10px;border-top:1px solid rgba(255,255,255,.18)"><div class="g"><b>ملء الشاشة</b><div class="m">${fsSupported() ? 'يخفي شريط المتصفح أول ما تدوس على الشاشة.' : 'المتصفح ده مش بيدعمه. ضيف التطبيق للشاشة الرئيسية وهيفتح على الشاشة كلها.'}</div></div>${fsSupported() ? `<button class="sw ${prefOn('fs') ? 'on' : ''}" data-act="pfs" role="switch" aria-checked="${prefOn('fs')}" aria-label="ملء الشاشة"></button>` : ''}</div>`}</div>
     ${S.admin ? '<button class="bt" data-act="admin">لوحة الإدارة</button>' : ''}
@@ -1637,6 +1754,8 @@ const ACTIONS = {
     else if (v === 'stats') { initStats(); S.st.loading = true; render(); await loadStatsScope(); S.st.loading = false; }
     else if (v === 'account') { render(); await Promise.all([S.boards.total ? null : loadBoard('total').catch(() => {}), loadFcm(), loadNames()]); }
     else if (v === 'round') { await loadPicks().catch(() => {}); await loadMyPts(); }
+    else if (v === 'shop') { S.shop.sheet = null; S.shop.loading = true; render(); await Promise.all([loadShop().catch(() => {}), loadNames()]); S.shop.loading = false; }
+    else if (v === 'pred') { S.pr.sheet = null; S.pr.dt = null; S.pr.info = false; render(); await predLoad(); }
     render();
   },
   async gw(el) { S.gw = Number(el.dataset.g); await Promise.all([loadPicks(), loadMyPts()]); chooseDay(); render(); },
@@ -1703,7 +1822,9 @@ const ACTIONS = {
     catch (e) { toast('مقدرتش أحذفها: ' + (e.code || e.message)); }
     render();
   },
-  push() { return (S.fcm && S.fcm.on) ? disablePush() : enablePush(); },
+  push() { return (S.fcm && S.fcm.on) ? disablePush('on') : enablePush('on'); },
+  pushev() { return (S.fcm && S.fcm.ev) ? disablePush('ev') : enablePush('ev'); },
+  evtog() { S.evOpen = !S.evOpen; renderMatchBody(); },
   ssc(el) { S.st.kind = el.dataset.k; refreshStats(); },
   sfx(el) { S.st.kind = 'match'; S.st.fid = el.dataset.fid; refreshStats(); },
   sday(el) { S.st.kind = 'day'; S.st.day = el.dataset.k; refreshStats(); },
@@ -1728,6 +1849,9 @@ const ACTIONS = {
     catch (e) { toast('مقدرتش أمسحها: ' + (e.code || e.message)); }
   },
   sx(el) { const k = el.dataset.k; S.st.ex[k] = !S.st.ex[k]; renderStatsBody(); },
+  mca(el) { const mc = S.st.mc || (S.st.mc = []); if (mc.length < MC_MAX && !mc.includes(el.dataset.k)) mc.push(el.dataset.k); renderStatsBody(); },
+  mcx(el) { S.st.mc = (S.st.mc || []).filter(k => k !== el.dataset.k); renderStatsBody(); },
+  mcclr() { S.st.mc = []; renderStatsBody(); },
   sopp(el) { S.st.opp = el.dataset.u; renderStatsBody(); },
   sopp0() { S.st.opp = null; S.st.oq = ''; renderStatsBody(); },
   steam(el) {
@@ -1761,11 +1885,20 @@ const ACTIONS = {
     else {
       const why = canPick(d, p, pl); if (why) return toast(why);
       p.ids.push(pid);
+      if (p.sub === pid) p.sub = null;
       for (let i = 1; i <= 4; i++) {
         const q = ((S.pos - 1 + i) % 4) + 1;
         if (!p.ids.some(id => { const o = d.players.find(x => x.i === id); return o && o.p === q; })) { S.pos = q; break; }
       }
     }
+    changed(fid);
+  },
+  psub(el, e) {
+    e.stopPropagation();
+    const fid = S.fx, p = pickOf(fid), pid = Number(el.dataset.pid);
+    if (isLocked(fid)) return toast('الماتش بدأ، الاختيار مقفول');
+    if (p.ids.includes(pid)) return toast('اللاعب ده في اختياراتك بالفعل');
+    p.sub = p.sub === pid ? null : pid;
     changed(fid);
   },
   cap(el, e) {
@@ -1925,6 +2058,766 @@ const INPUTS = {
   usearch(t) { S.uq = t.value; const l = $('#ulist'); if (l) l.innerHTML = adminRows(); },
   pfile(t) { const f = t.files && t.files[0]; t.value = ''; if (f) changePhoto(f); }
 };
+/* ═════════════════════ التوقعات ═════════════════════
+   توقع نتيجة كل ماتش + سؤالين، ومعزز ×٢ لماتش واحد في الجولة.
+   البيانات: preds/<fid>_<uid> (توقعي)، pstats/<fid> (نسب النتايج قبل الماتش)،
+   ppub/<fid> (توقعات الكل بعد القفل)، pboard/gw_N و pboard/total (النقط، بيكتبها الـ Apps Script). */
+
+/* لازم تطابق PRED في Code.gs */
+const PRED = { res: 3, home: 2, away: 2, diff: 3, rare: 2, rarePct: 10, rareMin: 5, boost: 2 };
+const PRANGE = [['0-2', '٠-٢'], ['3-4', '٣-٤'], ['5+', '٥+']];
+const PYN = (y, n) => [['yes', 'أيوه', y], ['no', 'لأ', n]];
+const PQ = {
+  scorer: { t: () => 'مين هيجيب جون؟', s: 'جون', pts: 3, player: true },
+  motm: { t: () => 'نجم الماتش: مين هياخد ٣ بونص؟', s: 'نجم الماتش', pts: 5, player: true },
+  assist: { t: () => 'مين هيعمل أسيست؟', s: 'أسيست', pts: 4, player: true },
+  red: { t: () => 'هيبقى فيه كارت أحمر؟', s: 'كارت أحمر', opts: () => PYN(5, 1) },
+  og: { t: () => 'هيبقى فيه جون في مرماه؟', s: 'جون في مرماه', opts: () => PYN(5, 1) },
+  yellow_count: { t: () => 'عدد الكروت الصفرا في الماتش', s: 'الصفرا', pts: 3, opts: () => PRANGE },
+  yellow_more: { t: () => 'مين هياخد كروت صفرا أكتر؟', s: 'كروت أكتر', pts: 3, opts: d => [['h', teamName(d.h)], ['d', 'متساوي'], ['a', teamName(d.a)]] },
+  saves_h: { t: d => 'تصديات حارس ' + teamName(d.h), s: 'تصديات ' + 'الأرض', pts: 3, opts: () => PRANGE },
+  saves_a: { t: d => 'تصديات حارس ' + teamName(d.a), s: 'تصديات ' + 'الضيف', pts: 3, opts: () => PRANGE }
+};
+const pqTitle = (k, d) => PQ[k] ? PQ[k].t(d) + (PQ[k].pts ? ' · +' + N(PQ[k].pts) : '') : k;
+function pqAnsLabel(k, v, d) {
+  if (v == null || v === '') return '—';
+  const q = PQ[k]; if (!q) return String(v);
+  if (q.player) { const p = d && d.players.find(x => x.i === v); return p ? p.n : '؟'; }
+  const o = q.opts(d).find(x => x[0] === v); return o ? o[1] : String(v);
+}
+
+S.pr = { tab: 'm', preds: {}, pst: {}, sheet: null, info: false, open: {}, boards: {}, total: null, pub: {}, bt: 'total', bgw: null, from: null, to: null, month: null, day: null, dt: null, pp: null, loading: false };
+
+/* ───── تحميل ───── */
+async function loadPreds() {
+  const fids = [...new Set(gwFixtures(S.gw).map(f => String(f.id)))], parts = [];
+  for (let i = 0; i < fids.length; i += 30) parts.push(fids.slice(i, i + 30));
+  const snaps = await Promise.all(parts.map(ids => getDocs(query(collection(db, 'preds'), where('uid', '==', S.user.uid), where('fid', 'in', ids)))));
+  const m = {};
+  snaps.forEach(s => s.docs.forEach(d => { const x = d.data(); m[x.fid] = { h: x.h, a: x.a, ans: x.ans || {}, boost: !!x.boost }; }));
+  S.pr.preds = m;
+}
+async function loadPst() {
+  const open = gwFixtures(S.gw).filter(f => koOf(f) && Date.now() < koOf(f));
+  await Promise.all(open.map(async f => {
+    try { const r = await getDoc(doc(db, 'pstats', String(f.id))); S.pr.pst[f.id] = r.exists() ? r.data() : { n: 0, dist: {} }; }
+    catch (e) { S.pr.pst[f.id] = { n: 0, dist: {} }; }
+  }));
+}
+async function loadPb(g) {
+  try { const r = await getDoc(doc(db, 'pboard', 'gw_' + g)); S.pr.boards[g] = r.exists() ? r.data() : null; }
+  catch (e) { S.pr.boards[g] = S.pr.boards[g] || null; }
+}
+async function loadPtotal() {
+  try { const r = await getDoc(doc(db, 'pboard', 'total')); S.pr.total = r.exists() ? r.data() : { rows: [] }; }
+  catch (e) { S.pr.total = S.pr.total || { rows: [] }; }
+}
+/* كل الجولات اللي بدأت (لفلاتر الترتيب): القديمة بتتحمّل مرة، والشغالة بتتحدث */
+async function loadAllPb() {
+  const now = Date.now();
+  const gs = gwNums().filter(g => gwFixtures(g).some(f => koOf(f) && koOf(f) <= now));
+  await Promise.all(gs.map(g => {
+    const b = S.pr.boards[g];
+    return (b === undefined || !b || !b.final) ? loadPb(g) : null;
+  }));
+}
+async function predLoad() {
+  if (S.gw == null) return;
+  S.pr.loading = true;
+  await Promise.all([loadPreds().catch(e => console.error(e)), loadPst(), loadPb(S.gw), loadPtotal(), loadNames()]);
+  if (S.pr.tab === 'b') await loadAllPb();
+  S.pr.loading = false;
+}
+
+/* ───── أدوات ───── */
+const pRow = (fid, uid) => { const b = S.pr.boards[S.gw], x = b && b.fx && b.fx[fid]; return x && x.rows ? x.rows[uid || S.user.uid] || null : null; };
+const pFx = fid => { const b = S.pr.boards[S.gw]; return b && b.fx ? b.fx[fid] || null : null; };
+const pDist = fid => { const p = S.pr.pst[fid]; return p && p.n >= PRED.rareMin ? p.dist || {} : null; };
+const pPops = dist => Object.keys(dist || {}).filter(k => dist[k] >= PRED.rarePct).sort((x, y) => dist[y] - dist[x]).slice(0, 4).map(k => { const [h, a] = k.split('-').map(Number); return { h, a, pct: dist[k] }; });
+const scoreHtml = (h, a) => `<span class="sc"><b>${h}</b><i>-</i><b>${a}</b></span>`;
+const ptsLabel = n => n ? N(n) + ' نقطة' : 'مفيش نقط';
+const myPredTotal = () => { const t = S.pr.total, r = t && t.rows && t.rows.find(x => x.uid === S.user.uid); return r ? r.pts : 0; };
+const fxDocQ = fid => { const d = S.fxdocs[fid]; return (d && d.q) || []; };
+
+/* ───── الشاشة ───── */
+function vPred() {
+  const P = S.pr;
+  const head = `<div class="h"><b>التوقعات</b><div class="ctr"><div class="m">نقطك</div><div class="d" style="font-size:24px">${N(myPredTotal())}</div></div></div>
+  <div class="tg eq"><button class="bt ${P.tab === 'm' ? 'on' : ''}" data-act="ptab" data-k="m">الماتشات</button><button class="bt ${P.tab === 'b' ? 'on' : ''}" data-act="ptab" data-k="b">الترتيب</button></div>`;
+  const body = P.tab === 'b' ? pBoardHtml() : pMatchesHtml();
+  return head + body + '<div id="psh"></div>';
+}
+function pMatchesHtml() {
+  const g = S.gw;
+  if (g == null) return `<div class="f"><div class="k ctr">مفيش جولات متاحة لسه.</div></div>`;
+  const nums = gwNums();
+  const days = daysOf(g);
+  return `${nums.length > 1 ? `<div class="tg eq">${nums.map(n => `<button class="bt ${n === g ? 'on' : ''}" data-act="pgw" data-g="${n}">الجولة ${N(n)}</button>`).join('')}</div>` : ''}
+  <div class="f">${days.map((d, i) => `<div class="r j" style="margin-top:4px;min-height:40px"><span class="m" style="font-size:14px;font-weight:700">${esc(d.label)}</span>${i === 0 ? `<button class="ib" data-act="pinfo" aria-label="إزاي النقط بتتحسب">${INFO_SVG}</button>` : ''}</div>${d.list.map(pcard).join('')}`).join('') || '<div class="k ctr">مفيش ماتشات في الجولة دي.</div>'}</div>`;
+}
+function pcard(f) {
+  const P = S.pr, fid = String(f.id), k = koOf(f), p = P.preds[fid], started = k && Date.now() >= k;
+  const x0 = started ? pFx(fid) : null, lv = started ? liveOf(fid) : null, row = started ? pRow(fid) : null, boosted = !!(p && p.boost);
+  const x = x0 && lv ? { ...x0, r: lv.r, m: lv.m, st: lv.s } : x0;
+  const team = t => `<div class="t">${crest(t, 50)}<span style="font-size:15px">${esc(teamName(t))}</span></div>`;
+  const box = v => `<span class="sb">${v}</span>`;
+  const boxes = started || !k
+    ? `<div class="r" style="gap:10px">${box(p ? p.h : '–')}${box(p ? p.a : '–')}</div>`
+    : `<button class="r" style="gap:10px;border:0;background:none;padding:0" data-act="popen" data-fid="${fid}" aria-label="اكتب توقعك">${box(p ? p.h : '+')}${box(p ? p.a : '+')}</button>`;
+  let mid = '';
+  if (!k) mid = '<span class="m">مواعيده لسه مش معروفة</span>';
+  else if (!started) {
+    const dist = pDist(fid), pops = pPops(dist);
+    mid = p ? `<span class="m">جاوبت ${N(Object.keys(p.ans || {}).length)} من سؤالين</span>`
+      : (pops.length ? `<div class="m" style="font-size:11px">التوقعات الشائعة</div><div class="r" style="gap:8px;justify-content:center">${pops.map(o => `<div class="ctr"><span class="pc">${scoreHtml(o.h, o.a)}</span><div class="m" style="font-size:11px">${N(o.pct)}٪</div></div>`).join('')}</div>`
+        : `<span class="m">معاه سؤالين</span>`);
+  } else if (x) {
+    const exact = p && x.st === 'ft' && p.h === x.r[0] && p.a === x.r[1];
+    mid = x.st === 'live'
+      ? `<div class="r" style="gap:8px;justify-content:center"><span class="pl lv">مباشر ${x.m ? N(x.m) + "'" : ''}</span>${scoreHtml(x.r[0], x.r[1])}</div>`
+      : (exact ? '<span class="pl ok" style="background:#2fbf5b;color:#04150a">ممتاز!</span>' : `<span class="m">النهاية: ${scoreHtml(x.r[0], x.r[1])}</span>`);
+  } else mid = '<span class="m">بدأ · النقط بتتحسب</span>';
+  const pit = !started ? myItemCode('p', fid) : null, pin = started && x0 && x0.it ? x0.it[S.user.uid] : null;
+  if (pit) mid += `<div style="margin-top:4px">${itemPill('p', pit)}</div>`;
+  else if (pin) mid += `<div style="margin-top:4px">${itemPill('p', pin.c)}</div>`;
+  let foot = '';
+  if (k && !started && p) {
+    foot = boosted
+      ? `<button class="pf bo" data-act="pboost" data-fid="${fid}"><span class="r" style="gap:6px">${BOLT}المعزز ×٢ شغال</span><span style="font-size:12px">إلغاء</span></button>`
+      : `<button class="pf" data-act="pboost" data-fid="${fid}"><span>شغّل المعزز ×٢</span><span class="m">واحد في الجولة</span></button>`;
+  } else if (started) {
+    const tot = row ? row[0] : 0, open = !!P.open[fid];
+    foot = `<button class="pf ${row && row[8] ? 'bo' : ''}" data-act="pexp" data-fid="${fid}"><span class="r" style="gap:6px">${row && row[8] ? BOLT : ''}${p ? ptsLabel(tot) : 'متوقعتش'}${x && x.st === 'live' ? ' <span class="pl" style="font-size:10px">مؤقت</span>' : ''}</span><span class="r" style="gap:4px;font-size:13px">التفاصيل<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" style="transform:${open ? 'rotate(180deg)' : 'none'}"><path d="M6 9l6 6 6-6"/></svg></span></button>`;
+    if (open) foot += `<div class="pd">
+      ${x ? `<div class="r j"><div><div class="m">${x.st === 'live' ? 'النتيجة دلوقتي' : 'النتيجة النهائية'}</div><b style="font-size:16px">${scoreHtml(x.r[0], x.r[1])}</b></div>${p && row ? `<button class="lnk" style="text-decoration:none;font-weight:700" data-act="pdet" data-fid="${fid}">+${N(row[0])} نقطة ‹</button>` : ''}</div>` : ''}
+      <button class="lnk" style="text-decoration:none;text-align:start;padding:12px 0 0" data-act="ppl" data-fid="${fid}">شوف توقعات اللاعبين ‹</button></div>`;
+  }
+  return `<div class="k pk ${x && p && x.st === 'ft' && p.h === x.r[0] && p.a === x.r[1] ? 'ex' : ''}">
+    <div class="ctr m" style="font-size:14px;margin-bottom:12px">${k ? fmtTime(k) : '—'}</div>
+    <div class="pkr">${team(f.h)}<div style="display:flex;flex-direction:column;align-items:center;gap:10px">${boxes}${mid}</div>${team(f.a)}</div>${foot ? `<div class="pft">${foot}</div>` : ''}</div>`;
+}
+const BOLT = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M13 2L4 14h7l-1 8 9-12h-7z"/></svg>';
+const INFO_SVG = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5"/></svg>';
+
+/* ───── الشيتات (بتترسم لوحدها علشان السكرول ميتحركش) ───── */
+function renderSheet() {
+  const el = $('#psh'); if (!el) return;
+  const old = el.querySelector('.sh'), top = old ? old.scrollTop : 0;
+  const P = S.pr;
+  el.innerHTML = P.sheet ? (P.sheet.picker ? pickerHtml() : sheetHtml()) : P.dt ? detHtml() : P.info ? infoHtml() : '';
+  const nw = el.querySelector('.sh'); if (nw && old) nw.scrollTop = top;
+}
+const ov = (inner, close) => `<div class="ov" data-act="${close}"><div class="sh" data-act="noop"><div class="hd"></div>${inner}</div></div>`;
+function wheel(side, v) {
+  return `<div class="wh" data-wheel="${side}"><button class="nb" data-act="pwh" data-k="${side}" data-d="-1" aria-label="قلّل">${v > 0 ? v - 1 : ''}</button><div class="nv2">${v}</div><button class="nb" data-act="pwh" data-k="${side}" data-d="1" aria-label="زوّد">${v < 9 ? v + 1 : ''}</button></div>`;
+}
+function sheetHtml() {
+  const sh = S.pr.sheet, d = S.fxdocs[sh.fid];
+  if (!d) return ov('<div class="ctr m">جاري التحميل…</div>', 'pclose');
+  const dist = pDist(sh.fid), pct = dist ? (dist[sh.h + '-' + sh.a] || 0) : null;
+  const pops = pPops(dist);
+  const qs = (d.q || []).map(k => {
+    const q = PQ[k]; if (!q) return '';
+    const v = sh.ans[k];
+    const ctl = q.player
+      ? `<button class="bt" style="display:flex;justify-content:space-between;align-items:center;width:100%;${v != null ? 'border-color:#2fd06b;background:rgba(47,208,107,.22)' : ''}" data-act="ppick" data-k="${k}"><span>${v != null ? esc(pqAnsLabel(k, v, d)) : 'اختار لاعب'}</span><span>⌄</span></button>`
+      : `<div class="r" style="gap:6px">${q.opts(d).map(o => `<button class="bt ${v === o[0] ? 'on' : ''}" style="flex:1;min-width:0;padding:0 6px;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" data-act="pq" data-k="${k}" data-v="${esc(o[0])}">${esc(o[1])}${o[2] ? ' · +' + N(o[2]) : ''}</button>`).join('')}</div>`;
+    return `<div style="display:flex;flex-direction:column;gap:6px"><div class="m" style="font-size:13px">${esc(pqTitle(k, d))}</div>${ctl}</div>`;
+  }).join('');
+  const pit = myItem('p', sh.fid);
+  let extra = '';
+  if (pit && pit.item === 'dbl') extra += `<div style="height:1px;background:rgba(255,255,255,.18)"></div><div class="r j"><b>توقعك التاني</b>${itemPill('p', 'dbl')}</div><div class="r" style="gap:12px;justify-content:center">${wheel('h2', sh.h2)}${wheel('a2', sh.a2)}</div><div class="m ctr">بيتحسبلك الأحسن من النتيجتين</div>`;
+  if (pit && pit.item === 'q3' && d.q3 && PQ[d.q3]) {
+    const k = d.q3, q = PQ[k], v = sh.ans[k];
+    const ctl = q.player
+      ? `<button class="bt" style="display:flex;justify-content:space-between;align-items:center;width:100%;${v != null ? 'border-color:#2fd06b;background:rgba(47,208,107,.22)' : ''}" data-act="ppick" data-k="${k}"><span>${v != null ? esc(pqAnsLabel(k, v, d)) : 'اختار لاعب'}</span><span>⌄</span></button>`
+      : `<div class="r" style="gap:6px">${q.opts(d).map(o => `<button class="bt ${v === o[0] ? 'on' : ''}" style="flex:1;min-width:0;padding:0 6px;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" data-act="pq" data-k="${k}" data-v="${esc(o[0])}">${esc(o[1])}${o[2] ? ' · +' + N(o[2]) : ''}</button>`).join('')}</div>`;
+    extra += `<div style="height:1px;background:rgba(255,255,255,.18)"></div><div class="r j"><b>السؤال التالت</b>${itemPill('p', 'q3')}</div><div style="display:flex;flex-direction:column;gap:6px"><div class="m" style="font-size:13px">${esc(pqTitle(k, d))}</div>${ctl}</div>`;
+  }
+  if (pit && !['dbl', 'q3'].includes(pit.item)) extra += `<div class="r j"><span class="m">متفعّل على الماتش ده</span>${itemPill('p', pit.item)}</div>`;
+  const form = s => `<span class="r" style="gap:4px">${(s || '').split('').map(c => `<span class="fm ${c}">${c === 'W' ? 'ف' : c === 'D' ? 'ت' : 'خ'}</span>`).join('') || '<span class="m">—</span>'}</span>`;
+  return ov(`
+    <div class="r j"><div class="t" style="width:84px">${crest(d.h, 40)}<span style="font-size:13px">${esc(teamName(d.h))}</span></div>
+      <div class="r" style="gap:12px">${wheel('h', sh.h)}${wheel('a', sh.a)}</div>
+      <div class="t" style="width:84px">${crest(d.a, 40)}<span style="font-size:13px">${esc(teamName(d.a))}</span></div></div>
+    <div class="r" style="gap:8px;justify-content:center;flex-wrap:wrap"><span class="m">${pct == null ? 'النسب بتظهر لما ' + N(PRED.rareMin) + ' يتوقعوا الماتش' : 'النتيجة دي توقعها ' + N(pct) + '٪ لحد دلوقتي'}</span>${pct != null && pct < PRED.rarePct ? `<span class="pl" style="background:rgba(245,179,1,.2);color:#ffd45c">نادرة · +${N(PRED.rare)} لو جت</span>` : ''}</div>
+    ${pops.length ? `<div style="height:1px;background:rgba(255,255,255,.18)"></div><div class="m ctr">التوقعات الشائعة (${N(PRED.rarePct)}٪ أو أكتر)</div>
+    <div class="r" style="gap:10px;justify-content:center">${pops.map(o => `<button class="chp ${o.h === sh.h && o.a === sh.a ? 'on' : ''}" data-act="ppop" data-h="${o.h}" data-a="${o.a}"><span>${scoreHtml(o.h, o.a)}</span><span class="m" style="font-size:11px">${N(o.pct)}٪</span></button>`).join('')}</div>` : ''}
+    ${qs ? `<div style="height:1px;background:rgba(255,255,255,.18)"></div><div class="r j"><b>أسئلة الماتش</b><span class="m">اختيارية</span></div>${qs}` : ''}${extra}
+    <button class="bt on" style="height:50px" data-act="psave">احفظ التوقع</button>
+    <div class="r j"><div style="display:flex;flex-direction:column;gap:6px"><span class="m" style="font-weight:700">${esc(teamName(d.h))} · آخر ٥</span>${form(d.hf)}</div><div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end"><span class="m" style="font-weight:700">${esc(teamName(d.a))} · آخر ٥</span>${form(d.af)}</div></div>`, 'pclose');
+}
+function pickerHtml() {
+  const sh = S.pr.sheet, d = S.fxdocs[sh.fid], k = sh.picker;
+  const grp = t => d.players.filter(x => x.t === t.id && x.s !== 'u').sort((a, b) => (b.tp || 0) - (a.tp || 0));
+  const rows = t => grp(t).map(pl => `<button class="k r pr ${sh.ans[k] === pl.i ? 'sel' : ''}" data-act="pplayer" data-pid="${pl.i}">${photo(pl)}<div class="g"><div class="nm">${esc(pl.n)}</div><div class="sub">${POS[pl.p]} · ${N(pl.tp || 0)} نقطة فانتاسي</div></div></button>`).join('');
+  return ov(`<div class="r j"><b style="font-size:17px">${esc(pqTitle(k, d))}</b><button class="bt" style="width:44px;padding:0" data-act="ppickx" aria-label="رجوع">×</button></div>
+    <div class="m">${esc(teamName(d.h))}</div>${rows(d.h)}<div class="m">${esc(teamName(d.a))}</div>${rows(d.a)}`, 'ppickx');
+}
+function infoHtml() {
+  const line = (a, b) => `<div class="r j" style="padding:6px 0;border-bottom:1px solid rgba(255,255,255,.08)"><span>${a}</span><b>${b}</b></div>`;
+  return ov(`<b style="font-size:20px">إزاي النقط بتتحسب</b>
+    <div><div class="nm" style="color:#8bffb8;margin-bottom:4px">توقع النتيجة</div><div class="m">النقط بتتجمع من البنود دي:</div>
+    ${line('الفايز صح (أو التعادل)', N(PRED.res))}${line('أهداف صاحب الأرض مظبوطة', N(PRED.home))}${line('أهداف الضيف مظبوطة', N(PRED.away))}${line('فارق الأهداف مظبوط', N(PRED.diff))}${line('النتيجة بالظبط', N(PRED.res + PRED.home + PRED.away + PRED.diff))}</div>
+    <div><div class="nm" style="color:#ffd45c;margin-bottom:4px">النتيجة النادرة: +${N(PRED.rare)}</div><div class="m" style="line-height:1.6">لو جبت النتيجة بالظبط، وكان اللي توقعوها أقل من ${N(PRED.rarePct)}٪ من اللاعبين. النتايج اللي ظاهرة على الكارت هي اللي ${N(PRED.rarePct)}٪ أو أكتر، يعني أي نتيجة مش ظاهرة تبقى نادرة. النسبة بتتحسب وقت صفارة البداية، فممكن نتيجة نادرة دلوقتي تبطل نادرة لو ناس كتير اختاروها بعدك. وبتشتغل لما يبقى فيه ${N(PRED.rareMin)} توقعات على الأقل.</div></div>
+    <div><div class="nm" style="color:#ffd45c;margin-bottom:4px">المعزز ×${N(PRED.boost)}</div><div class="m" style="line-height:1.6">ماتش واحد في الجولة، وبيضاعف نقط الماتش كله (النتيجة والأسئلة). تقدر تنقله لماتش تاني طول ما الماتش اللي عليه لسه مبدأش. لو مااستخدمتهوش بيضيع، ولو الماتش اتأجل بيرجعلك.</div></div>
+    <div><div class="nm" style="color:#8bffb8;margin-bottom:4px">الأسئلة</div><div class="m" style="line-height:1.6">سؤالين مع كل ماتش والإجابة اختيارية، ونقط كل سؤال مكتوبة جنبه. لو اللاعب اللي اخترته ملعبش الإجابة غلط، ونجم الماتش بيتثبت بعد ما FPL يأكد البونص.</div></div>
+    <div><div class="nm" style="color:#8bffb8;margin-bottom:4px">القفل والنقط</div><div class="m" style="line-height:1.6">التوقع بيتقفل مع صفارة البداية. أثناء الماتش النقط مؤقتة، وبتتثبت لما FPL يثبّت الجولة. الماتش المؤجل توقعك بيفضل محفوظ ويتنقل مع ميعاده الجديد.</div></div>
+    <button class="bt on" style="height:48px" data-act="pinfox">تمام</button>`, 'pinfox');
+}
+function detHtml() {
+  const fid = S.pr.dt, x = pFx(fid), row = pRow(fid), p = S.pr.preds[fid], d = S.fxdocs[fid];
+  if (!x || !row || !p) return '';
+  const out = s => { const t = Math.sign(s[0] - s[1]); return t > 0 ? 'أرض' : t < 0 ? 'ضيف' : 'تعادل'; };
+  const pv = v => v < 0 ? '<span class="m">لسه</span>' : v ? `<b style="color:#8bffb8">+${N(v)}</b>` : '<span class="m">٠</span>';
+  const tr = (a, sub, r, y, v) => `<div style="display:grid;grid-template-columns:minmax(0,1fr) 54px 54px 56px;align-items:center;min-height:44px;border-bottom:1px solid rgba(255,255,255,.08)"><div><div class="nm" style="font-size:14px">${a}</div>${sub ? `<div class="sub">${sub}</div>` : ''}</div><div class="ctr">${r}</div><div class="ctr">${y}</div><div style="text-align:end">${pv(v)}</div></div>`;
+  const qs = (x.q || []).map((k, i) => tr(esc(PQ[k] ? PQ[k].s : k), '', '', esc(pqAnsLabel(k, (p.ans || {})[k], d)), row[6 + i])).join('');
+  return ov(`<b style="font-size:20px">${x.st === 'live' ? 'النقط لحد دلوقتي' : 'النتيجة بالتفصيل'}</b>
+    <div style="display:grid;grid-template-columns:minmax(0,1fr) 54px 54px 56px" class="m"><span>البند</span><span class="ctr">النتيجة</span><span class="ctr">توقعك</span><span style="text-align:end">نقط</span></div>
+    ${tr('الفايز', '', out(x.r), out([p.h, p.a]), row[1])}${tr('أهداف صاحب الأرض', '', x.r[0], p.h, row[2])}${tr('أهداف الضيف', '', x.r[1], p.a, row[3])}${tr('فارق الأهداف', '', x.r[0] - x.r[1], p.h - p.a, row[4])}${tr('النتيجة النادرة', 'بالظبط وأقل من ' + N(PRED.rarePct) + '٪ توقعوها', '', '', row[5])}${qs}
+    ${row[8] ? `<div class="r j" style="min-height:40px"><span class="nm" style="color:#ffd45c">المعزز</span><b style="color:#ffd45c">×${N(PRED.boost)}</b></div>` : ''}${pItemLines(x, d)}
+    <div class="k r j" style="font-weight:800;font-size:16px"><span>${x.st === 'live' ? 'المجموع المؤقت' : 'مجموع النقط'}</span><span>${row[0] ? '+' + N(row[0]) + ' نقطة' : 'مفيش نقط'}</span></div>`, 'pdetx');
+}
+
+/* سطور حاجة المحل في تفاصيل النقط (من pboard: fx.it[uid]) */
+function pItemLines(x, d) {
+  const it = x && x.it && x.it[S.user.uid]; if (!it) return '';
+  const ln = (a, b) => `<div class="r j" style="min-height:36px"><span class="nm" style="color:#ffd45c">${a}</span><b style="color:#ffd45c">${b}</b></div>`;
+  let h = ln(COIN + ' ' + esc(itemDef('p', it.c).n), '');
+  if (it.c === 'dbl' && it.x2) h += ln('توقعك التاني ' + scoreHtml(it.x2[0], it.x2[1]), it.alt ? 'هو اللي اتحسب' : 'الأول أحسن');
+  if (it.b) h += ln('النتيجة الذهبية', '+' + N(it.b));
+  if (it.c === 'q3' && it.k3) h += ln(esc(PQ[it.k3] ? PQ[it.k3].s : it.k3) + ': ' + esc(pqAnsLabel(it.k3, it.v3, d)), it.q3 < 0 ? 'لسه' : '+' + N(Math.max(0, it.q3 || 0)));
+  if (it.c === 'q2x') h += ln('نقط الأسئلة', '×٢');
+  if (it.m > 1 && (it.c === 'pb3' || it.c === 'pb2')) h += ln('المضاعف', '×' + N(it.m));
+  if (it.s) h += ln('شبكة الأمان', '+' + N(it.s));
+  return h;
+}
+
+/* ───── توقعات اللاعبين (بعد القفل) ───── */
+function vPpl() {
+  const P = S.pr, fid = P.pp, f = fxInfo(fid), x = pFx(fid), pub = P.pub[fid], d = S.fxdocs[fid];
+  const chips = startedFx(S.gw).map(g => `<button class="bt ${String(g.id) === String(fid) ? 'on' : ''}" style="flex:none;font-size:12px" data-act="pplfx" data-fid="${g.id}">${esc(g.h.sn)} - ${esc(g.a.sn)}</button>`).join('');
+  const head = `<div class="h"><button class="bt" data-act="pback" style="padding:0 14px" aria-label="رجوع">›</button><div class="g"><b style="font-size:20px">توقعات اللاعبين</b></div></div><div class="tg">${chips}</div>`;
+  if (!f || pub === undefined) return head + '<div class="f"><div class="k ctr">جاري التحميل…</div></div>';
+  if (!pub) return head + '<div class="f"><div class="k ctr">التوقعات بتتنشر بعد بداية الماتش بدقايق، حدّث كمان شوية.</div></div>';
+  const by = pub.byUser || {}, uids = Object.keys(by).filter(u => !S.gone.has(u));
+  const cnt = {}; uids.forEach(u => { const k = by[u].h + '-' + by[u].a; cnt[k] = (cnt[k] || 0) + 1; });
+  const dist = {}; Object.keys(cnt).forEach(k => { dist[k] = Math.round(cnt[k] / uids.length * 100); });
+  const pops = uids.length >= PRED.rareMin ? pPops(dist) : [];
+  const rows = uids.map(u => { const r = x && x.rows && x.rows[u]; return { u, p: by[u], pts: r ? r[0] : 0, name: pub.names[u] || nm(u) }; })
+    .sort((a, b) => (b.pts - a.pts) || byName(a.name, b.name));
+  const ans = p => (pub.q || []).map(k => p.ans && p.ans[k] != null ? esc((PQ[k] ? PQ[k].s : k) + ': ' + pqAnsLabel(k, p.ans[k], d)) : '').filter(Boolean).join(' · ');
+  return head + `<div class="f">
+    <div class="k"><div class="r j">${crest(f.h)}<div class="ctr"><div class="d" style="font-size:30px">${x ? scoreHtml(x.r[0], x.r[1]) : '–'}</div><div class="m">${x ? (x.st === 'live' ? 'مباشر ' + (x.m ? N(x.m) + "' " : '') + '· النقط مؤقتة' : 'انتهى') : 'بدأ'}</div></div>${crest(f.a)}</div>
+    ${pops.length ? `<div class="m ctr mt">التوقعات الشائعة</div><div class="r" style="gap:12px;justify-content:center">${pops.map(o => `<div class="ctr">${scoreHtml(o.h, o.a)}<div class="m" style="font-size:11px">${N(o.pct)}٪</div></div>`).join('')}</div>` : ''}</div>
+    <div class="m">كل اللاعبين · ${N(rows.length)}</div>
+    ${rows.map(r => { const me = r.u === S.user.uid; return `<div class="k r" style="${me ? 'border-color:#2fd06b;background:rgba(47,208,107,.22)' : ''}">${avatar(photoOf(r.u), r.name)}<div class="g"><div class="nm">${esc(r.name)}${me ? ' (أنت)' : ''}${r.p.boost ? ' <span class="pl" style="background:#f5b301;color:#1a1300">×٢</span>' : ''}${r.p.it ? ' ' + itemPill('p', r.p.it.c) : ''}${r.p.it && r.p.it.x2 ? ' <span class="pl">التاني ' + r.p.it.x2[0] + '-' + r.p.it.x2[1] + '</span>' : ''}</div>${ans(r.p) ? `<div class="sub">${ans(r.p)}</div>` : ''}</div><b style="font-size:18px">${scoreHtml(r.p.h, r.p.a)}</b><span class="d" style="min-width:56px;text-align:end">${N(r.pts)}</span></div>`; }).join('') || '<div class="k ctr">محدش توقع الماتش ده.</div>'}
+  </div>`;
+}
+
+/* ───── الترتيب ───── */
+const monthName = ym => { const [y, m] = ym.split('-').map(Number); return new Intl.DateTimeFormat('ar-EG', { month: 'long', timeZone: 'UTC' }).format(Date.UTC(y, m - 1, 15)); };
+function pBoardHtml() {
+  const P = S.pr, docs = gwNums().map(g => [g, P.boards[g]]).filter(e => e[1] && e[1].fx && Object.keys(e[1].fx).length);
+  const gws = docs.map(e => e[0]), months = [...new Set(docs.map(e => e[1].month).filter(Boolean))].sort();
+  const days = [...new Set(docs.flatMap(e => Object.values(e[1].fx).map(x => x.d)))].sort();
+  const cur = gws.length ? gws[gws.length - 1] : null;
+  if (P.bgw == null || !gws.includes(P.bgw)) P.bgw = cur;
+  if (P.from == null || !gws.includes(P.from)) P.from = gws[0] ?? null;
+  if (P.to == null || !gws.includes(P.to)) P.to = cur;
+  if (P.month == null || !months.includes(P.month)) P.month = months[months.length - 1] ?? null;
+  if (P.day == null || !days.includes(P.day)) P.day = days[days.length - 1] ?? null;
+  const modes = [['total', 'الإجمالي'], ['gw', 'جولة'], ['range', 'من جولة لجولة'], ['month', 'شهر'], ['day', 'يوم']];
+  let sub = '';
+  if (P.bt === 'gw') sub = `<div class="tg">${gws.map(g => `<button class="bt ${g === P.bgw ? 'on' : ''}" style="flex:none" data-act="pbg" data-g="${g}">الجولة ${N(g)}</button>`).join('')}</div>`;
+  if (P.bt === 'range') sub = `<div class="tg eq" style="align-items:center">${['from', 'to'].map(w => `<div class="k r j" style="flex:1;padding:4px"><button class="bt" style="width:40px;padding:0" data-act="pbr" data-w="${w}" data-d="-1" aria-label="أقدم">−</button><div class="ctr"><div class="m" style="font-size:10px">${w === 'from' ? 'من' : 'لحد'}</div><b style="font-size:13px">الجولة ${N(P[w] ?? 0)}</b></div><button class="bt" style="width:40px;padding:0" data-act="pbr" data-w="${w}" data-d="1" aria-label="أحدث">+</button></div>`).join('')}</div>`;
+  if (P.bt === 'month') sub = `<div class="tg">${months.map(m => `<button class="bt ${m === P.month ? 'on' : ''}" style="flex:none" data-act="pbm" data-m="${m}">${esc(monthName(m))}</button>`).join('')}</div>`;
+  if (P.bt === 'day') sub = `<div class="tg">${[...days].reverse().map(k => `<button class="bt ${k === P.day ? 'on' : ''}" style="flex:none;font-size:13px" data-act="pbd" data-k="${k}">${esc(fmtDay(Date.parse(k + 'T12:00:00Z')))}</button>`).join('')}</div>`;
+  /* التجميع */
+  const agg = {}; let live = false;
+  if (P.bt === 'total') (P.total && P.total.rows || []).forEach(r => { agg[r.uid] = { pts: r.pts, ex: r.ex || 0, name: r.name }; });
+  else docs.forEach(([g, b]) => {
+    const okGw = P.bt === 'gw' ? g === P.bgw : P.bt === 'range' ? g >= P.from && g <= P.to : P.bt === 'month' ? b.month === P.month : true;
+    if (!okGw) return;
+    Object.values(b.fx).forEach(x => {
+      if (P.bt === 'day' && x.d !== P.day) return;
+      if (x.st === 'live') live = true;
+      Object.keys(x.rows || {}).forEach(u => { const r = x.rows[u], o = agg[u] = agg[u] || { pts: 0, ex: 0 }; o.pts += r[0]; if (r[2] > 0 && r[3] > 0) o.ex++; });
+    });
+  });
+  if (P.bt === 'total') live = docs.some(([, b]) => Object.values(b.fx).some(x => x.st === 'live'));
+  const banned = new Set(S.userList.filter(u => u.banned).map(u => u.id));
+  const list = Object.keys(agg).filter(u => !S.gone.has(u) && !banned.has(u)).map(u => ({ uid: u, name: S.names[u] || agg[u].name || nm(u), pts: agg[u].pts, ex: agg[u].ex }))
+    .sort((a, b) => (b.pts - a.pts) || (b.ex - a.ex) || byName(a.name, b.name));
+  let rank = 0, prev = null;
+  list.forEach((r, i) => { if (!prev || r.pts !== prev.pts || r.ex !== prev.ex) rank = i + 1; r.rank = rank; prev = r; });
+  const me = list.find(r => r.uid === S.user.uid);
+  const scope = P.bt === 'total' ? 'من أول الموسم' : P.bt === 'gw' ? 'الجولة ' + N(P.bgw ?? 0) : P.bt === 'range' ? 'من الجولة ' + N(P.from ?? 0) + ' لحد الجولة ' + N(P.to ?? 0) : P.bt === 'month' ? (P.month ? 'شهر ' + monthName(P.month) : '') : (P.day ? fmtDay(Date.parse(P.day + 'T12:00:00Z')) : '');
+  const ring = ['#f5b301', '#d0dde8', '#e0a070'];
+  const pod = list.slice(0, 3).map((r, i) => `<div style="display:flex;flex-direction:column;align-items:center;gap:6px;min-width:0">${avatarL('p', r.uid, r.name, i ? 46 : 56)}<div class="nm" style="font-size:13px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${decoName('p', r.uid, r.name)}</div><div class="k ctr" style="padding:6px;height:${i === 0 ? 92 : i === 1 ? 72 : 58}px;display:flex;flex-direction:column;justify-content:center;${r.uid === S.user.uid ? 'border-color:#2fd06b' : ''}"><div class="d" style="font-size:22px;color:${ring[i]}">${N(r.rank)}</div><div style="font-weight:700;font-size:13px">${N(r.pts)}</div></div></div>`);
+  const podium = pod.length === 3 ? [pod[1], pod[0], pod[2]] : pod;
+  return `<div class="tg">${modes.map(m => `<button class="bt ${P.bt === m[0] ? 'on' : ''}" style="flex:none" data-act="pbt" data-k="${m[0]}">${m[1]}</button>`).join('')}</div>${sub}
+  <div class="f"><div class="r j m"><span>${esc(scope)}${me ? ' · مركزك ' + N(me.rank) + ' من ' + N(list.length) : ''}</span>${live ? '<span class="pl lv">فيه ماتش شغال · النقط مؤقتة</span>' : ''}</div>
+  ${P.loading && !list.length ? '<div class="k ctr">جاري التحميل…</div>' : !list.length ? '<div class="k ctr">لسه مفيش نقط في الفترة دي.</div>' : `
+  <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;align-items:end">${podium.join('')}</div>
+  ${list.slice(3).map(r => { const mine = r.uid === S.user.uid, bg = bgCss('p', r.uid), ds = decoSub('p', r.uid); return `<div class="k r" style="${bg ? bg + (mine ? 'border-color:#2fd06b' : '') : mine ? 'border-color:#2fd06b;background:rgba(47,208,107,.26)' : ''}"><span class="d" style="width:26px;text-align:center;color:#d0dde8">${N(r.rank)}</span>${avatarL('p', r.uid, r.name)}<div class="g"><div class="nm">${decoName('p', r.uid, r.name)}${mine ? ' (أنت)' : ''}</div><div class="sub">${ds ? ds + ' · ' : ''}${r.ex ? N(r.ex) + ' نتيجة مظبوطة' : 'مفيش نتايج مظبوطة'}</div></div><span class="d" style="font-size:20px">${N(r.pts)}</span></div>`; }).join('')}`}
+  </div>`;
+}
+
+/* ───── الحفظ والمعزز ───── */
+async function savePred() {
+  const sh = S.pr.sheet, fid = String(sh.fid), d = S.fxdocs[fid];
+  if (isLocked(fid)) { S.pr.sheet = null; render(); return toast('الماتش بدأ، التوقع اتقفل'); }
+  const prev = S.pr.preds[fid], ans = {};
+  (d.q || []).forEach(k => { if (sh.ans[k] != null) ans[k] = sh.ans[k]; });
+  try {
+    await setDoc(doc(db, 'preds', fid + '_' + S.user.uid), { uid: S.user.uid, gw: d.gw, fid, h: sh.h, a: sh.a, ans, boost: !!(prev && prev.boost), updatedAt: serverTimestamp() });
+    S.pr.preds[fid] = { h: sh.h, a: sh.a, ans, boost: !!(prev && prev.boost) };
+    /* بيانات المحل: النتيجة التانية أو إجابة السؤال التالت */
+    const pit = myItem('p', fid);
+    if (pit && pit.item === 'dbl') await setItemX(pit, { h: sh.h2, a: sh.a2 }).catch(e => { console.error(e); toast('مقدرتش أحفظ التوقع التاني'); });
+    if (pit && pit.item === 'q3' && d.q3) await setItemX(pit, { v: sh.ans[d.q3] ?? null }).catch(e => { console.error(e); toast('مقدرتش أحفظ السؤال التالت'); });
+    S.pr.sheet = null; toast('اتحفظ التوقع ✓'); render();
+  } catch (e) { console.error(e); toast(e.code === 'permission-denied' ? 'الحفظ مرفوض: الماتش ممكن يكون بدأ أو حسابك محظور' : 'مقدرتش أحفظ، تأكد من النت'); }
+}
+async function togglePredBoost(fid) {
+  const P = S.pr, p = P.preds[fid], uid = S.user.uid;
+  if (!p) return toast('احفظ توقعك الأول');
+  if (isLocked(fid)) return toast('الماتش بدأ');
+  const inGw = new Set(gwFixtures(S.gw).map(f => String(f.id)));
+  const other = Object.keys(P.preds).find(k => k !== fid && P.preds[k].boost && inGw.has(k) && kickoffOf(k));
+  if (!p.boost && other && isLocked(other)) return toast('المعزز اتثبّت على ماتش بدأ في الجولة دي');
+  const b = writeBatch(db);
+  const put = (k, on) => { const x = P.preds[k]; b.set(doc(db, 'preds', k + '_' + uid), { uid, gw: S.gw, fid: k, h: x.h, a: x.a, ans: x.ans || {}, boost: on, updatedAt: serverTimestamp() }); };
+  if (p.boost) put(fid, false);
+  else { if (other) put(other, false); put(fid, true); }
+  try {
+    await b.commit();
+    if (p.boost) p.boost = false; else { if (other) P.preds[other].boost = false; p.boost = true; }
+    toast(p.boost ? 'المعزز ×٢ اتشغّل على الماتش ده' : 'اتلغى المعزز'); render();
+  } catch (e) { console.error(e); toast('مقدرتش أغيّر المعزز'); }
+}
+
+/* ───── الأحداث ───── */
+function bumpWheel(side, delta) {
+  const sh = S.pr.sheet; if (!sh || sh.picker) return;
+  sh[side] = Math.max(0, Math.min(9, sh[side] + delta)); renderSheet();
+}
+let whY = null, whK = null;
+document.addEventListener('touchstart', e => { const w = e.target.closest && e.target.closest('[data-wheel]'); if (!w) return; whY = e.touches[0].clientY; whK = w.dataset.wheel; }, { passive: true });
+document.addEventListener('touchend', e => {
+  if (whK == null) return;
+  const dy = e.changedTouches[0].clientY - whY, k = whK; whK = null;
+  if (Math.abs(dy) < 18) return;
+  bumpWheel(k, (dy < 0 ? 1 : -1) * Math.max(1, Math.round(Math.abs(dy) / 36)));
+}, { passive: true });
+Object.assign(ACTIONS, {
+  noop() {},
+  async ptab(el) { S.pr.tab = el.dataset.k; render(); if (S.pr.tab === 'b') { S.pr.loading = true; render(); await Promise.all([loadAllPb(), loadPtotal(), loadNames()]); S.pr.loading = false; render(); } },
+  async pgw(el) { S.gw = Number(el.dataset.g); S.pr.open = {}; render(); await predLoad(); chooseDay(); render(); },
+  async popen(el) {
+    const fid = String(el.dataset.fid);
+    if (isLocked(fid)) return toast('الماتش بدأ، التوقع اتقفل');
+    const p = S.pr.preds[fid];
+    S.pr.sheet = { fid, h: p ? p.h : 0, a: p ? p.a : 0, ans: Object.assign({}, (p && p.ans) || {}), picker: null };
+    const pit = myItem('p', fid), px = (pit && pit.x) || {};
+    if (pit && pit.item === 'dbl') { S.pr.sheet.h2 = Number.isInteger(px.h) ? px.h : 0; S.pr.sheet.a2 = Number.isInteger(px.a) ? px.a : 0; }
+    renderSheet();
+    try { await loadFixture(fid, false); } catch (e) { S.pr.sheet = null; toast('مقدرتش أفتح الماتش'); }
+    const d3 = S.fxdocs[fid];
+    if (S.pr.sheet && pit && pit.item === 'q3' && d3 && d3.q3 && px.v != null) S.pr.sheet.ans[d3.q3] = px.v;
+    renderSheet();
+  },
+  pclose() { S.pr.sheet = null; renderSheet(); },
+  pwh(el) { bumpWheel(el.dataset.k, Number(el.dataset.d)); },
+  ppop(el) { const sh = S.pr.sheet; if (!sh) return; sh.h = Number(el.dataset.h); sh.a = Number(el.dataset.a); renderSheet(); },
+  pq(el) { const sh = S.pr.sheet; if (!sh) return; const k = el.dataset.k, v = el.dataset.v; if (sh.ans[k] === v) delete sh.ans[k]; else sh.ans[k] = v; renderSheet(); },
+  ppick(el) { const sh = S.pr.sheet; if (!sh) return; sh.picker = el.dataset.k; renderSheet(); const x = $('#psh .sh'); if (x) x.scrollTop = 0; },
+  ppickx() { const sh = S.pr.sheet; if (!sh) return; sh.picker = null; renderSheet(); },
+  pplayer(el) { const sh = S.pr.sheet; if (!sh || !sh.picker) return; const v = Number(el.dataset.pid); if (sh.ans[sh.picker] === v) delete sh.ans[sh.picker]; else sh.ans[sh.picker] = v; sh.picker = null; renderSheet(); },
+  psave() { savePred(); },
+  pboost(el) { togglePredBoost(String(el.dataset.fid)); },
+  pinfo() { S.pr.info = true; renderSheet(); },
+  pinfox() { S.pr.info = false; renderSheet(); },
+  pexp(el) { const fid = String(el.dataset.fid); S.pr.open[fid] = !S.pr.open[fid]; render(); },
+  async pdet(el) { const fid = String(el.dataset.fid); S.pr.dt = fid; try { await loadFixture(fid, false); } catch (e) { /* الأسماء بس */ } renderSheet(); },
+  pdetx() { S.pr.dt = null; renderSheet(); },
+  async ppl(el) { S.pr.pp = String(el.dataset.fid); S.view = 'ppl'; render(); await pplLoad(); render(); },
+  async pplfx(el) { S.pr.pp = String(el.dataset.fid); render(); await pplLoad(); render(); },
+  pback() { leaveSub(); S.view = 'pred'; render(); },
+  pbt(el) { S.pr.bt = el.dataset.k; render(); },
+  pbg(el) { S.pr.bgw = Number(el.dataset.g); render(); },
+  pbm(el) { S.pr.month = el.dataset.m; render(); },
+  pbd(el) { S.pr.day = el.dataset.k; render(); },
+  pbr(el) {
+    const P = S.pr, w = el.dataset.w, d = Number(el.dataset.d);
+    const gws = gwNums().filter(g => P.boards[g] && P.boards[g].fx && Object.keys(P.boards[g].fx).length);
+    const i = gws.indexOf(P[w]) + d; if (i < 0 || i >= gws.length) return;
+    const v = gws[i];
+    if (w === 'from' && v > P.to) return; if (w === 'to' && v < P.from) return;
+    P[w] = v; render();
+  }
+});
+async function pplLoad() {
+  const fid = S.pr.pp;
+  await Promise.all([
+    (async () => { try { const r = await getDoc(doc(db, 'ppub', fid)); S.pr.pub[fid] = r.exists() ? r.data() : null; } catch (e) { S.pr.pub[fid] = null; } })(),
+    loadFixture(fid, false).catch(() => {}), loadPb(S.gw), loadNames()
+  ]);
+}
+/* أثناء الماتشات: النقط بتتحدث كل دقيقة (لو مفيش شيت مفتوح) */
+setInterval(async () => {
+  if (!S.user || (S.view !== 'pred' && S.view !== 'ppl') || S.pr.sheet || S.pr.dt || S.gw == null) return;
+  const now = Date.now();
+  if (!gwFixtures(S.gw).some(f => koOf(f) && now >= koOf(f) && now <= koOf(f) + END_AFTER)) return;
+  await loadPb(S.gw);
+  if (S.view === 'pred' && S.pr.tab === 'b') await loadPtotal();
+  if (!S.pr.sheet && !S.pr.dt && !S.pr.info) render();
+}, 60000);
+
+/* ═════════════════════ المحل ═════════════════════
+   عملتين منفصلين: توكن الفانتاسي (f) وتوكن التوقعات (p). الكسب والسقف والأسعار لازم تطابق SHOP في Code.gs
+   و priceF/priceP في firestore.rules.
+   البيانات: wallet/<uid> (الرصيد)، buys/<uid>_<n> (المشتريات)، config/shop (مفتوح ولا لأ)، config/look (الشكليات). */
+const HAS_PRED = true;
+const SHOP = {
+  cap: 400, tcMult: 3, goalPts: 3, gold: 5, psafe: 3,
+  earnF: { play: 1, day: [5, 3, 1], gw: [20, 10, 5], low: 1 },
+  earnP: { all: 3, day: [5, 3, 1], gw: [20, 10, 5] }
+};
+const COS_ITEMS = [
+  { k: 'emoji', n: 'إيموجي جنب الاسم', p: 50, d: 'إيموجي جنب اسمك في الترتيب لحد ما الجولة تخلص.' },
+  { k: 'tomato', n: 'طماطماية', p: 75, d: 'ترمي إيموجي جاهز جنب اسم لاعب تاني في الترتيب، لحد آخر النهارده.' },
+  { k: 'title', n: 'لقب', p: 120, d: 'لقب ثابت جنب اسمك في الترتيب.' },
+  { k: 'sign', n: 'يافطة', p: 150, d: 'جملة جاهزة جنب اسمك في الترتيب لحد ما الجولة تخلص. الجمل من قايمة جاهزة، محدش يقدر يكتب من عنده.' },
+  { k: 'bg', n: 'خلفية الكارت', p: 180, d: 'خلفية ثابتة لكارتك في الترتيب.' },
+  { k: 'color', n: 'لون للاسم', p: 220, d: 'لون ثابت لاسمك في الترتيب.' },
+  { k: 'crown', n: 'تاج', p: 300, d: '👑 جنب اسمك في الترتيب لحد ما الجولة تخلص.' },
+  { k: 'frame', n: 'إطار للصورة', p: 380, d: 'إطار ثابت حوالين صورتك في الترتيب.' }
+];
+const SHOP_ITEMS = {
+  f: [
+    { k: 'tc', n: 'تريبل كابتن', p: 180, s: 'day', d: 'الكابتن بتاعك ×٣ بدل ×٢ في اليوم اللي تختاره.' },
+    { k: 'safe', n: 'شبكة أمان', p: 170, s: 'day', d: 'لو نقط يومك طلعت أقل من متوسط اللي لعبوا اليوم ده، بتاخد المتوسط.' },
+    { k: 'dcap', n: 'كابتن مزدوج', p: 150, s: 'day', d: 'كابتنين في نفس اليوم في ماتشين مختلفين، والاتنين ×٢.' },
+    { k: 'chip3', n: 'خاصية تالتة', p: 150, s: 'fx', d: 'خاصية زيادة في الماتش اللي تختاره، فوق الخاصيتين بتوع الجولة. لازم تكون مختلفة عنهم.' },
+    { k: 'p5', n: 'لاعب خامس', p: 140, s: 'fx', d: '٥ لاعبين بدل ٤ في الماتش اللي تختاره. مركز واحد بس ممكن يتكرر، و٣ من فريق بحد أقصى.' },
+    { k: 'goals', n: 'يوم الأهداف', p: 140, s: 'day', d: 'أي لاعب من اختياراتك يجيب جون في اليوم ده ياخد +٣ لكل جون.' },
+    { k: 'dup', n: 'خاصية مكررة', p: 120, s: 'fx', d: 'تستخدم خاصية استخدمتها قبل كده في الجولة مرة تانية، في الماتش اللي تختاره.' },
+    { k: 'bench', n: 'احتياطي', p: 110, s: 'fx', d: 'تختار لاعب احتياطي في الماتش، ولو حد من اختياراتك ملعبش ولا دقيقة، الاحتياطي بينزل مكانه بعد نهاية الماتش.' },
+    { k: 'capins', n: 'تأمين الكابتن', p: 90, s: 'day', d: 'لو الكابتن ملعبش، الكابتنية بتروح لأعلى لاعب لعب من اختياراتك في نفس الماتش.' }
+  ],
+  p: [
+    { k: 'pb3', n: 'معزز ×٣', p: 150, s: 'fx', d: 'الماتش اللي تختاره بـ ×٣. لو المعزز العادي على نفس الماتش، بيبقى ×٣ مش ×٦.' },
+    { k: 'dbl', n: 'توقع مزدوج', p: 140, s: 'fx', d: 'تحط نتيجتين للماتش، ويتحسبلك الأحسن فيهم.' },
+    { k: 'gold', n: 'النتيجة الذهبية', p: 120, s: 'fx', d: 'لو جبت النتيجة بالظبط في الماتش ده، تاخد ١٥ بدل ١٠.' },
+    { k: 'pb2', n: 'معزز تاني', p: 90, s: 'fx', d: 'ماتش تاني بـ ×٢ في الجولة، فوق المعزز العادي.' },
+    { k: 'q2x', n: 'أسئلة ×٢', p: 90, s: 'fx', d: 'نقط أسئلة الماتش ده ×٢.' },
+    { k: 'q3', n: 'سؤال تالت', p: 75, s: 'fx', d: 'سؤال زيادة في الماتش ده بنقطه.' },
+    { k: 'psafe', n: 'شبكة أمان', p: 75, s: 'fx', d: 'لو جبت صفر في الماتش ده، تاخد ٣ نقط.' }
+  ]
+};
+const LOOK = {
+  emoji: ['🔥', '😎', '⚽', '🦁', '🐐', '🚀', '💪', '🎯', '😈', '🍀', '⚡', '🧠'],
+  tomato: ['🍅', '🤡', '🥚', '🐢', '😴'],
+  titleF: ['ملك الكباتن', 'حرامي النقط', 'الداهية', 'الحصان الأسود', 'أبو الخواص', 'صاحب الكومبو', 'المحترف', 'الخبير'],
+  titleP: ['العرّاف', 'صياد النوادر', 'قارئ الكف', 'بلورة سحرية', 'المحلل', 'أبو النتايج', 'الخبير التكتيكي', 'مستشار الماتشات'],
+  sign: ['الدوري ده بتاعي', 'اللي جاي أحلى', 'مين ينافس؟', 'سيبوني في حالي', 'الكابتن ده عرّافي', 'جاي ليكم', 'متستعجلوش عليا', 'النقط بتحبني', 'ارحموا الضعيف', 'الكورة مدوّرة'],
+  color: [['ذهبي', '#ffd45c'], ['أخضر', '#59f29a'], ['سماوي', '#6fd3ff'], ['وردي', '#ff8fc7'], ['بنفسجي', '#c49bff'], ['برتقالي', '#ffa45c'], ['أحمر', '#ff7b7b']],
+  frame: [['ذهبي', '#f5b301'], ['فضي', '#e3edf5'], ['زمردي', '#2fd06b'], ['ناري', '#ff5a36'], ['نيون', '#4fd8ff'], ['بنفسجي', '#b47bff']],
+  bg: [['غروب', 'linear-gradient(120deg,rgba(255,120,60,.42),rgba(160,40,120,.42))'], ['محيط', 'linear-gradient(120deg,rgba(20,140,220,.42),rgba(10,60,130,.5))'], ['غابة', 'linear-gradient(120deg,rgba(40,170,90,.42),rgba(10,80,50,.5))'], ['ذهب', 'linear-gradient(120deg,rgba(245,179,1,.42),rgba(150,90,0,.45))'], ['ليل', 'linear-gradient(120deg,rgba(90,60,200,.45),rgba(20,20,70,.55))'], ['كرز', 'linear-gradient(120deg,rgba(220,40,80,.42),rgba(90,10,40,.5))']]
+};
+const DAY_ITEMS = ['tc', 'safe', 'dcap', 'goals', 'capins'];
+const COIN = '🪙';
+const curName = c => c === 'p' ? 'التوقعات' : 'الفانتاسي';
+const itemDef = (cur, k) => SHOP_ITEMS[cur].find(x => x.k === k) || COS_ITEMS.find(x => x.k === k) || { k, n: k, p: 0, d: '' };
+const isPtItem = k => SHOP_ITEMS.f.some(x => x.k === k) || SHOP_ITEMS.p.some(x => x.k === k);
+const titlesOf = cur => cur === 'p' ? LOOK.titleP : LOOK.titleF;
+
+S.shop = { on: false, w: null, buys: [], look: null, cur: 'f', sec: 'shop', sheet: null, loading: false };
+
+/* ───── تحميل ───── */
+async function loadShop() {
+  const uid = S.user.uid;
+  const [c, w, b] = await Promise.all([
+    getDoc(doc(db, 'config', 'shop')).catch(() => null),
+    getDoc(doc(db, 'wallet', uid)).catch(() => null),
+    getDocs(query(collection(db, 'buys'), where('uid', '==', uid))).catch(() => null)
+  ]);
+  S.shop.on = !!(c && c.exists() && c.data().on === true);
+  if (w) S.shop.w = w.exists() ? w.data() : null;
+  if (b) S.shop.buys = b.docs.map(d => ({ id: d.id, ...d.data() })).sort((x, y) => (x.n || 0) - (y.n || 0));
+}
+let lookUnsub = null;
+function watchLook() {
+  if (lookUnsub) return;
+  lookUnsub = onSnapshot(doc(db, 'config', 'look'), s => {
+    S.shop.look = s.exists() ? s.data() : null;
+    if (S.view === 'board' || S.view === 'shop' || (HAS_PRED && S.view === 'pred' && S.pr.tab === 'b' && !S.pr.sheet)) render();
+  }, () => {});
+}
+function stopLook() { if (lookUnsub) { lookUnsub(); lookUnsub = null; } }
+
+/* ───── أدوات ───── */
+const balOf = cur => { const w = S.shop.w; return w ? Math.max(0, (w['e' + cur] || 0) - (w['s' + cur] || 0)) : 0; };
+const fxGw = fid => { for (const g of gwNums()) if (gwFixtures(g).some(x => String(x.id) === String(fid))) return g; return null; };
+/* حاجة المحل المتفعّلة على الماتش ده (أو على يومه لو حاجة يوم) */
+function myItem(cur, fid) {
+  if (fid == null) return null;
+  const day = dayOfFx(fid);
+  return S.shop.buys.find(b => b.cur === cur && b.k === 'pt' && !b.u && b.t != null
+    && (String(b.t) === String(fid) || (DAY_ITEMS.includes(b.item) && dayOfFx(b.t) === day))) || null;
+}
+const myItemCode = (cur, fid) => { const b = myItem(cur, fid); return b ? b.item : null; };
+const p5On = fid => myItemCode('f', fid) === 'p5';
+const maxIds = fid => p5On(fid) ? 5 : 4;
+/* الحاجة متقفلة؟ (حاجات اليوم بتتقفل مع أول ماتش في اليوم) */
+function itemLock(b) {
+  if (b.t == null) return null;
+  const k = kickoffOf(b.t);
+  if (!k) return null;
+  if (!DAY_ITEMS.includes(b.item)) return k;
+  const g = fxGw(b.t), day = dayOfFx(b.t);
+  const ks = (g != null ? gwFixtures(g) : []).filter(f => koOf(f) && dayKey(koOf(f)) === day).map(koOf);
+  return ks.length ? Math.min(k, ...ks) : k;
+}
+const itemLocked = b => { const l = itemLock(b); return l != null && Date.now() >= l; };
+function targetLabel(b) {
+  const f = fxInfo(b.t);
+  if (!f) return 'ماتش رقم ' + esc(b.t);
+  const k = koOf(f);
+  return DAY_ITEMS.includes(b.item) ? (k ? 'يوم ' + fmtDay(k) : 'يوم لسه مش معروف') : `${esc(teamName(f.h))} ضد ${esc(teamName(f.a))}${k ? ' · ' + fmtDay(k) : ''}`;
+}
+const itemPill = (cur, code) => code ? `<span class="pl" style="background:#f5b301;color:#1a1300">${COIN} ${esc(itemDef(cur, code).n)}</span>` : '';
+
+/* ───── الشكليات في الترتيب ───── */
+function lookOf(cur, uid) { const L = S.shop.look; return (L && L[cur] && L[cur][uid]) || {}; }
+function decoName(cur, uid, name) {
+  const o = lookOf(cur, uid);
+  const col = o.c != null && LOOK.color[o.c] ? ` style="color:${LOOK.color[o.c][1]}"` : '';
+  let h = `<span${col}>${esc(name)}</span>`;
+  if (o.cr) h = '👑 ' + h;
+  if (o.e != null && LOOK.emoji[o.e]) h += ' ' + LOOK.emoji[o.e];
+  const L = S.shop.look, tom = (L && L.tom && L.tom[cur] && L.tom[cur][uid]) || [];
+  if (tom.length) h += ' ' + tom.slice(0, 5).map(t => `<span title="${esc(nm(t.u))}">${LOOK.tomato[t.e] || ''}</span>`).join('');
+  return h;
+}
+function decoSub(cur, uid) {
+  const o = lookOf(cur, uid), tl = titlesOf(cur), out = [];
+  if (o.t != null && tl[o.t]) out.push(`<span class="pl" style="background:rgba(245,179,1,.22);color:#ffd45c">${esc(tl[o.t])}</span>`);
+  if (o.s != null && LOOK.sign[o.s]) out.push(`<span class="pl">🪧 ${esc(LOOK.sign[o.s])}</span>`);
+  return out.join(' ');
+}
+const frameCss = (cur, uid) => { const o = lookOf(cur, uid), f = o.fr != null && LOOK.frame[o.fr]; return f ? `box-shadow:0 0 0 2px ${f[1]},0 0 10px ${f[1]};` : ''; };
+const bgCss = (cur, uid) => { const o = lookOf(cur, uid), b = o.bg != null && LOOK.bg[o.bg]; return b ? `background:${b[1]};` : ''; };
+function avatarL(cur, uid, name, size) {
+  const a = avatar(photoOf(uid), name, size), f = frameCss(cur, uid);
+  return f ? a.replace('class="av" style="', 'class="av" style="' + f) : a;
+}
+
+/* ───── الشراء والتفعيل ───── */
+async function buyItem(cur, item, x, gw) {
+  const uid = S.user.uid, def = itemDef(cur, item), price = def.p;
+  const wr = await getDoc(doc(db, 'wallet', uid));
+  if (!wr.exists()) throw new Error('nowallet');
+  const w = wr.data(), have = (w['e' + cur] || 0) - (w['s' + cur] || 0);
+  if (have < price) throw new Error('nobal');
+  const n = (w.n || 0) + 1, upd = { n };
+  upd['s' + cur] = (w['s' + cur] || 0) + price;
+  const data = { uid, n, cur, item, k: isPtItem(item) ? 'pt' : 'cos', price, gw: gw ?? null, t: null, at: null, createdAt: serverTimestamp() };
+  if (x) data.x = x;
+  const b = writeBatch(db);
+  b.update(doc(db, 'wallet', uid), upd);
+  b.set(doc(db, 'buys', uid + '_' + n), data);
+  await b.commit();
+  S.shop.w = { ...w, ...upd };
+  S.shop.buys.push({ id: uid + '_' + n, ...data, createdAt: Date.now() });
+}
+async function setTarget(b, fid) {
+  const g = fid == null ? null : fxGw(fid);
+  await updateDoc(doc(db, 'buys', b.id), { t: fid == null ? null : String(fid), gw: g, at: serverTimestamp() });
+  b.t = fid == null ? null : String(fid); b.gw = g;
+}
+/* بيانات زيادة للتوقع المزدوج والسؤال التالت (بتتحفظ مع التوقع) */
+async function setItemX(b, x) {
+  await updateDoc(doc(db, 'buys', b.id), { x, at: serverTimestamp() });
+  b.x = x;
+}
+
+/* ───── الشاشة ───── */
+function vShop() {
+  const H = S.shop, cur = H.cur, bal = balOf(cur);
+  const head = `<div class="h"><b>المحل</b><div class="ctr"><div class="m">توكن ${curName(cur)}</div><div class="d" style="font-size:24px">${COIN} ${N(bal)}</div></div></div>`;
+  const curTabs = HAS_PRED ? `<div class="tg eq" style="grid-template-columns:1fr 1fr">${['f', 'p'].map(c => `<button class="bt ${cur === c ? 'on' : ''}" style="flex:1 0 calc((100% - 6px) / 2)" data-act="shcur" data-c="${c}">${c === 'f' ? 'الفانتاسي' : 'التوقعات'}</button>`).join('')}</div>` : '';
+  const secs = [['shop', 'المحل'], ['mine', 'حاجاتي'], ['earn', 'الكسب']];
+  const secTabs = `<div class="tg eq">${secs.map(([k, l]) => `<button class="bt ${H.sec === k ? 'on' : ''}" data-act="shsec" data-k="${k}">${l}</button>`).join('')}</div>`;
+  const body = H.loading && !H.w && !H.buys.length ? '<div class="k ctr">جاري التحميل…</div>' : H.sec === 'mine' ? shopMine(cur) : H.sec === 'earn' ? shopEarn(cur) : shopList(cur);
+  return head + curTabs + secTabs + `<div class="f">${body}</div><div id="ssh"></div>`;
+}
+function balCard(cur) {
+  const bal = balOf(cur), pct = Math.min(100, Math.round(bal / SHOP.cap * 100));
+  return `<div class="k"><div class="r j"><b>رصيدك</b><span class="d" style="font-size:20px">${COIN} ${N(bal)} <span class="m">من ${N(SHOP.cap)}</span></span></div><div class="bar mt"><i style="width:${pct}%;background:#f5b301"></i></div>${bal >= SHOP.cap ? '<div class="m warn mt">وصلت للسقف. اصرف علشان تكسب تاني.</div>' : ''}</div>`;
+}
+function shopList(cur) {
+  const H = S.shop, bal = balOf(cur);
+  const row = it => {
+    const can = H.on && bal >= it.p;
+    return `<div class="k"><div class="r j" style="align-items:flex-start"><div class="g"><b>${esc(it.n)}</b>${it.s ? `<span class="pl" style="margin-inline-start:6px">${it.s === 'day' ? 'يوم' : 'ماتش'}</span>` : ''}<div class="m" style="margin-top:4px;line-height:1.6">${esc(it.d)}</div></div>
+      <button class="bt ${can ? 'on' : ''}" style="flex:none;height:40px;padding:0 12px" data-act="shbuy" data-k="${it.k}" ${can ? '' : 'disabled'}>${COIN} ${N(it.p)}</button></div></div>`;
+  };
+  return `${H.on ? '' : '<div class="k" style="border-color:#f5b301;background:rgba(245,179,1,.16)"><b class="warn">المحل لسه مقفول</b><div class="m">الإدارة هتفتحه قريب. وقتها التوكن هيبدأ يتصرف مع تثبيت كل جولة.</div></div>'}
+  ${balCard(cur)}
+  <div class="r j" style="margin-top:6px"><b>بتأثر على النقط</b><span class="m">حاجة واحدة بس في الجولة</span></div>
+  ${SHOP_ITEMS[cur].map(row).join('')}
+  <div class="r j" style="margin-top:6px"><b>شكلي</b><span class="m">بيظهر في ترتيب ${curName(cur)} بس</span></div>
+  ${COS_ITEMS.map(row).join('')}`;
+}
+function shopMine(cur) {
+  const H = S.shop, mine = H.buys.filter(b => b.cur === cur);
+  const pts = mine.filter(b => b.k === 'pt' && !b.u), used = mine.filter(b => b.k === 'pt' && b.u);
+  const card = b => {
+    const def = itemDef(cur, b.item), locked = b.t != null && itemLocked(b);
+    const st = b.t == null ? '<span class="m">مش متفعّلة</span>'
+      : `<span class="m">${locked ? 'اتقفلت على' : 'متفعّلة على'}: ${targetLabel(b)}</span>`;
+    const btns = locked ? '<span class="pl ok">شغالة</span>'
+      : b.t == null ? `<button class="bt on" style="height:38px;padding:0 12px" data-act="shact" data-id="${esc(b.id)}">فعّلها</button>`
+      : `<span class="r" style="gap:6px"><button class="bt" style="height:38px;padding:0 10px" data-act="shact" data-id="${esc(b.id)}">غيّر</button><button class="bt" style="height:38px;padding:0 10px" data-act="shoff" data-id="${esc(b.id)}">شيلها</button></span>`;
+    return `<div class="k r j" style="${b.t != null ? 'border-color:#f5b301' : ''}"><div class="g"><b>${esc(def.n)}</b><div style="margin-top:3px">${st}</div></div>${btns}</div>`;
+  };
+  const me = S.user.uid, myName = S.profile ? S.profile.username : nm(me);
+  const prev = `<div class="k r" style="${bgCss(cur, me)}">${avatarL(cur, me, myName)}<div class="g"><div class="nm">${decoName(cur, me, myName)}</div>${decoSub(cur, me) ? `<div class="sub" style="margin-top:3px">${decoSub(cur, me)}</div>` : ''}</div></div>`;
+  return `<div class="m">الحاجات اللي بتأثر على النقط بتتفعّل على ماتش أو يوم، وتقدر تغيّرها لحد ما يتقفل. حاجة واحدة بس بتتحسب في الجولة، ولو الماتش اتأجل أو مالكش اختيار فيه بترجعلك.</div>
+  ${pts.length ? pts.map(card).join('') : '<div class="k ctr">معندكش حاجات لسه. اشتري من المحل.</div>'}
+  ${used.length ? `<div class="r j" style="margin-top:6px"><b>اتستخدمت</b></div>${used.slice(-10).reverse().map(b => `<div class="k r j"><span>${esc(itemDef(cur, b.item).n)}</span><span class="m">الجولة ${N(b.gw || 0)}</span></div>`).join('')}` : ''}
+  <div class="r j" style="margin-top:6px"><b>شكلك في ترتيب ${curName(cur)}</b><span class="m">بيتحدث خلال ٥ دقايق</span></div>${prev}`;
+}
+function earnLine(r) {
+  const day = r.d ? fmtDay(Date.parse(r.d + 'T12:00:00Z')) : '';
+  const rk = r.rk ? 'المركز ' + N(r.rk) : '';
+  const t = { play: 'لعبت كل ماتشات ' + day, day: rk + ' في ' + day, gw: rk + ' في الجولة', low: 'لعبت كل الأيام (تعويض النص التحتاني)', all: 'توقعت كل ماتشات الجولة', pday: rk + ' في ' + day, pgw: rk + ' في الجولة' }[r.k] || r.k;
+  return `<div class="r j" style="padding:4px 0"><span class="m">${esc(t)}</span><b>+${N(r.a)}</b></div>`;
+}
+function shopEarn(cur) {
+  const E = cur === 'p' ? SHOP.earnP : SHOP.earnF;
+  const line = (a, b) => `<div class="r j" style="padding:6px 0;border-bottom:1px solid rgba(255,255,255,.08)"><span>${a}</span><b>${b}</b></div>`;
+  const pr = l => l.map(N).join(' / ');
+  const table = cur === 'p'
+    ? line('توقعت كل ماتشات الجولة', N(E.all)) + line('ترتيب اليوم: الأول / التاني / التالت', pr(E.day)) + line('ترتيب الجولة: الأول / التاني / التالت', pr(E.gw))
+    : line('لعبت كل ماتشات اليوم', N(E.play)) + line('ترتيب اليوم: الأول / التاني / التالت', pr(E.day)) + line('ترتيب الجولة: الأول / التاني / التالت', pr(E.gw)) + line('لعبت كل أيام الجولة وكنت في النص التحتاني', N(E.low));
+  const hist = ((S.shop.w && S.shop.w.hist) || []).filter(h => h.c === cur).slice().reverse();
+  return `<div class="k"><b>إزاي تكسب توكن ${curName(cur)}</b><div class="mt">${table}</div>
+    <div class="m mt" style="line-height:1.6">التوكن بيتصرف لما الجولة تتثبّت نهائي (بعد ما FPL يأكد البونص). التعادل في المركز بياخد نفس الجايزة، واللي نقطه صفر مالوش جايزة مركز. سقف الرصيد ${N(SHOP.cap)}.${cur === 'p' ? '' : ' توكن الفانتاسي بيتصرف في محل الفانتاسي بس.'}</div>
+    <div class="m mt" style="line-height:1.6">التوكن ميتشتريش بفلوس، ومينفعش يتحول بين اللاعبين.</div></div>
+  ${balCard(cur)}
+  <b style="margin-top:6px">آخر كسب</b>
+  ${hist.length ? hist.map(h => `<div class="k"><div class="r j"><b>الجولة ${N(h.g)}</b><span class="d" style="font-size:18px">+${N(h.a)}</span></div>${h.full > h.a ? `<div class="m warn">كان المفروض ${N(h.full)}، بس الرصيد وصل للسقف</div>` : ''}<div class="mt">${(h.r || []).map(earnLine).join('')}</div></div>`).join('') : '<div class="k ctr">لسه مكسبتش توكن.</div>'}`;
+}
+
+/* ───── الشيتات ───── */
+const sOv = (inner, close) => `<div class="ov" data-act="${close}"><div class="sh" data-act="noop"><div class="hd"></div>${inner}</div></div>`;
+function renderShopSheet() {
+  const el = $('#ssh'); if (!el) return;
+  const old = el.querySelector('.sh'), top = old ? old.scrollTop : 0;
+  const sh = S.shop.sheet;
+  el.innerHTML = !sh ? '' : sh.mode === 'buy' ? buySheet(sh) : actSheet(sh);
+  const nw = el.querySelector('.sh'); if (nw && old) nw.scrollTop = top;
+}
+function choiceGrid(field, list, sel, fmt) {
+  return `<div class="r" style="flex-wrap:wrap;gap:8px">${list.map((v, i) => `<button class="bt ${sel === i ? 'on' : ''}" style="height:auto;min-height:42px;padding:6px 12px" data-act="shpick" data-f="${field}" data-v="${i}">${fmt(v, i)}</button>`).join('')}</div>`;
+}
+function buySheet(sh) {
+  const cur = S.shop.cur, it = itemDef(cur, sh.item), bal = balOf(cur), c = sh.c;
+  let pick = '';
+  if (sh.item === 'emoji') pick = choiceGrid('i', LOOK.emoji, c.i, v => `<span style="font-size:20px">${v}</span>`);
+  if (sh.item === 'title') pick = choiceGrid('i', titlesOf(cur), c.i, v => esc(v));
+  if (sh.item === 'sign') pick = choiceGrid('i', LOOK.sign, c.i, v => '🪧 ' + esc(v));
+  if (sh.item === 'color') pick = choiceGrid('i', LOOK.color, c.i, v => `<span style="color:${v[1]};font-weight:800">${esc(v[0])}</span>`);
+  if (sh.item === 'frame') pick = choiceGrid('i', LOOK.frame, c.i, v => `<span class="r" style="gap:8px"><span class="av" style="width:24px;height:24px;box-shadow:0 0 0 2px ${v[1]},0 0 8px ${v[1]}"></span>${esc(v[0])}</span>`);
+  if (sh.item === 'bg') pick = `<div style="display:flex;flex-direction:column;gap:8px">${LOOK.bg.map((v, i) => `<button class="k" style="background:${v[1]};${c.i === i ? 'border-color:#2fd06b;box-shadow:0 0 0 2px #2fd06b' : ''}" data-act="shpick" data-f="i" data-v="${i}"><b>${esc(v[0])}</b></button>`).join('')}</div>`;
+  if (sh.item === 'tomato') {
+    const others = S.userList.filter(u => u.id !== S.user.uid && !u.banned && !S.gone.has(u.id)).sort((a, b) => byName(a.name || '', b.name || ''));
+    pick = `<div class="m">ترمي إيه؟</div>${choiceGrid('e', LOOK.tomato, c.e, v => `<span style="font-size:20px">${v}</span>`)}
+      <div class="m">على مين؟</div><div style="display:flex;flex-direction:column;gap:6px;max-height:260px;overflow-y:auto">${others.map(u => `<button class="k r" style="padding:8px 10px;${c.to === u.id ? 'border-color:#2fd06b;background:rgba(47,208,107,.22)' : ''}" data-act="shpick" data-f="to" data-v="${esc(u.id)}">${avatar(u.photo, u.name, 28)}<span class="g">${esc(u.name || nm(u.id))}</span></button>`).join('') || '<div class="m">مفيش لاعبين تانيين.</div>'}</div>`;
+  }
+  const ready = sh.item === 'tomato' ? (c.e != null && c.to) : ['emoji', 'title', 'sign', 'color', 'frame', 'bg'].includes(sh.item) ? c.i != null : true;
+  const ok = ready && bal >= it.p && S.shop.on && !sh.busy;
+  return sOv(`<div class="r j"><b style="font-size:20px">${esc(it.n)}</b><button class="bt" style="width:44px;padding:0" data-act="shclose" aria-label="إغلاق">×</button></div>
+    <div class="m" style="line-height:1.6">${esc(it.d)}</div>
+    ${it.s ? `<div class="m warn" style="line-height:1.6">بعد الشراء هتلاقيها في "حاجاتي"، وتفعّلها على ${it.s === 'day' ? 'يوم' : 'ماتش'} قبل ما ${it.s === 'day' ? 'أول ماتش فيه يبدأ' : 'يبدأ'}.</div>` : ''}
+    ${pick}
+    <div class="k r j"><span>السعر</span><b>${COIN} ${N(it.p)}</b></div>
+    <div class="r j m"><span>رصيدك بعد الشراء</span><span>${COIN} ${N(Math.max(0, bal - it.p))}</span></div>
+    <button class="bt on" style="height:50px" data-act="shconfirm" ${ok ? '' : 'disabled'}>${sh.busy ? 'جاري الشراء…' : 'اشتري'}</button>`, 'shclose');
+}
+function actSheet(sh) {
+  const b = S.shop.buys.find(x => x.id === sh.id); if (!b) return '';
+  const def = itemDef(b.cur, b.item), now = Date.now(), isDay = DAY_ITEMS.includes(b.item);
+  const groups = gwNums().map(g => {
+    let opts;
+    if (isDay) {
+      opts = daysOf(g).filter(d => d.ms && d.list.every(f => koOf(f) && koOf(f) > now)).map(d => ({ fid: String(d.list[0].id), label: d.label, sub: N(d.list.length) + ' ماتش' }));
+    } else {
+      opts = gwFixtures(g).filter(f => koOf(f) && koOf(f) > now).sort((x, y) => koOf(x) - koOf(y)).map(f => ({ fid: String(f.id), label: `${teamName(f.h)} ضد ${teamName(f.a)}`, sub: fmtDay(koOf(f)) + ' · ' + fmtTime(koOf(f)) }));
+    }
+    return { g, opts };
+  }).filter(x => x.opts.length);
+  const body = groups.length ? groups.map(x => `<div class="m" style="font-weight:700">الجولة ${N(x.g)}</div>${x.opts.map(o => `<button class="k r j" style="${String(b.t) === o.fid ? 'border-color:#2fd06b;background:rgba(47,208,107,.22)' : ''}" data-act="shtarget" data-fid="${o.fid}"><span class="g"><b>${esc(o.label)}</b><div class="sub">${esc(o.sub)}</div></span><span>‹</span></button>`).join('')}`).join('')
+    : `<div class="k ctr">مفيش ${isDay ? 'أيام' : 'ماتشات'} لسه مبدأتش.</div>`;
+  return sOv(`<div class="r j"><b style="font-size:20px">فعّل ${esc(def.n)}</b><button class="bt" style="width:44px;padding:0" data-act="shclose" aria-label="إغلاق">×</button></div>
+    <div class="m" style="line-height:1.6">${esc(def.d)} ${isDay ? 'بتتقفل مع أول ماتش في اليوم.' : 'بتتقفل مع بداية الماتش.'}</div>${body}`, 'shclose');
+}
+
+/* ───── الأحداث ───── */
+Object.assign(ACTIONS, {
+  noop() {},
+  shcur(el) { S.shop.cur = el.dataset.c; render(); },
+  shsec(el) { S.shop.sec = el.dataset.k; render(); },
+  shbuy(el) {
+    if (!S.shop.on) return toast('المحل لسه مقفول');
+    S.shop.sheet = { mode: 'buy', item: el.dataset.k, c: {} };
+    renderShopSheet();
+    if (el.dataset.k === 'tomato' && !S.userList.length) loadNames().then(renderShopSheet).catch(() => {});
+  },
+  shpick(el) { const sh = S.shop.sheet; if (!sh) return; const f = el.dataset.f; sh.c[f] = f === 'to' ? el.dataset.v : Number(el.dataset.v); renderShopSheet(); },
+  shclose() { S.shop.sheet = null; renderShopSheet(); },
+  async shconfirm() {
+    const sh = S.shop.sheet; if (!sh || sh.busy) return;
+    const cur = S.shop.cur, it = itemDef(cur, sh.item), c = sh.c;
+    let x = null, gw = null;
+    if (['emoji', 'title', 'sign', 'color', 'frame', 'bg'].includes(sh.item)) x = { i: c.i };
+    if (sh.item === 'tomato') x = { to: c.to, e: c.e };
+    if (['emoji', 'sign', 'crown'].includes(sh.item)) gw = defaultGw() ?? null;
+    sh.busy = true; renderShopSheet();
+    try {
+      await buyItem(cur, sh.item, x, gw);
+      S.shop.sheet = null;
+      toast(`اشتريت ${it.n} ✓${it.s ? ' · فعّلها من "حاجاتي"' : ''}`);
+      if (it.s) S.shop.sec = 'mine';
+      render();
+    } catch (e) {
+      console.error(e); sh.busy = false; renderShopSheet();
+      toast(e.message === 'nobal' ? 'رصيدك مش مكفي' : e.message === 'nowallet' ? 'لسه مكسبتش توكن' : e.code === 'permission-denied' ? 'الشراء مرفوض: المحل ممكن يكون اتقفل أو الرصيد اتغير. حدّث وجرّب تاني' : 'مقدرتش أشتري، تأكد من النت');
+      loadShop().then(() => { if (S.view === 'shop') render(); }).catch(() => {});
+    }
+  },
+  shact(el) { S.shop.sheet = { mode: 'act', id: el.dataset.id }; renderShopSheet(); },
+  async shtarget(el) {
+    const sh = S.shop.sheet, b = sh && S.shop.buys.find(x => x.id === sh.id); if (!b) return;
+    const fid = el.dataset.fid, g = fxGw(fid);
+    const other = S.shop.buys.find(x => x.id !== b.id && x.cur === b.cur && x.k === 'pt' && !x.u && x.t != null && x.gw === g);
+    if (other) return toast(`عندك ${itemDef(b.cur, other.item).n} متفعّلة في الجولة دي. حاجة واحدة بس بتتحسب، شيلها الأول.`);
+    if (b.t != null && itemLocked(b)) return toast('الحاجة دي اتقفلت خلاص');
+    try { await setTarget(b, fid); S.shop.sheet = null; toast(`${itemDef(b.cur, b.item).n} اتفعّلت ✓`); render(); }
+    catch (e) { console.error(e); toast(e.code === 'permission-denied' ? 'مرفوض: الماتش ممكن يكون بدأ' : 'مقدرتش أفعّلها'); }
+  },
+  async shoff(el) {
+    const b = S.shop.buys.find(x => x.id === el.dataset.id); if (!b) return;
+    if (itemLocked(b)) return toast('الحاجة دي اتقفلت خلاص');
+    try { await setTarget(b, null); toast('اتشالت، وتقدر تفعّلها تاني'); render(); }
+    catch (e) { console.error(e); toast('مقدرتش أشيلها'); }
+  }
+});
+
 document.addEventListener('click', e => { const el = e.target.closest('[data-act]'); if (el && ACTIONS[el.dataset.act]) ACTIONS[el.dataset.act](el, e); });
 document.addEventListener('submit', e => { const f = e.target.closest('[data-form]'); if (f) { e.preventDefault(); FORMS[f.dataset.form](f); } });
 document.addEventListener('input', e => { const t = e.target; if (t.dataset && t.dataset.in && INPUTS[t.dataset.in]) INPUTS[t.dataset.in](t); });
@@ -1972,13 +2865,13 @@ onAuthStateChanged(auth, u => { if (!u) stopLive(); });
 /* ───────── البداية ───────── */
 onAuthStateChanged(auth, async u => {
   S.user = u;
-  if (!u) { leaveSub(); S.editName = false; S.profile = null; S.admin = false; S.picks = {}; S.stats = {}; S.scores = {}; S.st = newSt(); S.fcm = null; S.tours = []; S.tour = null; S.tn = null; S.invites = {}; S.gone = new Set(); S.userList = []; S.namesAt = 0; S.view = 'login'; render(); return; }
+  if (!u) { stopLook(); S.shop = { ...S.shop, w: null, buys: [], look: null, sheet: null, sec: 'shop', cur: 'f' }; leaveSub(); S.editName = false; S.profile = null; S.admin = false; S.picks = {}; S.stats = {}; S.scores = {}; S.st = newSt(); S.fcm = null; S.tours = []; S.tour = null; S.tn = null; S.invites = {}; S.gone = new Set(); S.userList = []; S.namesAt = 0; Object.assign(S.pr, { preds: {}, pst: {}, boards: {}, total: null, pub: {}, open: {}, sheet: null, dt: null, info: false, pp: null }); S.view = 'login'; render(); return; }
   S.view = 'loading'; render();
   try { await bootUser(); } catch (e) { console.error(e); S.view = 'error'; }
   if (S.profile && !S.profile.banned) startLive();
   render();
 });
-setInterval(() => { if (S.view === 'round' && lockSig() !== lastSig) render(); }, 30000);
+setInterval(() => { if ((S.view === 'round' || (S.view === 'pred' && !S.pr.sheet && !S.pr.dt && !S.pr.info)) && lockSig() !== lastSig) render(); }, 30000);
 
 /* ───────── الإعدادات المحلية (على الجهاز ده بس) ───────── */
 const PREF_DEF = { snd: true, fs: true };
