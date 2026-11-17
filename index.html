@@ -582,9 +582,9 @@ function validIds(fx, ids, chip, five) {
 const chipsUsedElsewhere = fid => { const u = {}; Object.keys(S.picks).forEach(k => { if (String(k) !== String(fid) && S.picks[k].chip) u[S.picks[k].chip] = k; }); return u; };
 const chipsLeft = () => MAX_CHIPS - new Set(Object.values(S.picks).map(p => p.chip).filter(Boolean)).size;
 function canUseChip(fid, c) {
-  const u = chipsUsedElsewhere(fid), it = myItemCode('f', fid);
-  if (u[c]) return it === 'dup' ? null : 'الخاصية دي مستخدمة في ماتش تاني في الجولة دي';   // خاصية مكررة (المحل)
-  if (Object.keys(u).length >= MAX_CHIPS && it !== 'chip3') return 'استخدمت خاصيتين في الجولة دي بالفعل';   // خاصية تالتة (المحل)
+  const u = chipsUsedElsewhere(fid), dupOn = hasItem('f', fid, 'dup'), c3On = hasItem('f', fid, 'chip3');
+  if (u[c]) return dupOn ? null : 'الخاصية دي مستخدمة في ماتش تاني في الجولة دي';   // خاصية مكررة (المحل)
+  if (Object.keys(u).length >= MAX_CHIPS && !c3On) return 'استخدمت خاصيتين في الجولة دي بالفعل';   // خاصية تالتة (المحل)
   return null;
 }
 function toggleChip(c) {
@@ -609,7 +609,7 @@ const stealMissing = fid => { const p = S.picks[fid]; return !!(p && p.chip === 
 function capTakenElsewhere(fid) {
   const day = dayOfFx(fid);
   const n = Object.keys(S.picks).filter(k => k !== String(fid) && S.picks[k].cap != null && dayOfFx(k) === day).length;
-  return n >= (myItemCode('f', fid) === 'dcap' ? 2 : 1);   // كابتن مزدوج (المحل): كابتنين في اليوم
+  return n >= (hasItem('f', fid, 'dcap') ? 2 : 1);   // كابتن مزدوج (المحل): كابتنين في اليوم
 }
 const saveTimers = {};
 function setSave(s) { S.save = s; const el = $('#sv'); if (el) { el.textContent = s === 'saving' ? 'جاري الحفظ…' : s === 'saved' ? 'تم الحفظ' : s === 'error' ? 'فشل الحفظ' : ''; el.className = 'pl sv ' + (s === 'saved' ? 'ok' : s === 'error' ? 'bad' : ''); } }
@@ -765,7 +765,7 @@ function card(f) {
     <div class="r j"><div class="t">${crest(f.h)}<span>${esc(teamName(f.h))}</span></div>
     <div class="ctr">${cardMid(f, k, locked, status)}</div>
     <div class="t">${crest(f.a)}<span>${esc(teamName(f.a))}</span></div></div>
-    <div class="r j m mt"><span>اختياراتك ${N(n)}/${N(maxIds(f.id))}${myItemCode('f', f.id) ? ' · <b class="warn">' + esc(itemDef('f', myItemCode('f', f.id)).n) + '</b>' : ''}${S.picks[f.id] && S.picks[f.id].chip ? ' · <b class="warn">' + CHIPS[S.picks[f.id].chip].n + '</b>' : ''}${S.picks[f.id] && S.picks[f.id].cap != null ? ' · <b class="warn">الكابتن هنا</b>' : ''}${stealMissing(f.id) ? ' · <b class="warn">اختار الفريق!</b>' : ''}</span><span>${locked ? 'عرض اختياراتك' : 'اختار لاعبينك'} ‹</span></div>
+    <div class="r j m mt"><span>اختياراتك ${N(n)}/${N(maxIds(f.id))}${myItems('f', f.id).map(b => ' · <b class="warn">' + esc(itemDef('f', b.item).n) + '</b>').join('')}${S.picks[f.id] && S.picks[f.id].chip ? ' · <b class="warn">' + CHIPS[S.picks[f.id].chip].n + '</b>' : ''}${S.picks[f.id] && S.picks[f.id].cap != null ? ' · <b class="warn">الكابتن هنا</b>' : ''}${stealMissing(f.id) ? ' · <b class="warn">اختار الفريق!</b>' : ''}</span><span>${locked ? 'عرض اختياراتك' : 'اختار لاعبينك'} ‹</span></div>
   </button>`;
 }
 
@@ -788,12 +788,12 @@ function renderMatchBody() {
   const btn = (pl, pos, label) => pl
     ? `<div class="sl fl ${S.pos === pl.p && !locked ? 'act' : ''}" data-act="pos" data-p="${pl.p}" role="button" tabindex="0">${p.cap !== pl.i ? '' : locked ? '<span class="c">C</span>' : `<button class="c cs on" data-act="cap" data-pid="${pl.i}" aria-label="إلغاء الكابتن">C</button>`}${locked ? '' : `<button class="rm" data-act="rmp" data-pid="${pl.i}" aria-label="شيل ${esc(pl.n)}">×</button>`}${photo(pl)}<span class="nm">${esc(pl.n)}</span><span class="sub">${POS[pl.p]}${locked ? ' · ' + N(sc.pts[pl.i] || 0) : ''}</span></div>`
     : `<button class="sl" data-act="pos" data-p="${pos}"><span>${locked ? '—' : '+'}</span><span>${label}</span></button>`;
-  const five = p5On(fid), item = myItem('f', fid);
+  const five = p5On(fid), fitems = myItems('f', fid), item = fitems.find(b => b.item === 'bench') || null;
   const slots = p.chip === 'free_pos' || five
     ? [...Array(five ? 5 : 4).keys()].map(i => btn(chosen[i], S.pos, 'لاعب ' + N(i + 1)))
     : [1, 2, 3, 4].map(pos => btn(chosen.find(x => x.p === pos), pos, POS[pos]));
-  const subPl = item && item.item === 'bench' && p.sub != null ? byId(p.sub) : null;
-  let html = `${item ? `<div class="k r j" style="margin:0 16px 10px;width:auto;border-color:#f5b301;background:rgba(245,179,1,.16)"><span>${itemPill('f', item.item)}</span><span class="m">${DAY_ITEMS.includes(item.item) ? 'على اليوم كله' : 'على الماتش ده'}</span></div>` : ''}<div class="pt">${slots.join('')}</div>${item && item.item === 'bench' ? `<div class="k r j" style="margin:0 16px 10px;width:auto"><div class="g"><b>الاحتياطي</b><div class="m">${subPl ? esc(subPl.n) + ' · ' + POS[subPl.p] : locked ? 'مختارتش احتياطي' : 'اضغط "احتياطي" جنب أي لاعب في القايمة'}</div></div>${subPl && !locked ? `<button class="bt" style="height:36px;padding:0 10px" data-act="psub" data-pid="${subPl.i}">شيله</button>` : ''}</div>` : ''}${capOff && chosen.length ? '<div class="m" style="padding:0 16px 10px;margin-top:-4px">الكابتن بتاعك النهارده في ماتش تاني، علشان كده مفيش كابتن هنا.</div>' : ''}`;
+  const subPl = item && p.sub != null ? byId(p.sub) : null;
+  let html = `${fitems.map(b => `<div class="k r j" style="margin:0 16px 10px;width:auto;border-color:#f5b301;background:rgba(245,179,1,.16)"><span>${itemPill('f', b.item)}</span><span class="m">${DAY_ITEMS.includes(b.item) ? 'على اليوم كله' : 'على الماتش ده'}</span></div>`).join('')}<div class="pt">${slots.join('')}</div>${item ? `<div class="k r j" style="margin:0 16px 10px;width:auto"><div class="g"><b>الاحتياطي</b><div class="m">${subPl ? esc(subPl.n) + ' · ' + POS[subPl.p] : locked ? 'مختارتش احتياطي' : 'اضغط "احتياطي" جنب أي لاعب في القايمة'}</div></div>${subPl && !locked ? `<button class="bt" style="height:36px;padding:0 10px" data-act="psub" data-pid="${subPl.i}">شيله</button>` : ''}</div>` : ''}${capOff && chosen.length ? '<div class="m" style="padding:0 16px 10px;margin-top:-4px">الكابتن بتاعك النهارده في ماتش تاني، علشان كده مفيش كابتن هنا.</div>' : ''}`;
 
   /* الخاصية المستخدمة + بونص هلقط رزقي */
   let stealBonus = 0, stealNote = '';
@@ -807,7 +807,7 @@ function renderMatchBody() {
     const bonus = p.cap != null ? (sc.pts[p.cap] || 0) * (CAP_MULT - 1) : 0;
     const xb = (sc.xb && sc.xb[S.user.uid]) || 0;   // نقط المحل الزيادة (بيحسبها Code.gs)
     html += `<div class="f"><div class="k r j"><div><b>مجموع الماتش</b><div class="m">${p.cap != null ? 'شامل الكابتن ×' + N(CAP_MULT) + ' · ' : ''}${sc.status === 'ft' ? 'انتهى' : sc.status === 'live' ? 'مباشر (نقط مؤقتة)' : 'لسه مفيش نقط'}</div></div><span class="d" style="font-size:28px">${N(base + bonus + stealBonus + xb)}</span></div>`;
-    if (xb) html += `<div class="k r j" style="border-color:#f5b301"><b>${item ? esc(itemDef('f', item.item).n) : 'المحل'}</b><span class="d" style="font-size:20px">${xb > 0 ? '+' : ''}${N(xb)}</span></div>`;
+    if (xb) html += `<div class="k r j" style="border-color:#f5b301"><b>${fitems.length ? fitems.map(b => esc(itemDef('f', b.item).n)).join(' + ') : 'المحل'}</b><span class="d" style="font-size:20px">${xb > 0 ? '+' : ''}${N(xb)}</span></div>`;
     if (p.chip) {
       const tm = p.team != null ? (p.team === d.h.id ? d.h : d.a) : null;
       html += `<div class="k r j"><div><b>الخاصية: ${CHIPS[p.chip].n}</b>${p.chip === 'steal' ? `<div class="m">${tm ? 'فريق ' + esc(teamName(tm)) : 'مختارتش فريق'}${stealNote ? ' · ' + stealNote : ''}</div>` : ''}</div>${p.chip === 'steal' && !stealNote ? `<span class="d" style="font-size:20px">+${N(stealBonus)}</span>` : ''}</div>`;
@@ -880,7 +880,7 @@ function renderList() {
     const sel = p.ids.includes(x.i);
     const why = sel ? null : canPick(d, p, x);
     const team = x.t === d.h.id ? d.h : d.a;
-    const bench = myItemCode('f', fid) === 'bench';
+    const bench = hasItem('f', fid, 'bench');
     const right = sel
       ? (p.cap === x.i ? `<button class="cb on" data-act="cap" data-pid="${x.i}" aria-label="إلغاء الكابتن">C</button>`
         : (capLocked ? '<span class="pl ok">مختار</span>' : `<button class="cb" data-act="cap" data-pid="${x.i}" aria-label="اجعله كابتن">C</button>`))
@@ -1725,15 +1725,15 @@ function effPicks(uid, fxs) {
     p.xb = (sc0 && sc0.xb && sc0.xb[uid]) || 0;   // نقط المحل الزيادة
     let chip = p.chip, dc = false, dcap = false, wasNew = false;
     if (chip) {
-      const extra = (p.it === 'chip3' && !used[chip]) || (p.it === 'dup' && used[chip]);   // خاصية تالتة / مكررة (المحل)
+      const extra = (hasIt(p, 'chip3') && !used[chip]) || (hasIt(p, 'dup') && used[chip]);   // خاصية تالتة / مكررة (المحل)
       if ((!extra && (used[chip] || nUsed >= MAX_CHIPS)) || (chip === 'steal' && p.team !== f.h.id && p.team !== f.a.id)) { chip = null; dc = true; }
       else { wasNew = !used[chip]; if (wasNew) nUsed++; used[chip] = true; }
     }
     let cap = p.cap;
-    if (cap != null) { const dk = dayKey(koOf(f)); if ((capDay[dk] || 0) >= (p.it === 'dcap' ? 2 : 1)) { cap = null; dcap = true; } else capDay[dk] = (capDay[dk] || 0) + 1; }
+    if (cap != null) { const dk = dayKey(koOf(f)); if ((capDay[dk] || 0) >= (hasIt(p, 'dcap') ? 2 : 1)) { cap = null; dcap = true; } else capDay[dk] = (capDay[dk] || 0) + 1; }
     const eff = { ...p, chip, cap, team: chip ? p.team : null };
     /* زي Code.gs: لو الخاصية اتشالت والتشكيلة مخالفة للقواعد العادية، الماتش كله ما يتحسبش */
-    if (!validIds(S.fxdocs[f.id], p.ids, chip, p.it === 'p5')) {
+    if (!validIds(S.fxdocs[f.id], p.ids, chip, hasIt(p, 'p5'))) {
       if (chip && wasNew) { used[chip] = false; nUsed--; }
       if (cap != null && !dcap) capDay[dayKey(koOf(f))]--;
       const z = calcPick(f.id, { ...eff, ids: [], cap: null, chip: null });
@@ -2914,7 +2914,16 @@ function myItem(cur, fid) {
     && (String(b.t) === String(fid) || (DAY_ITEMS.includes(b.item) && dayOfFx(b.t) === day))) || null;
 }
 const myItemCode = (cur, fid) => { const b = myItem(cur, fid); return b ? b.item : null; };
-const p5On = fid => myItemCode('f', fid) === 'p5';
+/* الفانتاسي: أكتر من حاجة ممكن تتفعّل في نفس الجولة، فبنسأل عن كل حاجة بكودها */
+function myItems(cur, fid) {
+  if (fid == null) return [];
+  const day = dayOfFx(fid);
+  return S.shop.buys.filter(b => b.cur === cur && b.k === 'pt' && !b.u && b.t != null
+    && (String(b.t) === String(fid) || (DAY_ITEMS.includes(b.item) && dayOfFx(b.t) === day)));
+}
+const hasItem = (cur, fid, code) => myItems(cur, fid).some(b => b.item === code);
+const hasIt = (p, c) => Array.isArray(p.it) ? p.it.includes(c) : p.it === c;
+const p5On = fid => hasItem('f', fid, 'p5');
 const maxIds = fid => p5On(fid) ? 5 : 4;
 /* الحاجة متقفلة؟ (حاجات اليوم بتتقفل مع أول ماتش في اليوم) */
 function itemLock(b) {
@@ -2933,7 +2942,7 @@ function targetLabel(b) {
   const k = koOf(f);
   return DAY_ITEMS.includes(b.item) ? (k ? 'يوم ' + fmtDay(k) : 'يوم لسه مش معروف') : `${esc(teamName(f.h))} ضد ${esc(teamName(f.a))}${k ? ' · ' + fmtDay(k) : ''}`;
 }
-const itemPill = (cur, code) => code ? `<span class="pl" style="background:#f5b301;color:#1a1300">${COIN} ${esc(itemDef(cur, code).n)}</span>` : '';
+const itemPill = (cur, code) => code ? String(code).split(',').map(c => `<span class="pl" style="background:#f5b301;color:#1a1300">${COIN} ${esc(itemDef(cur, c).n)}</span>`).join(' ') : '';
 
 /* ───── الشكليات في الترتيب ───── */
 function lookOf(cur, uid) { const L = S.shop.look; return (L && L[cur] && L[cur][uid]) || {}; }
@@ -3013,7 +3022,7 @@ function shopList(cur) {
   };
   return `${H.on ? '' : '<div class="k" style="border-color:#f5b301;background:rgba(245,179,1,.16)"><b class="warn">المحل لسه مقفول</b><div class="m">الإدارة هتفتحه قريب. وقتها التوكن هيبدأ يتصرف مع تثبيت كل جولة.</div></div>'}
   ${balCard(cur)}
-  <div class="r j" style="margin-top:6px"><b>بتأثر على النقط</b><span class="m">حاجة واحدة بس في الجولة</span></div>
+  <div class="r j" style="margin-top:6px"><b>بتأثر على النقط</b><span class="m">${cur === 'f' ? 'تقدر تفعّل أكتر من حاجة في الجولة' : 'حاجة واحدة بس في الجولة'}</span></div>
   ${SHOP_ITEMS[cur].map(row).join('')}
   <div class="r j" style="margin-top:6px"><b>مظهرك</b><span class="m">ثلاثي الأبعاد · بيظهر في ترتيب ${curName(cur)} بس</span></div>
   ${COS_ITEMS.map(row).join('')}`;
@@ -3032,7 +3041,7 @@ function shopMine(cur) {
   };
   const me = S.user.uid, myName = S.profile ? S.profile.username : nm(me);
   const prev = `<div class="k r" style="${bgCss(cur, me)}">${avatarL(cur, me, myName)}<div class="g"><div class="nm">${decoName(cur, me, myName)}</div>${decoSub(cur, me) ? `<div class="sub" style="margin-top:3px">${decoSub(cur, me)}</div>` : ''}</div></div>`;
-  return `<div class="m">الحاجات اللي بتأثر على النقط بتتفعّل على ماتش أو يوم، وتقدر تغيّرها لحد ما يتقفل. حاجة واحدة بس بتتحسب في الجولة، ولو الماتش اتأجل أو مالكش اختيار فيه بترجعلك.</div>
+  return `<div class="m">الحاجات اللي بتأثر على النقط بتتفعّل على ماتش أو يوم، وتقدر تغيّرها لحد ما يتقفل. ${cur === 'f' ? 'تقدر تفعّل أكتر من حاجة في نفس الجولة (حاجة واحدة من كل نوع على نفس اليوم أو الماتش)' : 'حاجة واحدة بس بتتحسب في الجولة'}، ولو الماتش اتأجل أو مالكش اختيار فيه بترجعلك.</div>
   ${pts.length ? pts.map(card).join('') : '<div class="k ctr">معندكش حاجات لسه. اشتري من المحل.</div>'}
   ${used.length ? `<div class="r j" style="margin-top:6px"><b>اتستخدمت</b></div>${used.slice(-10).reverse().map(b => `<div class="k r j"><span>${esc(itemDef(cur, b.item).n)}</span><span class="m">الجولة ${N(b.gw || 0)}</span></div>`).join('')}` : ''}
   <div class="r j" style="margin-top:6px"><b>شكلك في ترتيب ${curName(cur)}</b><span class="m">بيتحدث خلال ٥ دقايق</span></div>${prev}`;
@@ -3150,8 +3159,10 @@ Object.assign(ACTIONS, {
   async shtarget(el) {
     const sh = S.shop.sheet, b = sh && S.shop.buys.find(x => x.id === sh.id); if (!b) return;
     const fid = el.dataset.fid, g = fxGw(fid);
-    const other = S.shop.buys.find(x => x.id !== b.id && x.cur === b.cur && x.k === 'pt' && !x.u && x.t != null && x.gw === g);
-    if (other) return toast(`عندك ${itemDef(b.cur, other.item).n} متفعّلة في الجولة دي. حاجة واحدة بس بتتحسب، شيلها الأول.`);
+    /* التوقعات: حاجة واحدة في الجولة. الفانتاسي: أكتر من حاجة، بس مش نفس النوع على نفس اليوم/الماتش */
+    const other = S.shop.buys.find(x => x.id !== b.id && x.cur === b.cur && x.k === 'pt' && !x.u && x.t != null && x.gw === g
+      && (b.cur === 'p' || (x.item === b.item && (DAY_ITEMS.includes(b.item) ? dayOfFx(x.t) === dayOfFx(fid) : String(x.t) === String(fid)))));
+    if (other) return toast(b.cur === 'p' ? `عندك ${itemDef(b.cur, other.item).n} متفعّلة في الجولة دي. حاجة واحدة بس بتتحسب، شيلها الأول.` : `${itemDef(b.cur, b.item).n} متفعّلة بالفعل على ${DAY_ITEMS.includes(b.item) ? 'اليوم ده' : 'الماتش ده'}. استخدم نسخة تانية في يوم أو ماتش تاني.`);
     if (b.t != null && itemLocked(b)) return toast('الحاجة دي اتقفلت خلاص');
     try { await setTarget(b, fid); S.shop.sheet = null; toast(`${itemDef(b.cur, b.item).n} اتفعّلت ✓`); render(); }
     catch (e) { console.error(e); toast(e.code === 'permission-denied' ? 'مرفوض: الماتش ممكن يكون بدأ' : 'مقدرتش أفعّلها'); }
@@ -3374,7 +3385,7 @@ function showIntro() {
   el.id = 'intro'; el.className = 'gt';
   el.innerHTML = `<i class="gorb o1"></i><i class="gorb o2"></i><i class="gorb o3"></i><i class="gring"></i>
     <div class="gcard"><img class="glg" src="icon-192.png" alt=""><div class="gtt">Mido’s Fantasy</div><div class="gst">اختار ٤ لاعبين من كل ماتش ونافس واثبتلهم انك التوب</div>
-    <button class="gbt" type="button"><span>لم حسنات وصلي ع النبي</span></button><div class="gsl">اللهم صلّ وسلّم وبارك على سيدنا محمد ﷺ</div></div>`;
+    <button class="gbt" type="button"><span>م تصلي ع النبي</span></button><div class="gsl">اللهم صلّ وسلّم وبارك على سيدنا محمد ﷺ</div></div>`;
   document.body.appendChild(el);
   const ctx = prefOn('snd') ? audio() : null;
   if (ctx) { loadSound('click'); loadSound('intro'); }
