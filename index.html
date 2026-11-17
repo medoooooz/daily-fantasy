@@ -1832,7 +1832,7 @@ function usageHtml() {
   const tot = list.reduce((a, x) => a + (x.d.secs || 0), 0), visits = list.reduce((a, x) => a + (x.d.n || 0), 0);
   const rows = list.map((x, i) => `<div class="k r"><span class="d" style="width:28px;text-align:center;color:${i < 3 ? '#f5b301' : 'var(--mu)'}">${N(i + 1)}</span>${avatar(x.u.photo, x.u.username)}<div class="g"><div class="nm">${esc(x.u.username)}</div><div class="sub">دخل ${N(x.d.n)} مرة${x.d.last ? ' · آخر دخول ' + fmtDay(tsMs(x.d.last)) + ' ' + fmtTime(tsMs(x.d.last)) : ''}</div></div><div class="ctr"><div class="d" style="font-size:16px">${fmtDur(x.d.secs)}</div><div class="m">مدة البقاء</div></div></div>`).join('');
   return `<div class="r j"><b>ترتيب الاستخدام</b><span class="m">${N(list.length)} لاعب · ${N(visits)} دخول · ${fmtDur(tot)}</span></div>
-  <div class="tg eq"><button class="bt ${byN ? '' : 'on'}" data-act="usort" data-k="secs">الأكتر وقت</button><button class="bt ${byN ? 'on' : ''}" data-act="usort" data-k="n">الأكتر دخول</button></div>
+  <div class="tg eq"><button class="bt ${byN ? '' : 'on'}" data-act="usagesort" data-k="secs">الأكتر وقت</button><button class="bt ${byN ? 'on' : ''}" data-act="usagesort" data-k="n">الأكتر دخول</button></div>
   ${rows || '<div class="k ctr">لسه مفيش بيانات. التسجيل بيبدأ من أول دخول بعد التحديث.</div>'}`;
 }
 function vAdmin() {
@@ -1924,7 +1924,7 @@ const ACTIONS = {
     else if (v === 'pred') { S.pr.sheet = null; S.pr.dt = null; S.pr.info = false; render(); await predLoad(); }
     render();
   },
-  usort(el) { S.usort = el.dataset.k; render(); },
+  usagesort(el) { S.usort = el.dataset.k; render(); },
   async rtab(el) {
     S.rt = el.dataset.k; render();
     if (S.rt === 'b') { await Promise.all([loadBoard('total'), S.gw != null ? loadBoard('gw_' + S.gw) : null, loadNames()]).catch(() => {}); render(); }
@@ -3374,7 +3374,7 @@ function showIntro() {
   el.id = 'intro'; el.className = 'gt';
   el.innerHTML = `<i class="gorb o1"></i><i class="gorb o2"></i><i class="gorb o3"></i><i class="gring"></i>
     <div class="gcard"><img class="glg" src="icon-192.png" alt=""><div class="gtt">Mido’s Fantasy</div><div class="gst">اختار ٤ لاعبين من كل ماتش ونافس واثبتلهم انك التوب</div>
-    <button class="gbt" type="button"><span>لم حسنات وصلي ع النبي</span></button><div class="gsl">اللهم صلّ وسلّم وبارك على سيدنا محمد ﷺ</div></div>`;
+    <button class="gbt" type="button"><span>م لم حسنات وصلي ع النبي</span></button><div class="gsl">اللهم صلّ وسلّم وبارك على سيدنا محمد ﷺ</div></div>`;
   document.body.appendChild(el);
   const ctx = prefOn('snd') ? audio() : null;
   if (ctx) { loadSound('click'); loadSound('intro'); }
