@@ -267,11 +267,16 @@ body::before,body::after{opacity:.45}
 @keyframes crf{50%{transform:translateY(-2px) rotate(-4deg)}}
 .lvd{display:inline-block;width:8px;height:8px;border-radius:50%;background:#ff4d4d;vertical-align:middle;animation:lvp 1.4s infinite}
 @keyframes lvp{0%{box-shadow:0 0 0 0 rgba(255,77,77,.6)}70%{box-shadow:0 0 0 7px rgba(255,77,77,0)}100%{box-shadow:0 0 0 0 rgba(255,77,77,0)}}
+/* ===== مجسّمات الاسم ===== */
+.c3{font-weight:800;text-shadow:0 1px 0 rgba(255,255,255,.25),0 2px 0 rgba(0,0,0,.35),0 4px 8px rgba(0,0,0,.35)}
+.e3{display:inline-block;filter:drop-shadow(0 3px 3px rgba(0,0,0,.45));animation:crf 3s ease-in-out infinite}
+.t3{display:inline-block;padding:2px 10px;border-radius:999px;font-size:11px;font-weight:800;color:#2a1b00;background:linear-gradient(180deg,#ffe58a,#f0a800);box-shadow:inset 0 1px 0 rgba(255,255,255,.7),inset 0 -2px 3px rgba(120,70,0,.45),0 4px 8px -3px rgba(0,0,0,.5)}
+.s3{display:inline-block;padding:2px 10px;border-radius:12px;font-size:11px;font-weight:700;background:linear-gradient(160deg,rgba(255,255,255,.22),rgba(255,255,255,.06));border:1px solid rgba(255,255,255,.22);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);box-shadow:inset 0 1px 0 rgba(255,255,255,.35),0 5px 10px -5px rgba(0,0,0,.5)}
 /* ===== المحل ===== */
 .shk{transition:transform .15s}
 .shic{flex:none;width:48px;height:48px;border-radius:16px;display:grid;place-items:center;font-size:24px;background:linear-gradient(145deg,rgba(var(--afr),.6),rgba(var(--afr),.14));box-shadow:inset 0 1px 0 rgba(255,255,255,.4),inset 0 -7px 12px rgba(0,0,0,.28),0 10px 16px -10px rgba(0,0,0,.7)}
 .shic.cos{background:linear-gradient(145deg,rgba(245,179,1,.75),rgba(150,80,0,.35))}
-@media (prefers-reduced-motion:reduce){.fr3::before,.cr3,.lvd{animation:none}#intro.gt *{animation-duration:.01s!important}}
+@media (prefers-reduced-motion:reduce){.fr3::before,.cr3,.lvd,.e3{animation:none}#intro.gt *{animation-duration:.01s!important}}
 </style>
 </head>
 <body>
@@ -2816,23 +2821,28 @@ const SHOP = {
   earnP: { all: 3, day: [5, 3, 1], gw: [20, 10, 5] }
 };
 const COS_ITEMS = [
-  { k: 'bg', n: 'خلفية مجسّمة', p: 180, cos: 1, d: 'خلفية زجاجية ثلاثية الأبعاد لصفّك في الترتيب، بتفضل معاك على طول.' },
-  { k: 'crown', n: 'تاج ثلاثي الأبعاد', p: 300, cos: 1, d: 'تاج لامع بيطفو جنب اسمك في الترتيب لحد ما الجولة تخلص.' },
-  { k: 'frame', n: 'إطار متحرك', p: 380, cos: 1, d: 'إطار مجسّم بيلف حوالين صورتك في الترتيب، بيفضل معاك على طول.' }
+  { k: 'emoji', n: 'إيموجي جنب الاسم', p: 20, cos: 1, d: 'إيموجي جنب اسمك في الترتيب لحد ما الجولة تخلص.' },
+  { k: 'tomato', n: 'طماطماية', p: 30, cos: 1, d: 'ترمي إيموجي جاهز جنب اسم لاعب تاني في الترتيب، لحد آخر النهارده.' },
+  { k: 'title', n: 'لقب', p: 50, cos: 1, d: 'لقب مجسّم ثابت جنب اسمك في الترتيب.' },
+  { k: 'sign', n: 'يافطة', p: 60, cos: 1, d: 'جملة جاهزة في فقاعة زجاجية جنب اسمك في الترتيب لحد ما الجولة تخلص. الجمل من قايمة جاهزة، محدش يقدر يكتب من عنده.' },
+  { k: 'bg', n: 'خلفية مجسّمة', p: 75, cos: 1, d: 'خلفية زجاجية ثلاثية الأبعاد لصفّك في الترتيب، بتفضل معاك على طول.' },
+  { k: 'color', n: 'لون للاسم', p: 90, cos: 1, d: 'لون مجسّم ثابت لاسمك في الترتيب.' },
+  { k: 'crown', n: 'تاج ثلاثي الأبعاد', p: 120, cos: 1, d: 'تاج لامع بيطفو جنب اسمك في الترتيب لحد ما الجولة تخلص.' },
+  { k: 'frame', n: 'إطار متحرك', p: 150, cos: 1, d: 'إطار مجسّم بيلف حوالين صورتك في الترتيب، بيفضل معاك على طول.' }
 ];
 const SHOP_ITEMS = {
   f: [
-    { k: 'tc', n: 'تريبل كابتن', p: 180, s: 'day', d: 'الكابتن بتاعك ×٣ بدل ×٢ في اليوم اللي تختاره.' },
-    { k: 'safe', n: 'شبكة أمان', p: 170, s: 'day', d: 'لو نقط يومك طلعت أقل من متوسط اللي لعبوا اليوم ده، بتاخد المتوسط.' },
-    { k: 'dcap', n: 'كابتن مزدوج', p: 150, s: 'day', d: 'كابتنين في نفس اليوم في ماتشين مختلفين، والاتنين ×٢.' },
-    { k: 'chip3', n: 'خاصية تالتة', p: 150, s: 'fx', d: 'خاصية زيادة في الماتش اللي تختاره، فوق الخاصيتين بتوع الجولة. لازم تكون مختلفة عنهم.' },
-    { k: 'p5', n: 'لاعب خامس', p: 140, s: 'fx', d: '٥ لاعبين بدل ٤ في الماتش اللي تختاره. مركز واحد بس ممكن يتكرر، و٣ من فريق بحد أقصى.' },
-    { k: 'goals', n: 'يوم الأهداف', p: 140, s: 'day', d: 'أي لاعب من اختياراتك يجيب جون في اليوم ده ياخد +٣ لكل جون.' },
-    { k: 'asst', n: 'يوم الأسيستات', p: 130, s: 'day', d: 'أي لاعب من اختياراتك يعمل أسيست في اليوم ده ياخد +٢ لكل أسيست.' },
-    { k: 'cs', n: 'يوم الكلين شيت', p: 130, s: 'day', d: 'أي حارس أو مدافع من اختياراتك يخرج بكلين شيت في اليوم ده ياخد +٢.' },
-    { k: 'dup', n: 'خاصية مكررة', p: 120, s: 'fx', d: 'تستخدم خاصية استخدمتها قبل كده في الجولة مرة تانية، في الماتش اللي تختاره.' },
-    { k: 'bench', n: 'احتياطي', p: 110, s: 'fx', d: 'تختار لاعب احتياطي في الماتش، ولو حد من اختياراتك ملعبش ولا دقيقة، الاحتياطي بينزل مكانه بعد نهاية الماتش.' },
-    { k: 'capins', n: 'تأمين الكابتن', p: 90, s: 'day', d: 'لو الكابتن ملعبش، الكابتنية بتروح لأعلى لاعب لعب من اختياراتك في نفس الماتش.' }
+    { k: 'tc', n: 'تريبل كابتن', p: 210, s: 'day', d: 'الكابتن بتاعك ×٣ بدل ×٢ في اليوم اللي تختاره.' },
+    { k: 'safe', n: 'شبكة أمان', p: 195, s: 'day', d: 'لو نقط يومك طلعت أقل من متوسط اللي لعبوا اليوم ده، بتاخد المتوسط.' },
+    { k: 'dcap', n: 'كابتن مزدوج', p: 175, s: 'day', d: 'كابتنين في نفس اليوم في ماتشين مختلفين، والاتنين ×٢.' },
+    { k: 'chip3', n: 'خاصية تالتة', p: 175, s: 'fx', d: 'خاصية زيادة في الماتش اللي تختاره، فوق الخاصيتين بتوع الجولة. لازم تكون مختلفة عنهم.' },
+    { k: 'p5', n: 'لاعب خامس', p: 160, s: 'fx', d: '٥ لاعبين بدل ٤ في الماتش اللي تختاره. مركز واحد بس ممكن يتكرر، و٣ من فريق بحد أقصى.' },
+    { k: 'goals', n: 'يوم الأهداف', p: 160, s: 'day', d: 'أي لاعب من اختياراتك يجيب جون في اليوم ده ياخد +٣ لكل جون.' },
+    { k: 'asst', n: 'يوم الأسيستات', p: 150, s: 'day', d: 'أي لاعب من اختياراتك يعمل أسيست في اليوم ده ياخد +٢ لكل أسيست.' },
+    { k: 'cs', n: 'يوم الكلين شيت', p: 150, s: 'day', d: 'أي حارس أو مدافع من اختياراتك يخرج بكلين شيت في اليوم ده ياخد +٢.' },
+    { k: 'dup', n: 'خاصية مكررة', p: 140, s: 'fx', d: 'تستخدم خاصية استخدمتها قبل كده في الجولة مرة تانية، في الماتش اللي تختاره.' },
+    { k: 'bench', n: 'احتياطي', p: 125, s: 'fx', d: 'تختار لاعب احتياطي في الماتش، ولو حد من اختياراتك ملعبش ولا دقيقة، الاحتياطي بينزل مكانه بعد نهاية الماتش.' },
+    { k: 'capins', n: 'تأمين الكابتن', p: 105, s: 'day', d: 'لو الكابتن ملعبش، الكابتنية بتروح لأعلى لاعب لعب من اختياراتك في نفس الماتش.' }
   ],
   p: [
     { k: 'pb3', n: 'معزز ×٣', p: 150, s: 'fx', d: 'الماتش اللي تختاره بـ ×٣. لو المعزز العادي على نفس الماتش، بيبقى ×٣ مش ×٦.' },
@@ -2845,6 +2855,12 @@ const SHOP_ITEMS = {
   ]
 };
 const LOOK = {
+  emoji: ['🔥', '😎', '⚽', '🦁', '🐐', '🚀', '💪', '🎯', '😈', '🍀', '⚡', '🧠'],
+  tomato: ['🍅', '🤡', '🥚', '🐢', '😴'],
+  titleF: ['ملك الكباتن', 'حرامي النقط', 'الداهية', 'الحصان الأسود', 'أبو الخواص', 'صاحب الكومبو', 'المحترف', 'الخبير'],
+  titleP: ['العرّاف', 'صياد النوادر', 'قارئ الكف', 'بلورة سحرية', 'المحلل', 'أبو النتايج', 'الخبير التكتيكي', 'مستشار الماتشات'],
+  sign: ['الدوري ده بتاعي', 'اللي جاي أحلى', 'مين ينافس؟', 'سيبوني في حالي', 'الكابتن ده عرّافي', 'جاي ليكم', 'متستعجلوش عليا', 'النقط بتحبني', 'ارحموا الضعيف', 'الكورة مدوّرة'],
+  color: [['ذهبي', 'var(--gt)'], ['أخضر', 'var(--ac)'], ['سماوي', '#6fd3ff'], ['وردي', '#ff8fc7'], ['بنفسجي', '#c49bff'], ['برتقالي', '#ffa45c'], ['أحمر', '#ff7b7b']],
   frame: [['ذهبي', '#ffe27a', '#b87500'], ['فضي', '#ffffff', '#8aa0b2'], ['زمردي', '#6dffbd', '#0a8f55'], ['ناري', '#ffb347', '#ff2d1a'], ['نيون', '#8af4ff', '#2b6bff'], ['بنفسجي', '#e4b8ff', '#7a2cff']],
   bg: [
     ['غروب', 'radial-gradient(120% 100% at 0% 0%,rgba(255,255,255,.22),transparent 55%),linear-gradient(135deg,rgba(255,130,60,.55),rgba(150,40,130,.55))'],
@@ -2856,12 +2872,12 @@ const LOOK = {
   ]
 };
 const DAY_ITEMS = ['tc', 'safe', 'dcap', 'goals', 'asst', 'cs', 'capins'];
-const ICON = { tc: '🔱', safe: '🛡️', dcap: '✌️', chip3: '🎴', p5: '🖐️', goals: '⚽', asst: '🎁', cs: '🧤', dup: '🔁', bench: '🪑', capins: '🩹', pb3: '🚀', dbl: '🎲', gold: '🏅', pb2: '⚡', q2x: '❓', q3: '➕', psafe: '🪂', frame: '💍', bg: '🎨', crown: '👑' };
+const ICON = { tc: '🔱', safe: '🛡️', dcap: '✌️', chip3: '🎴', p5: '🖐️', goals: '⚽', asst: '🎁', cs: '🧤', dup: '🔁', bench: '🪑', capins: '🩹', pb3: '🚀', dbl: '🎲', gold: '🏅', pb2: '⚡', q2x: '❓', q3: '➕', psafe: '🪂', frame: '💍', bg: '🎨', crown: '👑', emoji: '😎', tomato: '🍅', title: '🏷️', sign: '🪧', color: '🌈' };
 const COIN = '🪙';
 const curName = c => c === 'p' ? 'التوقعات' : 'الفانتاسي';
 const itemDef = (cur, k) => SHOP_ITEMS[cur].find(x => x.k === k) || COS_ITEMS.find(x => x.k === k) || { k, n: k, p: 0, d: '' };
 const isPtItem = k => SHOP_ITEMS.f.some(x => x.k === k) || SHOP_ITEMS.p.some(x => x.k === k);
-const titlesOf = () => [];
+const titlesOf = cur => cur === 'p' ? LOOK.titleP : LOOK.titleF;
 
 S.shop = { on: false, w: null, buys: [], look: null, cur: 'f', sec: 'shop', sheet: null, loading: false };
 
@@ -2924,9 +2940,20 @@ function lookOf(cur, uid) { const L = S.shop.look; return (L && L[cur] && L[cur]
 const CROWN3D = '<svg class="cr3" viewBox="0 0 34 26" width="22" height="17" aria-label="تاج"><defs><linearGradient id="crg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff6b0"/><stop offset=".5" stop-color="#f5b301"/><stop offset="1" stop-color="#a86a00"/></linearGradient></defs><path d="M3 21L1 6l8 7 8-11 8 11 8-7-2 15z" fill="url(#crg)" stroke="#8a5600" stroke-width="1.2" stroke-linejoin="round"/><rect x="4" y="21" width="26" height="4" rx="1.8" fill="#d99200" stroke="#8a5600" stroke-width="1"/><path d="M9 13l8-9" stroke="#fff" stroke-opacity=".55" stroke-width="1.4" stroke-linecap="round"/><circle cx="17" cy="14" r="2.1" fill="#ff4d6d" stroke="#8a1030" stroke-width=".7"/></svg>';
 function decoName(cur, uid, name) {
   const o = lookOf(cur, uid);
-  return (o.cr ? CROWN3D + ' ' : '') + `<span>${esc(name)}</span>`;
+  const col = o.c != null && LOOK.color[o.c] ? ` class="c3" style="color:${LOOK.color[o.c][1]}"` : '';
+  let h = `<span${col}>${esc(name)}</span>`;
+  if (o.cr) h = CROWN3D + ' ' + h;
+  if (o.e != null && LOOK.emoji[o.e]) h += ` <span class="e3">${LOOK.emoji[o.e]}</span>`;
+  const L = S.shop.look, tom = (L && L.tom && L.tom[cur] && L.tom[cur][uid]) || [];
+  if (tom.length) h += ' ' + tom.slice(0, 5).map(t => `<span class="e3" title="${esc(nm(t.u))}">${LOOK.tomato[t.e] || ''}</span>`).join('');
+  return h;
 }
-function decoSub() { return ''; }
+function decoSub(cur, uid) {
+  const o = lookOf(cur, uid), tl = titlesOf(cur), out = [];
+  if (o.t != null && tl[o.t]) out.push(`<span class="t3">${esc(tl[o.t])}</span>`);
+  if (o.s != null && LOOK.sign[o.s]) out.push(`<span class="s3">🪧 ${esc(LOOK.sign[o.s])}</span>`);
+  return out.join(' ');
+}
 const frameCss = () => '';
 const bgCss = (cur, uid) => { const o = lookOf(cur, uid), b = o.bg != null && LOOK.bg[o.bg]; return b ? `background:${b[1]};box-shadow:inset 0 1px 0 rgba(255,255,255,.3),inset 0 -12px 20px -10px rgba(0,0,0,.5),0 12px 22px -14px rgba(0,0,0,.7);` : ''; };
 function avatarL(cur, uid, name, size) {
@@ -3047,9 +3074,18 @@ function choiceGrid(field, list, sel, fmt) {
 function buySheet(sh) {
   const cur = S.shop.cur, it = itemDef(cur, sh.item), bal = balOf(cur), c = sh.c;
   let pick = '';
+  if (sh.item === 'emoji') pick = choiceGrid('i', LOOK.emoji, c.i, v => `<span style="font-size:20px">${v}</span>`);
+  if (sh.item === 'title') pick = choiceGrid('i', titlesOf(cur), c.i, v => esc(v));
+  if (sh.item === 'sign') pick = choiceGrid('i', LOOK.sign, c.i, v => '🪧 ' + esc(v));
+  if (sh.item === 'color') pick = choiceGrid('i', LOOK.color, c.i, v => `<span style="color:${v[1]};font-weight:800">${esc(v[0])}</span>`);
   if (sh.item === 'frame') pick = choiceGrid('i', LOOK.frame, c.i, v => `<span class="r" style="gap:8px"><span class="fr3" style="--c1:${v[1]};--c2:${v[2]}"><span class="av" style="width:24px;height:24px"></span></span>${esc(v[0])}</span>`);
   if (sh.item === 'bg') pick = `<div style="display:flex;flex-direction:column;gap:8px">${LOOK.bg.map((v, i) => `<button class="k" style="background:${v[1]};${c.i === i ? 'border-color:var(--af);box-shadow:0 0 0 2px var(--af)' : ''}" data-act="shpick" data-f="i" data-v="${i}"><b>${esc(v[0])}</b></button>`).join('')}</div>`;
-  const ready = ['frame', 'bg'].includes(sh.item) ? c.i != null : true;
+  if (sh.item === 'tomato') {
+    const others = S.userList.filter(u => u.id !== S.user.uid && !u.banned && !S.gone.has(u.id)).sort((a, b) => byName(a.name || '', b.name || ''));
+    pick = `<div class="m">ترمي إيه؟</div>${choiceGrid('e', LOOK.tomato, c.e, v => `<span style="font-size:20px">${v}</span>`)}
+      <div class="m">على مين؟</div><div style="display:flex;flex-direction:column;gap:6px;max-height:260px;overflow-y:auto">${others.map(u => `<button class="k r" style="padding:8px 10px;${c.to === u.id ? 'border-color:var(--af);background:rgba(var(--afr),.22)' : ''}" data-act="shpick" data-f="to" data-v="${esc(u.id)}">${avatar(u.photo, u.name, 28)}<span class="g">${esc(u.name || nm(u.id))}</span></button>`).join('') || '<div class="m">مفيش لاعبين تانيين.</div>'}</div>`;
+  }
+  const ready = sh.item === 'tomato' ? (c.e != null && c.to) : ['emoji', 'title', 'sign', 'color', 'frame', 'bg'].includes(sh.item) ? c.i != null : true;
   const ok = ready && bal >= it.p && S.shop.on && !sh.busy;
   return sOv(`<div class="r j"><b style="font-size:20px">${esc(it.n)}</b><button class="bt" style="width:44px;padding:0" data-act="shclose" aria-label="إغلاق">×</button></div>
     <div class="m" style="line-height:1.6">${esc(it.d)}</div>
