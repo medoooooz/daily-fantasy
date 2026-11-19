@@ -3538,7 +3538,8 @@ function showIntro() {
 /* ═════════════════════ حبشتكنات (ألعاب إضافية) ═════════════════════
    الألعاب: الكروت (على مدار الجولة) وصنفلي (كل يوم). لإضافة لعبة جديدة: ضيف عنصر في HGAMES، ودالة بتعرض تبويباتها في hbBody.
    لازم تطابق HAB في Code.gs. البيانات: cdeck/cpick/cpub/cboard و sdeck/spick/spub/sboard. */
-const HAB = { pick: 8, sortFull: 10, sortHalf: 5 };
+const HAB = { pick: 8, total: 15, sortFull: { players: 10, matches: { 3: 6, 4: 8, 5: 10 } } };
+const hbFull = (k, n) => k === 'c' ? (HAB.sortFull.matches[n] || HAB.sortFull.matches[3]) : HAB.sortFull.players;
 const HGAMES = [
   { id: 'cards', n: 'الكروت', ic: '🃏', tabs: [['play', 'لعب'], ['rank', 'الترتيب'], ['stats', 'إحصائيات'], ['cmp', 'مقارنة']] },
   { id: 'sort', n: 'صنفلي', ic: '🎚️', tabs: [['play', 'لعب'], ['rank', 'الترتيب'], ['stats', 'إحصائيات'], ['cmp', 'مقارنة']] }
@@ -3549,9 +3550,9 @@ const HB_SEC = {
   c: { t: 'ماتشات اليوم', q: 'رتّبها من الأكتر أهدافاً للأقل', u: 'هدف' }
 };
 S.hb = { g: 'all', tab: 'play', sheet: null, loading: false, rk: { c: 'total', s: 'total', cg: null, sg: null, sd: null },
-  c: { gw: null, deck: {}, mine: {}, pub: {}, board: {}, total: null },
-  s: { gw: null, day: null, decks: {}, mine: {}, pub: {}, board: {}, total: null, work: {} },
-  st: { c: 'pop', s: 'a', q: '' }, cmp: { opp: null, oq: '' }, combo: [] };
+  c: { gw: null, deck: {}, draft: {}, mine: {}, pub: {}, board: {}, total: null },
+  s: { gw: null, day: null, decks: {}, draft: {}, mine: {}, pub: {}, board: {}, total: null, work: {} },
+  st: { c: 'pop', s: 'a', q: '' }, cmp: { opp: null, oq: '' }, combo: [], adm: { pin: {}, pool: false, q: '' } };
 
 const hbDayLbl = k => fmtDay(Date.parse(k + 'T12:00:00Z'));
 const hbMe = () => S.user.uid;
@@ -3562,31 +3563,32 @@ async function hbGetMine(col) {
 async function hbLoadAll() {
   const H = S.hb, C = H.c, SS = H.s;
   H.loading = true;
-  const [cd, cb, cp, cm, sd, sb, sp, sm] = await Promise.all([hbGetAll('cdeck'), hbGetAll('cboard'), hbGetAll('cpub'), hbGetMine('cpick'), hbGetAll('sdeck'), hbGetAll('sboard'), hbGetAll('spub'), hbGetMine('spick'), loadNames()]);
-  C.deck = {}; C.board = {}; C.pub = {}; C.mine = {};
+  const adm = S.admin;
+  const [cd, cb, cp, cm, sd, sb, sp, sm, cdr, sdr] = await Promise.all([hbGetAll('cdeck'), hbGetAll('cboard'), hbGetAll('cpub'), hbGetMine('cpick'), hbGetAll('sdeck'), hbGetAll('sboard'), hbGetAll('spub'), hbGetMine('spick'), adm ? hbGetAll('cdraft') : {}, adm ? hbGetAll('sdraft') : {}, loadNames()]);
+  C.deck = {}; C.board = {}; C.pub = {}; C.mine = {}; C.draft = {};
   Object.keys(cd).forEach(k => { C.deck[Number(k.replace('gw_', ''))] = cd[k]; });
+  Object.keys(cdr).forEach(k => { C.draft[Number(k.replace('gw_', ''))] = cdr[k]; });
   Object.keys(cb).forEach(k => { if (k.startsWith('gw_')) C.board[Number(k.slice(3))] = cb[k]; });
   Object.keys(cp).forEach(k => { C.pub[Number(k.replace('gw_', ''))] = cp[k]; });
-  Object.keys(cm).forEach(k => { C.mine[Number(cm[k].gw)] = { ids: cm[k].ids || [] }; });
+  Object.keys(cm).forEach(k => { C.mine[Number(cm[k].gw)] = { ids: cm[k].ids || [], nos: cm[k].nos || [] }; });
   C.total = cb.total || { rows: [] };
-  SS.decks = sd; SS.board = {}; SS.pub = sp; SS.mine = {};
+  SS.decks = sd; SS.draft = sdr; SS.board = {}; SS.pub = sp; SS.mine = {};
   Object.keys(sb).forEach(k => { if (/^\d{4}-/.test(k)) SS.board[k] = sb[k]; });
   Object.keys(sm).forEach(k => { SS.mine[sm[k].day] = { a: sm[k].a || [], b: sm[k].b || [], c: (sm[k].c || []).map(String) }; });
   SS.total = sb.total || { rows: [] };
-  const cg = Object.keys(C.deck).map(Number).sort((a, b) => a - b);
-  if (C.gw == null || !C.deck[C.gw]) C.gw = cg.includes(S.gw) ? S.gw : (cg[cg.length - 1] ?? null);
-  const days = Object.keys(sd).sort();
-  const gs = [...new Set(days.map(k => sd[k].gw))].sort((a, b) => a - b);
+  const cg = hbGws();
+  if (C.gw == null || !cg.includes(C.gw)) C.gw = cg.includes(S.gw) ? S.gw : (cg[cg.length - 1] ?? null);
+  const gs = hbSGws();
   if (SS.gw == null || !gs.includes(SS.gw)) SS.gw = gs.includes(S.gw) ? S.gw : (gs[gs.length - 1] ?? null);
   const mine = hbDays();
   if (!SS.day || !mine.includes(SS.day)) { const t = dayKey(Date.now()); SS.day = mine.includes(t) ? t : (mine.find(k => k > t) || mine[mine.length - 1] || null); }
   H.loading = false;
 }
-const hbGws = () => Object.keys(S.hb.c.deck).map(Number).sort((a, b) => a - b);
-const hbSGws = () => [...new Set(Object.values(S.hb.s.decks).map(d => d.gw))].sort((a, b) => a - b);
-const hbDays = () => Object.keys(S.hb.s.decks).filter(k => S.hb.s.decks[k].gw === S.hb.s.gw).sort();
+const hbGws = () => [...new Set([...Object.keys(S.hb.c.deck), ...(S.admin ? Object.keys(S.hb.c.draft) : [])].map(Number))].sort((a, b) => a - b);
+const hbSGws = () => [...new Set([...Object.values(S.hb.s.decks), ...(S.admin ? Object.values(S.hb.s.draft) : [])].map(d => d.gw))].sort((a, b) => a - b);
+const hbDays = () => [...new Set([...Object.keys(S.hb.s.decks), ...(S.admin ? Object.keys(S.hb.s.draft) : [])])].filter(k => ((S.hb.s.decks[k] || S.hb.s.draft[k]).gw) === S.hb.s.gw).sort();
 const hbLockMs = d => d && d.lock ? tsMs(d.lock) : 0;
-const hbPtsPill = (p, m) => `<span class="pl ok">+${N(p)}</span><span class="pl bad">−${N(m)}</span>`;
+const hbPtsPill = (p, n) => `<span class="pl ok">نعم <bdi>+${N(p)}</bdi></span><span class="pl bad">لا <bdi>+${N(n)}</bdi></span>`;
 const hbNames = u => esc(S.names[u] || nm(u));
 const hbUserBtn = u => `<button class="evp${u === hbMe() ? ' me' : ''}" data-act="hu" data-u="${esc(u)}">${hbNames(u)}</button>`;
 const hbOthers = () => activeIds().filter(u => u !== hbMe());
@@ -3598,7 +3600,7 @@ function vHab() {
   const g = games.find(x => x.id === H.g) || games[0];
   const head = `<div class="h"><div><div class="m">Mido’s Fantasy</div><b>حبشتكنات</b></div><div class="ctr"><div class="m">نقطك</div><div class="d" style="font-size:24px">${sN(hbMyTotal())}</div></div></div>
   <div class="tg">${games.map(x => `<button class="bt ${x.id === g.id ? 'on' : ''}" data-act="hgame" data-k="${x.id}">${x.ic} ${x.n}</button>`).join('')}</div>
-  ${g.id === 'all' ? '' : `<div class="tg">${g.tabs.map(([k, l]) => `<button class="bt ${H.tab === k ? 'on' : ''}" data-act="htab" data-k="${k}" style="font-size:13px">${l}</button>`).join('')}</div>`}`;
+  ${g.id === 'all' ? '' : `<div class="tg">${g.tabs.concat(S.admin ? [['adm', '⚙️ إدارة']] : []).map(([k, l]) => `<button class="bt ${H.tab === k ? 'on' : ''}" data-act="htab" data-k="${k}" style="font-size:13px">${l}</button>`).join('')}</div>`}`;
   return head + (H.loading && !Object.keys(H.c.deck).length && !Object.keys(H.s.decks).length ? '<div class="f"><div class="k ctr">جاري التحميل…</div></div>' : hbBody(g.id)) + hbSheetHtml();
 }
 function hbMyTotal() {
@@ -3608,6 +3610,7 @@ function hbMyTotal() {
 function hbBody(g) {
   const H = S.hb;
   if (g === 'all') return hbAll();
+  if (H.tab === 'adm' && S.admin) return g === 'cards' ? hbAdmC() : hbAdmS();
   if (H.tab === 'rank') return hbRank(g);
   if (H.tab === 'stats') return g === 'cards' ? hbStatsC() : hbStatsS();
   if (H.tab === 'cmp') return g === 'cards' ? hbCmpC() : hbCmpS();
@@ -3643,28 +3646,34 @@ function hbGwChips(gws, cur, act) {
 function hbPlayC() {
   const C = S.hb.c, gw = C.gw, d = C.deck[gw];
   const chips = hbGwChips(hbGws(), gw, 'hcgw');
-  if (!d) return chips + '<div class="f"><div class="k ctr">كروت الجولة لسه ما اتجهزتش. بتظهر لما الجولة تتزامن (غالباً قبلها بيوم).</div></div>';
-  const mine = (C.mine[gw] || { ids: [] }).ids, b = C.board[gw], me = b && b.rows && b.rows.find(r => r.uid === hbMe());
+  if (!d) return chips + '<div class="f"><div class="k ctr">أسئلة الكروت لسه ما اتفتحتش من الإدارة.</div></div>';
+  const m = C.mine[gw] || { ids: [], nos: [] }, b = C.board[gw], me = b && b.rows && b.rows.find(r => r.uid === hbMe());
   const byDay = {}; d.cards.forEach(c => { (byDay[c.d] = byDay[c.d] || []).push(c); });
-  return chips + `<div class="f"><div class="k r j"><div class="g"><b>اختار ${N(HAB.pick)} كروت من ${N(d.cards.length)}</b><div class="m">كارت حصل = + نقطه · كارت ما حصلش = − خصمه · كل كارت بيتقفل مع بداية ماتشه</div></div><div class="ctr"><div class="d" style="font-size:24px;color:${mine.length === HAB.pick ? 'var(--ac)' : 'var(--tx)'}">${N(mine.length)}/${N(HAB.pick)}</div>${me ? `<div class="m">نقطك ${sN(me.pts)}</div>` : ''}</div></div>
-  ${Object.keys(byDay).sort().map(k => `<div class="m" style="margin-top:4px;font-weight:700;font-size:14px">${esc(hbDayLbl(k))}</div>${byDay[k].map(c => hbCardHtml(gw, c, mine)).join('')}`).join('')}</div>`;
+  return chips + `<div class="f"><div class="k r j"><div class="g"><b>اختار ${N(HAB.pick)} كروت من ${N(d.cards.length)}</b><div class="m">ضغطة = <b style="color:var(--ac)">نعم</b> هيحصل (أخضر) · ضغطتين = <b style="color:var(--neg)">لا</b> مش هيحصل (أحمر) · تالتة = شيل الاختيار. الصح بياخد نقط الكارت والغلط صفر (مفيش خصم). كل كارت بيتقفل مع ماتشه.</div></div><div class="ctr"><div class="d" style="font-size:24px;color:${m.ids.length === HAB.pick ? 'var(--ac)' : 'var(--tx)'}">${N(m.ids.length)}/${N(HAB.pick)}</div>${me ? `<div class="m">نقطك ${sN(me.pts)}</div>` : ''}</div></div>
+  ${Object.keys(byDay).sort().map(k => `<div class="m" style="margin-top:4px;font-weight:700;font-size:14px">${esc(hbDayLbl(k))}</div>${byDay[k].map(c => hbCardHtml(gw, c)).join('')}`).join('')}</div>`;
 }
-function hbCardHtml(gw, c, mine) {
-  const sel = mine.includes(c.id), lock = Date.now() >= c.ko, r = hbRes(gw, c.id), pub = S.hb.c.pub[gw], pk = pub && pub.by && pub.by[c.id];
+function hbCardHtml(gw, c) {
+  const side = hbSide(gw, c.id), lock = Date.now() >= c.ko, r = hbRes(gw, c.id), by = hbBy(gw, c.id);
   let st = '';
-  if (r === 1) st = `<span class="pl ok">✓ حصل</span>`; else if (r === 0) st = `<span class="pl bad">✗ ما حصلش</span>`;
-  else if (lock) st = '<span class="pl lv">مقفول</span>';
-  const sc = sel && r !== -1 ? (r === 1 ? `<b style="color:var(--ac)">+${N(c.p)}</b>` : `<b style="color:var(--neg)">−${N(c.m)}</b>`) : '';
-  return `<div class="k r hc" style="padding:10px;gap:8px;${sel ? 'border:2px solid var(--af);background:rgba(var(--afr),.16);' : ''}${lock && !sel ? 'opacity:.82;' : ''}">
+  if (r !== -1) {
+    if (side) { const ok = side === 'y' ? r === 1 : r === 0; st = ok ? `<span class="pl ok">✓ صح +${N(side === 'y' ? c.p : c.n)}</span>` : '<span class="pl bad">✗ غلط · صفر</span>'; }
+    else st = r === 1 ? '<span class="pl ok">حصل</span>' : '<span class="pl bad">ما حصلش</span>';
+  } else if (lock) st = '<span class="pl lv">مقفول</span>';
+  const bd = side === 'y' ? 'border:2px solid var(--af);background:rgba(var(--afr),.16);' : side === 'n' ? 'border:2px solid #d63a3f;background:rgba(214,58,63,.16);' : '';
+  const ind = `<span class="c" style="${side === 'n' ? 'background:#d63a3f;' : side === 'y' ? '' : 'background:rgba(var(--fg),.2);color:transparent'}">${side === 'n' ? '✕' : '✓'}</span>`;
+  return `<div class="k r hc" style="padding:10px;gap:8px;${bd}${lock && !side ? 'opacity:.82;' : ''}">
     <div class="r g" data-act="hcard" data-id="${c.id}" style="gap:10px;cursor:pointer;min-width:0"><span style="font-size:26px;width:34px;text-align:center;flex:none">${c.ic}</span>
-      <div class="g"><div class="nm" style="line-height:1.45">${esc(c.t)}</div><div class="sub" style="margin-top:3px">${hbFxLabel(c)} · ${esc(fmtTime(c.ko))}${pk ? ' · اختاره ' + N(pk.length) : ''}</div>
-      <div class="r" style="gap:5px;margin-top:5px;flex-wrap:wrap">${hbPtsPill(c.p, c.m)}${st}${sc}</div></div></div>
-    <div class="ctr" style="flex:none;display:flex;flex-direction:column;align-items:center;gap:2px"><span class="c" style="${sel ? '' : 'background:rgba(var(--fg),.2);color:transparent'}">✓</span><button class="ib" style="height:30px;width:30px" data-act="hcinfo" data-id="${c.id}" aria-label="تفاصيل">${INFO_SVG}</button></div></div>`;
+      <div class="g"><div class="nm" style="line-height:1.45">${esc(c.t)}</div><div class="sub" style="margin-top:3px">${hbFxLabel(c)} · ${esc(fmtTime(c.ko))}${by ? ' · نعم ' + N(by.y.length) + ' / لا ' + N(by.n.length) : ''}</div>
+      <div class="r" style="gap:5px;margin-top:5px;flex-wrap:wrap">${hbPtsPill(c.p, c.n)}${st}</div></div></div>
+    <div class="ctr" style="flex:none;display:flex;flex-direction:column;align-items:center;gap:2px">${ind}<button class="ib" style="height:30px;width:30px" data-act="hcinfo" data-id="${c.id}" aria-label="تفاصيل">${INFO_SVG}</button></div></div>`;
 }
+const hbSide = (gw, id) => { const m = S.hb.c.mine[gw]; if (!m || !m.ids.includes(id)) return null; return m.nos.includes(id) ? 'n' : 'y'; };
+const hbBy = (gw, cid) => { const p = S.hb.c.pub[gw], b = p && p.by && p.by[cid]; if (!b) return null; const o = Array.isArray(b) ? { y: b, n: [] } : b; return { y: (o.y || []).filter(u => !S.gone.has(u)), n: (o.n || []).filter(u => !S.gone.has(u)) }; };
+const hbWin = (gw, id, side) => { const r = hbRes(gw, id); return r === -1 ? null : (side === 'y' ? r === 1 : r === 0); };
 let hbChain = Promise.resolve();
-function hbQueueSave(gw, ids, last) {
+function hbQueueSave(gw, ids, nos, last) {
   hbChain = hbChain.then(async () => {
-    try { await setDoc(doc(db, 'cpick', gw + '_' + hbMe()), { uid: hbMe(), gw, ids, last, updatedAt: serverTimestamp() }); }
+    try { await setDoc(doc(db, 'cpick', gw + '_' + hbMe()), { uid: hbMe(), gw, ids, nos, last, updatedAt: serverTimestamp() }); }
     catch (e) { console.error(e); toast(e.code === 'permission-denied' ? 'الكارت اتقفل أو الحفظ مرفوض' : 'مقدرتش أحفظ، تأكد من النت'); await hbLoadAll(); if (S.view === 'hab') render(); }
   });
 }
@@ -3695,38 +3704,39 @@ function hbRank(g) {
 }
 
 /* ───── الكروت: إحصائيات ───── */
-function hbLockedPicks(gw) {   // لكل لاعب: كروته اللي اتقفلت (من cpub)
+function hbLockedPicks(gw) {   // لكل لاعب: Map(كارت -> 'y' | 'n') للكروت اللي اتقفلت (من cpub)
   const pub = S.hb.c.pub[gw], by = (pub && pub.by) || {}, u = {};
-  Object.keys(by).forEach(cid => by[cid].forEach(x => { if (!S.gone.has(x)) (u[x] = u[x] || new Set()).add(cid); }));
+  Object.keys(by).forEach(cid => { const b = hbBy(gw, cid); if (b) { b.y.forEach(x => (u[x] = u[x] || new Map()).set(cid, 'y')); b.n.forEach(x => (u[x] = u[x] || new Map()).set(cid, 'n')); } });
   return u;
 }
 function hbStatsC() {
   const C = S.hb.c, gw = C.gw, d = C.deck[gw], st = S.hb.st;
   const chips = hbGwChips(hbGws(), gw, 'hcgw');
   const tabs = `<div class="tg eq">${[['pop', 'الكروت'], ['combo', 'كومبوهات'], ['like', 'مين زيي']].map(([k, l]) => `<button class="bt ${st.c === k ? 'on' : ''}" data-act="hstc" data-k="${k}" style="font-size:13px">${l}</button>`).join('')}</div>`;
-  if (!d) return chips + '<div class="f"><div class="k ctr">مفيش كروت للجولة دي.</div></div>';
-  const pub = C.pub[gw], by = (pub && pub.by) || {}, locked = d.cards.filter(c => by[c.id]);
+  if (!d) return chips + '<div class="f"><div class="k ctr">أسئلة الكروت لسه ما اتفتحتش.</div></div>';
+  const locked = d.cards.filter(c => hbBy(gw, c.id));
   if (!locked.length) return chips + tabs + '<div class="f"><div class="k ctr">الإحصائيات بتظهر بعد ما أول كارت يتقفل (بداية أول ماتش) بدقيقة.</div></div>';
   const users = hbLockedPicks(gw), nU = Object.keys(users).length || 1;
+  const tok = (c, s) => c + ':' + s, lbl = k => { const [id, s] = k.split(':'), c = hbCard(gw, id); return `<div class="sub" style="font-size:12px"><b style="color:${s === 'y' ? 'var(--ac)' : 'var(--neg)'}">${s === 'y' ? 'نعم' : 'لا'}</b> ${c.ic} ${esc(c.t)}</div>`; };
   let body = '';
   if (st.c === 'pop') {
-    const rows = locked.map(c => { const l = (by[c.id] || []).filter(x => !S.gone.has(x)), r = hbRes(gw, c.id); return { c, n: l.length, bad: r === 0 ? l.length : 0, ok: r === 1 ? l.length : 0, r }; }).sort((a, b) => b.n - a.n);
-    body = `<div class="m">اضغط على أي كارت تشوف مين اختاره ومين اتلسع منه</div>` + rows.map(x => `<button class="k" data-act="hcinfo" data-id="${x.c.id}" style="padding:10px"><div class="r j"><span style="font-size:22px">${x.c.ic}</span><div class="g"><div class="nm">${esc(x.c.t)}</div><div class="sub">اختاره ${N(x.n)} من ${N(nU)} (${N(Math.round(x.n / nU * 100))}٪)${x.r === 1 ? ' · حصل ✓' : x.r === 0 ? ' · ما حصلش ✗' : ''}</div></div>${x.bad ? `<span class="pl bad">🔥 ${N(x.bad)} اتلسعوا</span>` : x.ok ? `<span class="pl ok">${N(x.ok)} كسبوا</span>` : ''}</div><div class="bar mt"><i style="width:${Math.round(x.n / nU * 100)}%"></i></div></button>`).join('');
+    const rows = locked.map(c => { const b = hbBy(gw, c.id), r = hbRes(gw, c.id), n = b.y.length + b.n.length; return { c, b, n, r, bad: r === 1 ? b.n.length : r === 0 ? b.y.length : 0, ok: r === 1 ? b.y.length : r === 0 ? b.n.length : 0 }; }).sort((a, b) => b.n - a.n);
+    body = `<div class="m">اضغط على أي كارت تشوف مين قال نعم ومين قال لا ومين اتلسع</div>` + rows.map(x => `<button class="k" data-act="hcinfo" data-id="${x.c.id}" style="padding:10px"><div class="r j"><span style="font-size:22px">${x.c.ic}</span><div class="g"><div class="nm">${esc(x.c.t)}</div><div class="sub">نعم ${N(x.b.y.length)} · لا ${N(x.b.n.length)} (${N(Math.round(x.n / nU * 100))}٪ اختاروه)${x.r === 1 ? ' · حصل ✓' : x.r === 0 ? ' · ما حصلش ✗' : ''}</div></div>${x.bad ? `<span class="pl bad">🔥 ${N(x.bad)} اتلسعوا</span>` : x.ok ? `<span class="pl ok">${N(x.ok)} كسبوا</span>` : ''}</div><div class="r mt" style="gap:2px;height:8px;border-radius:6px;overflow:hidden;background:rgba(var(--fg),.1)"><i style="display:block;height:100%;width:${x.n ? x.b.y.length / x.n * 100 : 0}%;background:var(--af)"></i><i style="display:block;height:100%;width:${x.n ? x.b.n.length / x.n * 100 : 0}%;background:#d63a3f"></i></div></button>`).join('');
   } else if (st.c === 'combo') {
-    const ids = locked.map(c => c.id), pairs = {}, trios = {};
-    Object.keys(users).forEach(u => { const a = ids.filter(i => users[u].has(i)); for (let i = 0; i < a.length; i++) for (let j = i + 1; j < a.length; j++) { const k = a[i] + '|' + a[j]; (pairs[k] = pairs[k] || []).push(u); for (let l = j + 1; l < a.length; l++) { const t = a[i] + '|' + a[j] + '|' + a[l]; (trios[t] = trios[t] || []).push(u); } } });
+    const pairs = {}, trios = {}, ord = new Map(d.cards.map((c, i) => [c.id, i]));
+    Object.keys(users).forEach(u => { const a = [...users[u]].sort((x, y) => ord.get(x[0]) - ord.get(y[0])).map(([c, s]) => tok(c, s)); for (let i = 0; i < a.length; i++) for (let j = i + 1; j < a.length; j++) { const k = a[i] + '|' + a[j]; (pairs[k] = pairs[k] || []).push(u); for (let l = j + 1; l < a.length; l++) { const t = a[i] + '|' + a[j] + '|' + a[l]; (trios[t] = trios[t] || []).push(u); } } });
     const top = (o, n) => Object.keys(o).filter(k => o[k].length > 1).sort((x, y) => o[y].length - o[x].length).slice(0, n);
-    const line = (k, o) => { const cs = k.split('|').map(i => hbCard(gw, i)); return `<button class="k" data-act="hcombo" data-k="${k}" style="padding:10px"><div class="r j"><div class="g">${cs.map(c => `<div class="sub" style="font-size:12px">${c.ic} ${esc(c.t)}</div>`).join('')}</div><span class="pl ok">${N(o[k].length)} لاعب</span></div></button>`; };
-    const mc = S.hb.combo.filter(i => ids.includes(i));
-    const both = mc.length ? Object.keys(users).filter(u => mc.every(i => users[u].has(i))) : [];
-    body = `<div class="k"><b>كومبو بإيدك</b><div class="m">اختار لحد ٦ كروت (من اللي اتقفلت) وشوف مين اختارهم كلهم</div><div class="r" style="flex-wrap:wrap;gap:6px;margin-top:8px">${locked.map(c => `<button class="pi ${mc.includes(c.id) ? 'on' : ''}" data-act="hmc" data-id="${c.id}" style="height:auto;padding:6px 10px;text-align:start;font-size:12px">${c.ic} ${esc(c.t)}</button>`).join('')}</div>
-      ${mc.length ? `<div class="mt"><b>${N(both.length)} لاعب اختاروا الكروت دي كلها</b><div class="r" style="flex-wrap:wrap;gap:6px;margin-top:6px">${both.map(hbUserBtn).join('') || '<span class="m">محدش</span>'}</div></div>` : ''}</div>
+    const line = (k, o) => `<button class="k" data-act="hcombo" data-k="${k}" style="padding:10px"><div class="r j"><div class="g">${k.split('|').map(lbl).join('')}</div><span class="pl ok">${N(o[k].length)} لاعب</span></div></button>`;
+    const mc = S.hb.combo.filter(t => locked.some(c => c.id === t.split(':')[0]));
+    const both = mc.length ? Object.keys(users).filter(u => mc.every(t => { const [c, s] = t.split(':'); return users[u].get(c) === s; })) : [];
+    body = `<div class="k"><b>كومبو بإيدك</b><div class="m">دوس على الكارت: مرة نعم ومرتين لا وتالتة تشيله (لحد ٦ كروت من اللي اتقفلت) وشوف مين اختارهم كده</div><div class="r" style="flex-wrap:wrap;gap:6px;margin-top:8px">${locked.map(c => { const t = mc.find(x => x.split(':')[0] === c.id), s = t && t.split(':')[1]; return `<button class="pi ${s ? 'on' : ''}" data-act="hmc" data-id="${c.id}" style="height:auto;padding:6px 10px;text-align:start;font-size:12px;${s === 'n' ? 'background:rgba(214,58,63,.3);border-color:#d63a3f' : ''}">${s ? (s === 'y' ? 'نعم ' : 'لا ') : ''}${c.ic} ${esc(c.t)}</button>`; }).join('')}</div>
+      ${mc.length ? `<div class="mt"><b>${N(both.length)} لاعب اختاروا الكروت دي بنفس الاختيار</b><div class="r" style="flex-wrap:wrap;gap:6px;margin-top:6px">${both.map(hbUserBtn).join('') || '<span class="m">محدش</span>'}</div></div>` : ''}</div>
       <div class="m">أكتر ثلاثيات اتكررت</div>${top(trios, 5).map(k => line(k, trios)).join('') || '<div class="k ctr m">مفيش تكرار لسه.</div>'}
       <div class="m">أكتر ثنائيات اتكررت</div>${top(pairs, 8).map(k => line(k, pairs)).join('') || '<div class="k ctr m">مفيش تكرار لسه.</div>'}`;
   } else {
-    const mine = new Set((C.mine[gw] || { ids: [] }).ids.filter(i => by[i])), others = Object.keys(users).filter(u => u !== hbMe());
-    const sim = others.map(u => ({ u, n: [...users[u]].filter(i => mine.has(i)).length, t: users[u].size })).sort((a, b) => b.n - a.n || byName(nm(a.u), nm(b.u)));
-    const row = x => `<button class="k r" data-act="hu" data-u="${esc(x.u)}" style="padding:10px">${avatarL('p', x.u, nm(x.u))}<div class="g"><div class="nm">${decoName('p', x.u, nm(x.u))}</div><div class="sub">${N(x.n)} كارت مشترك من ${N(mine.size)}</div></div><span class="d" style="font-size:18px">${N(mine.size ? Math.round(x.n / mine.size * 100) : 0)}٪</span></button>`;
+    const mine = new Map([...(users[hbMe()] || new Map())]), others = Object.keys(users).filter(u => u !== hbMe());
+    const sim = others.map(u => ({ u, n: [...users[u]].filter(([c, s]) => mine.get(c) === s).length })).sort((a, b) => b.n - a.n || byName(nm(a.u), nm(b.u)));
+    const row = x => `<button class="k r" data-act="hu" data-u="${esc(x.u)}" style="padding:10px">${avatarL('p', x.u, nm(x.u))}<div class="g"><div class="nm">${decoName('p', x.u, nm(x.u))}</div><div class="sub">${N(x.n)} اختيار متطابق (نفس الكارت ونفس نعم/لا) من ${N(mine.size)}</div></div><span class="d" style="font-size:18px">${N(mine.size ? Math.round(x.n / mine.size * 100) : 0)}٪</span></button>`;
     body = mine.size ? `<div class="m">الأقرب ليك في الاختيارات (على الكروت اللي اتقفلت)</div>${sim.slice(0, 8).map(row).join('') || '<div class="k ctr">لسه محدش.</div>'}${sim.length > 8 ? `<div class="m">الأبعد عنك</div>${sim.slice(-3).reverse().map(row).join('')}` : ''}` : '<div class="k ctr">اختار كروتك الأول وبعد ما تتقفل هتشوف مين شبهك.</div>';
   }
   return chips + tabs + `<div class="f">${body}</div>`;
@@ -3740,23 +3750,23 @@ function hbOppPick(pfx) {
 }
 const hbOppRows = list => list.map(u => `<button class="k r" data-act="hopp" data-u="${esc(u)}">${avatar(photoOf(u), nm(u))}<span class="g nm">${esc(nm(u))}</span><span class="m">قارن ‹</span></button>`).join('') || '<div class="k ctr">مفيش نتايج.</div>';
 const hbCmpHead = u => `<div class="k r j"><div class="r">${avatar(photoOf(hbMe()), nm(hbMe()))}<b>أنت</b></div><button class="lnk" data-act="hopp0">تغيير</button><div class="r"><b>${esc(nm(u))}</b>${avatar(photoOf(u), nm(u))}</div></div>`;
-function hbPickPts(gw, id, picked) {
-  const c = hbCard(gw, id), r = hbRes(gw, id);
-  if (!picked) return null;
-  return r === 1 ? c.p : r === 0 ? -c.m : 0;
+function hbPickPts(gw, id, side) {
+  const c = hbCard(gw, id), w = hbWin(gw, id, side);
+  if (!side) return null;
+  return w === null ? null : w ? (side === 'y' ? c.p : c.n) : 0;
 }
 function hbCmpC() {
   const C = S.hb.c, gw = C.gw, d = C.deck[gw], opp = S.hb.cmp.opp;
   if (!opp || !activeIds().includes(opp)) return hbGwChips(hbGws(), gw, 'hcgw') + hbOppPick();
-  if (!d) return '<div class="f"><div class="k ctr">مفيش كروت للجولة دي.</div></div>';
-  const pub = C.pub[gw], by = (pub && pub.by) || {}, locked = d.cards.filter(c => by[c.id]);
-  const has = (u, id) => (by[id] || []).includes(u);
+  if (!d) return '<div class="f"><div class="k ctr">أسئلة الكروت لسه ما اتفتحتش.</div></div>';
+  const locked = d.cards.filter(c => hbBy(gw, c.id));
+  const sideOf = (u, id) => { const b = hbBy(gw, id); return b.y.includes(u) ? 'y' : b.n.includes(u) ? 'n' : null; };
   let ta = 0, tb = 0;
   const rows = locked.map(c => {
-    const a = has(hbMe(), c.id), b = has(opp, c.id), r = hbRes(gw, c.id), pa = hbPickPts(gw, c.id, a), pb = hbPickPts(gw, c.id, b);
+    const sa = sideOf(hbMe(), c.id), sb = sideOf(opp, c.id), pa = hbPickPts(gw, c.id, sa), pb = hbPickPts(gw, c.id, sb), r = hbRes(gw, c.id);
     ta += pa || 0; tb += pb || 0;
-    const cell = (on, p) => `<div class="ctr" style="padding:6px;border-radius:10px;${on ? (r === 1 ? 'background:rgba(var(--afr),.25)' : r === 0 ? 'background:rgba(214,58,63,.3)' : 'background:rgba(var(--fg),.14)') : ''}">${on ? (r === -1 ? '✓' : sN(p)) : '—'}</div>`;
-    return `<div class="k" style="padding:8px"><div class="sub" style="font-size:12px;margin-bottom:6px">${c.ic} ${esc(c.t)} ${r === 1 ? '· حصل' : r === 0 ? '· ما حصلش' : ''}</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">${cell(a, pa)}${cell(b, pb)}</div></div>`;
+    const cell = (s, p) => { if (!s) return '<div class="ctr m" style="padding:6px">—</div>'; const w = r === -1 ? null : p > 0; return `<div class="ctr" style="padding:6px;border-radius:10px;background:${w === true ? 'rgba(var(--afr),.25)' : w === false ? 'rgba(214,58,63,.3)' : 'rgba(var(--fg),.14)'}"><b style="color:${s === 'y' ? 'var(--ac)' : 'var(--neg)'}">${s === 'y' ? 'نعم' : 'لا'}</b>${w === null ? '' : ' · ' + sN(p)}</div>`; };
+    return `<div class="k" style="padding:8px"><div class="sub" style="font-size:12px;margin-bottom:6px">${c.ic} ${esc(c.t)} ${r === 1 ? '· حصل' : r === 0 ? '· ما حصلش' : ''}</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">${cell(sa, pa)}${cell(sb, pb)}</div></div>`;
   });
   return hbGwChips(hbGws(), gw, 'hcgw') + `<div class="f">${hbCmpHead(opp)}${rows.join('') || '<div class="k ctr">لسه مفيش كروت اتقفلت.</div>'}
   <div class="k r j"><span class="d" style="font-size:22px${ta > tb ? ';color:var(--ac)' : ''}">${sN(ta)}</span><span class="m">مجموع الكروت اللي اتقفلت</span><span class="d" style="font-size:22px${tb > ta ? ';color:var(--ac)' : ''}">${sN(tb)}</span></div></div>`;
@@ -3778,8 +3788,8 @@ function hbItemRow(k, it, i, n, o) {
     ? `<div class="r" style="gap:6px">${crest(it.h, 30)}<b>${esc(it.h.sn)}</b><span class="m">ضد</span><b>${esc(it.a.sn)}</b>${crest(it.a, 30)}</div>`
     : `<div class="r" style="gap:8px">${photo({ t: it.tm, c: it.c })}<div><div class="nm">${esc(it.n)}</div><div class="sub">${esc(it.t)} · ${POS[it.p]}</div></div></div>`;
   const val = o.val != null ? `<span class="pl ${o.ok === true ? 'ok' : o.ok === false ? 'bad' : ''}">${N(o.val)} ${HB_SEC[k].u}</span>` : '';
-  const mv = o.lock ? '' : `<div class="r" style="gap:2px;flex:none"><button class="bt" style="width:38px;height:38px;padding:0;font-size:18px" data-act="hsmv" data-k="${k}" data-i="${i}" data-d="-1" ${i === 0 ? 'disabled' : ''} aria-label="فوق">▲</button><button class="bt" style="width:38px;height:38px;padding:0;font-size:18px" data-act="hsmv" data-k="${k}" data-i="${i}" data-d="1" ${i === n - 1 ? 'disabled' : ''} aria-label="تحت">▼</button></div>`;
-  return `<div class="k r" style="padding:8px 10px;gap:10px;${o.ok === true ? 'border-color:var(--af)' : o.ok === false ? 'border-color:#d63a3f' : ''}"><span class="d" style="width:22px;font-size:18px;color:var(--mu)">${N(i + 1)}</span><div class="g" style="min-width:0">${body}</div>${val}${mv}</div>`;
+  const mv = o.lock ? '' : `<div data-drag="${k}" aria-label="اسحب لتغيير المكان" style="touch-action:none;cursor:grab;flex:none;width:52px;height:46px;display:flex;align-items:center;justify-content:center;font-size:26px;line-height:1;color:var(--mu);border-radius:12px;background:rgba(var(--fg),.12);user-select:none;-webkit-user-select:none">⠿</div>`;
+  return `<div class="k r" data-row="1" data-id="${esc(String(hbItemId(k, it)))}" style="padding:8px 10px;gap:10px;${o.lock ? '' : 'user-select:none;-webkit-user-select:none;'}${o.ok === true ? 'border-color:var(--af)' : o.ok === false ? 'border-color:#d63a3f' : ''}"><span class="d" style="width:22px;font-size:18px;color:var(--mu)">${N(i + 1)}</span><div class="g" style="min-width:0">${body}</div>${val}${mv}</div>`;
 }
 function hbSecHtml(day, k) {
   const SS = S.hb.s, deck = SS.decks[day], items = deck[k] || [];
@@ -3800,16 +3810,16 @@ function hbSecHtml(day, k) {
   if (!lock) foot = `<button class="bt ${dirty || !saved ? 'on' : ''}" style="height:46px" data-act="hssave" data-k="${k}">${saved && !dirty ? 'اتحفظ ✓' : saved ? 'حفظ التعديل' : 'حفظ الترتيب'}</button>`;
   else if (!saved) foot = '<div class="k ctr m">ما رتبتش القسم ده قبل القفل (مفيش نقط ولا خصم).</div>';
   else if (mp) foot = `<div class="k r j"><span class="m">${mp[0] === -1 ? 'النقط لسه (الماتشات شغالة)' : N(mp[1]) + ' مكان صح'}</span><b class="d" style="font-size:20px;color:${mp[0] > 0 ? 'var(--ac)' : mp[0] < 0 ? 'var(--neg)' : 'var(--tx)'}">${mp[0] === -1 ? '…' : sN(mp[0])}</b></div>`;
-  return `<div class="k" style="padding:12px"><b>${HB_SEC[k].t}</b><div class="m" style="margin-bottom:8px">${HB_SEC[k].q}${lock && vals && !done ? ' · القيم مؤقتة' : ''}</div><div style="display:flex;flex-direction:column;gap:6px">${rows}</div><div style="margin-top:8px">${foot}</div></div>`;
+  return `<div class="k" style="padding:12px"><b>${HB_SEC[k].t}</b><div class="m">${HB_SEC[k].q}${lock ? (vals && !done ? ' · القيم مؤقتة' : '') : ' · اسحب ⠿ بصباعك وغيّر المكان'}</div><div class="m" style="margin-bottom:8px">النقط: الكل صح <b>${N(hbFull(k, items.length))}</b> · ناقص واحد <b>${N(Math.round(hbFull(k, items.length) / 2))}</b> · ولا واحد صح <b>−${N(Math.round(hbFull(k, items.length) / 2))}</b></div><div data-list="${k}" style="display:flex;flex-direction:column;gap:6px">${rows}</div><div style="margin-top:8px">${foot}</div></div>`;
 }
 function hbPlayS() {
   const SS = S.hb.s, gws = hbSGws(), days = hbDays(), day = SS.day, deck = day && SS.decks[day];
   const chips = hbGwChips(gws, SS.gw, 'hsgw');
-  if (!deck) return chips + '<div class="f"><div class="k ctr">صنفلي لسه ما اتجهزش لليوم ده. بيظهر لما الجولة تتزامن.</div></div>';
+  if (!deck) return chips + '<div class="f"><div class="k ctr">أسئلة صنفلي لسه ما اتفتحتش من الإدارة.</div></div>';
   const lockMs = hbLockMs(deck), lock = Date.now() >= lockMs;
   const tabs = `<div class="tg eq">${days.map(k => `<button class="bt dy ${k === day ? 'on' : ''}" data-act="hsday" data-k="${k}"><span>${esc(fmtWd(Date.parse(k + 'T12:00:00Z')))}</span><small>${esc(fmtDm(Date.parse(k + 'T12:00:00Z')))}</small></button>`).join('')}</div>`;
   const b = SS.board[day], me = b && b.rows && b.rows.find(r => r.uid === hbMe());
-  return chips + tabs + `<div class="f"><div class="k r j"><div class="g"><b>صنفلي · ${esc(hbDayLbl(day))}</b><div class="m">${lock ? 'اتقفل مع أول ماتش في اليوم' : 'بيتقفل ' + esc(fmtTime(lockMs)) + ' (أول ماتش في اليوم)'} · الكل صح = ${N(HAB.sortFull)} · ناقص واحد = ${N(HAB.sortHalf)} · ولا واحد = −${N(HAB.sortHalf)}</div></div>${me ? `<div class="ctr"><div class="m">نقطك</div><div class="d" style="font-size:22px">${sN(me.pts)}</div></div>` : ''}</div>
+  return chips + tabs + `<div class="f"><div class="k r j"><div class="g"><b>صنفلي · ${esc(hbDayLbl(day))}</b><div class="m">${lock ? 'اتقفل مع أول ماتش في اليوم' : 'بيتقفل ' + esc(fmtTime(lockMs)) + ' (أول ماتش في اليوم)'}</div></div>${me ? `<div class="ctr"><div class="m">نقطك</div><div class="d" style="font-size:22px">${sN(me.pts)}</div></div>` : ''}</div>
   ${['a', 'b', 'c'].map(k => hbSecHtml(day, k)).join('')}</div>`;
 }
 
@@ -3865,12 +3875,13 @@ function hbSheetHtml() {
   const sh = S.hb.sheet; if (!sh) return '';
   if (sh.t === 'card') {
     const gw = S.hb.c.gw, c = hbCard(gw, sh.id); if (!c) return '';
-    const pub = S.hb.c.pub[gw], by = pub && pub.by && pub.by[c.id], r = hbRes(gw, c.id);
+    const by = hbBy(gw, c.id), r = hbRes(gw, c.id);
     const lst = (arr, t) => `<div><div class="m" style="margin-bottom:4px">${t} (${N(arr.length)})</div><div class="r" style="flex-wrap:wrap;gap:6px">${arr.map(hbUserBtn).join('') || '<span class="m">محدش</span>'}</div></div>`;
     let body;
     if (!by) body = '<div class="k ctr m">مين اختار الكارت ده بيظهر بعد بداية الماتش بدقيقة.</div>';
-    else { const l = by.filter(x => !S.gone.has(x)); body = r === 1 ? lst(l, 'اللي اختاروه وكسبوا ✓ (+' + c.p + ')') : r === 0 ? lst(l, '🔥 اللي اتلسعوا (−' + c.m + ')') : lst(l, 'اللي اختاروه'); }
-    return ov(`<div class="r" style="gap:10px"><span style="font-size:30px">${c.ic}</span><div class="g"><b>${esc(c.t)}</b><div class="sub">${hbFxLabel(c)} · ${esc(fmtTime(c.ko))}</div></div></div><div class="r" style="gap:6px">${hbPtsPill(c.p, c.m)}${r === 1 ? '<span class="pl ok">✓ حصل</span>' : r === 0 ? '<span class="pl bad">✗ ما حصلش</span>' : ''}</div>${body}<button class="bt" data-act="hshx">إغلاق</button>`, 'hshx');
+    else if (r === -1) body = lst(by.y, 'قالوا نعم') + lst(by.n, 'قالوا لا');
+    else body = lst(r === 1 ? by.y : by.n, 'كسبوا ✓ (+' + (r === 1 ? c.p : c.n) + ')') + lst(r === 1 ? by.n : by.y, '🔥 اتلسعوا (غلط · صفر)');
+    return ov(`<div class="r" style="gap:10px"><span style="font-size:30px">${c.ic}</span><div class="g"><b>${esc(c.t)}</b><div class="sub">${hbFxLabel(c)} · ${esc(fmtTime(c.ko))}</div></div></div><div class="r" style="gap:6px">${hbPtsPill(c.p, c.n)}${r === 1 ? '<span class="pl ok">✓ حصل</span>' : r === 0 ? '<span class="pl bad">✗ ما حصلش</span>' : ''}</div>${body}<button class="bt" data-act="hshx">إغلاق</button>`, 'hshx');
   }
   if (sh.t === 'item') {
     const SS = S.hb.s, day = SS.day, deck = SS.decks[day], k = sh.k, it = (deck[k] || []).find(x => String(hbItemId(k, x)) === String(sh.id)); if (!it) return '';
@@ -3887,8 +3898,8 @@ function hbUserSheet(u) {
   const rkOf = (t) => { const r = hbRanked((t && t.rows) || []).find(x => x.uid === u); return r ? `${N(r.rank)} · ${sN(r.pts)} نقطة` : '—'; };
   let cards = '';
   if (d) {
-    const pub = H.c.pub[gw], by = (pub && pub.by) || {}, mine = d.cards.filter(c => (by[c.id] || []).includes(u));
-    cards = `<div><div class="m" style="margin-bottom:4px">كروت الجولة ${N(gw)} اللي اتقفلت (${N(mine.length)})</div>${mine.map(c => { const r = hbRes(gw, c.id); return `<div class="r" style="gap:8px;padding:5px 0;border-top:1px solid rgba(var(--fg),.12)"><span>${c.ic}</span><span class="g" style="font-size:13px">${esc(c.t)}</span><b style="color:${r === 1 ? 'var(--ac)' : r === 0 ? 'var(--neg)' : 'var(--mu)'}">${r === 1 ? '+' + N(c.p) : r === 0 ? '−' + N(c.m) : '…'}</b></div>`; }).join('') || '<div class="m">لسه مفيش كروت اتقفلت ليه.</div>'}</div>`;
+    const mine = d.cards.map(c => { const b = hbBy(gw, c.id); return b && (b.y.includes(u) ? [c, 'y'] : b.n.includes(u) ? [c, 'n'] : null); }).filter(Boolean);
+    cards = `<div><div class="m" style="margin-bottom:4px">كروت الجولة ${N(gw)} اللي اتقفلت (${N(mine.length)})</div>${mine.map(([c, s]) => { const w = hbWin(gw, c.id, s); return `<div class="r" style="gap:8px;padding:5px 0;border-top:1px solid rgba(var(--fg),.12)"><b style="color:${s === 'y' ? 'var(--ac)' : 'var(--neg)'};width:32px">${s === 'y' ? 'نعم' : 'لا'}</b><span>${c.ic}</span><span class="g" style="font-size:13px">${esc(c.t)}</span><b style="color:${w === true ? 'var(--ac)' : w === false ? 'var(--neg)' : 'var(--mu)'}">${w === null ? '…' : w ? '+' + N(s === 'y' ? c.p : c.n) : '٠'}</b></div>`; }).join('') || '<div class="m">لسه مفيش كروت اتقفلت ليه.</div>'}</div>`;
   }
   let srt = '';
   const day = H.s.day, sd = day && H.s.decks[day], pb = day && hbPubS(day).find(x => x.u === u);
@@ -3910,10 +3921,11 @@ Object.assign(ACTIONS, {
   hcard(el) {
     const C = S.hb.c, gw = C.gw, c = hbCard(gw, el.dataset.id); if (!c) return;
     if (Date.now() >= c.ko) return toast('الماتش بدأ، الكارت اتقفل');
-    const m = C.mine[gw] = C.mine[gw] || { ids: [] }, on = m.ids.includes(c.id);
-    if (!on && m.ids.length >= HAB.pick) return toast('اخترت ' + N(HAB.pick) + ' كروت بالفعل، شيل كارت الأول');
-    m.ids = on ? m.ids.filter(x => x !== c.id) : [...m.ids, c.id];
-    render(); hbQueueSave(gw, m.ids.slice(), c.id);
+    const m = C.mine[gw] = C.mine[gw] || { ids: [], nos: [] }, side = hbSide(gw, c.id);
+    if (!side) { if (m.ids.length >= HAB.pick) return toast('اخترت ' + N(HAB.pick) + ' كروت بالفعل، شيل كارت الأول'); m.ids = [...m.ids, c.id]; }
+    else if (side === 'y') m.nos = [...m.nos, c.id];
+    else { m.ids = m.ids.filter(x => x !== c.id); m.nos = m.nos.filter(x => x !== c.id); }
+    render(); hbQueueSave(gw, m.ids.slice(), m.nos.slice(), c.id);
   },
   hcinfo(el) { S.hb.sheet = { t: 'card', id: el.dataset.id }; render(); },
   hshx() { S.hb.sheet = null; render(); },
@@ -3926,8 +3938,12 @@ Object.assign(ACTIONS, {
   hrd(el) { S.hb.rk.sd = el.dataset.k; render(); },
   hstc(el) { S.hb.st.c = el.dataset.k; render(); },
   hsts(el) { S.hb.st.s = el.dataset.k; render(); },
-  hmc(el) { const a = S.hb.combo, i = a.indexOf(el.dataset.id); if (i >= 0) a.splice(i, 1); else if (a.length >= 6) return toast('أقصى حد ٦ كروت'); else a.push(el.dataset.id); render(); },
-  hcombo(el) { const a = el.dataset.k.split('|'); S.hb.combo = a; render(); },
+  hmc(el) {
+    const a = S.hb.combo, id = el.dataset.id, i = a.findIndex(t => t.split(':')[0] === id);
+    if (i < 0) { if (a.length >= 6) return toast('أقصى حد ٦ كروت'); a.push(id + ':y'); } else if (a[i].endsWith(':y')) a[i] = id + ':n'; else a.splice(i, 1);
+    render();
+  },
+  hcombo(el) { S.hb.combo = el.dataset.k.split('|'); render(); },
   hopp(el) { S.hb.cmp.opp = el.dataset.u; render(); },
   hopp0() { S.hb.cmp.opp = null; render(); },
   hsmv(el) {
@@ -3949,6 +3965,178 @@ Object.assign(ACTIONS, {
     } catch (e) { console.error(e); toast(e.code === 'permission-denied' ? 'الحفظ مرفوض: اليوم ممكن يكون اتقفل' : 'مقدرتش أحفظ، تأكد من النت'); }
   }
 });
+
+/* سحب وترتيب بالصباع في صنفلي: بنمسك المقبض ⠿ ونحرك الصف، والباقي بيفسّح مكان */
+let hbDrag = null;
+function hbDragUpdate() {
+  const d = hbDrag; if (!d) return;
+  const sy = window.scrollY, dy = d.y + sy - d.startY;
+  d.rows[d.i].style.transform = `translateY(${dy}px) scale(1.02)`;
+  const center = d.info[d.i].c + dy; let to = 0;
+  d.info.forEach((x, j) => { if (j !== d.i && x.c < center) to++; });
+  d.to = to;
+  d.rows.forEach((r, j) => { if (j === d.i) return; let t = 0; if (d.i < to && j > d.i && j <= to) t = -d.h; else if (d.i > to && j < d.i && j >= to) t = d.h; r.style.transform = t ? `translateY(${t}px)` : ''; });
+}
+function hbDragLoop() {
+  const d = hbDrag; if (!d) return;
+  if (d.y < 110) window.scrollBy(0, -14); else if (d.y > window.innerHeight - 170) window.scrollBy(0, 14);
+  hbDragUpdate(); d.raf = requestAnimationFrame(hbDragLoop);
+}
+document.addEventListener('pointerdown', e => {
+  const h = e.target.closest && e.target.closest('[data-drag]'); if (!h || hbDrag) return;
+  const row = h.closest('[data-row]'), list = row && row.parentElement; if (!row || !list) return;
+  const SS = S.hb.s; if (Date.now() >= hbLockMs(SS.decks[SS.day])) return;
+  e.preventDefault();
+  const rows = [...list.querySelectorAll(':scope > [data-row]')], sy = window.scrollY;
+  const info = rows.map(r => { const b = r.getBoundingClientRect(); return { c: b.top + sy + b.height / 2, h: b.height }; });
+  const i = rows.indexOf(row);
+  hbDrag = { k: h.dataset.drag, rows, info, i, to: i, startY: e.clientY + sy, y: e.clientY, h: info[i].h + 6, raf: 0 };
+  S.hb.dragging = true;
+  rows.forEach((r, j) => { r.style.transition = j === i ? 'none' : 'transform .15s'; });
+  row.style.position = 'relative'; row.style.zIndex = '5'; row.style.boxShadow = '0 10px 28px rgba(0,0,0,.35)';
+  try { h.setPointerCapture(e.pointerId); } catch (x) { /* مش مهم */ }
+  hbDragLoop();
+}, { passive: false });
+document.addEventListener('pointermove', e => { if (hbDrag) { hbDrag.y = e.clientY; e.preventDefault(); } }, { passive: false });
+function hbDragEnd(cancel) {
+  const d = hbDrag; if (!d) return; hbDrag = null; cancelAnimationFrame(d.raf); S.hb.dragging = false;
+  d.rows.forEach(r => { r.style.cssText = ''; });
+  if (!cancel && d.to !== d.i) {
+    const ids = d.rows.map(r => r.dataset.id), [m] = ids.splice(d.i, 1); ids.splice(d.to, 0, m);
+    const SS = S.hb.s; (SS.work[SS.day] = SS.work[SS.day] || {})[d.k] = ids.map(x => d.k === 'c' ? String(x) : Number(x));
+  }
+  render();
+}
+document.addEventListener('pointerup', () => hbDragEnd(false));
+document.addEventListener('pointercancel', () => hbDragEnd(true));
+
+/* ───── الإدارة: مراجعة أسئلة الكروت وصنفلي وفتحها للاعبين ───── */
+const hbRand = n => Math.floor(Math.random() * n);
+const hbShuf = a => { const x = a.slice(); for (let i = x.length - 1; i > 0; i--) { const j = hbRand(i + 1); [x[i], x[j]] = [x[j], x[i]]; } return x; };
+/** هل الكارت ده يتحط مع المختارين؟ (ماتش ٣ كروت بحد أقصى، مفيش كارتين من نفس العيلة في الماتش، ولا نفس اللاعب) */
+function hbCardFits(c, chosen) {
+  return chosen.filter(x => x.fid === c.fid).length < 3 && !chosen.some(x => x.fid === c.fid && x.fam === c.fam) && !(c.pl && chosen.some(x => x.pl === c.pl)) && chosen.filter(x => x.k === c.k).length < 3;
+}
+function hbDraftCards(dr) { const by = Object.fromEntries(dr.pool.map(c => [c.id, c])); return dr.sel.map(id => by[id]).filter(Boolean).sort((a, b) => a.ko - b.ko || a.fid - b.fid); }
+async function hbSaveDraftC(gw) { const dr = S.hb.c.draft[gw]; try { await updateDoc(doc(db, 'cdraft', 'gw_' + gw), { sel: dr.sel }); } catch (e) { toast('مقدرتش أحفظ المسودة: ' + (e.code || e.message)); } }
+function hbRollC(dr, pins, onlyId) {
+  const sel = hbDraftCards(dr), keep = onlyId ? sel.filter(c => c.id !== onlyId) : sel.filter(c => pins[c.id]);
+  const target = onlyId ? sel.length : Math.max(sel.length, HAB.total);
+  const old = new Set(sel.map(c => c.id)), out = keep.slice();
+  const cands = hbShuf(dr.pool.filter(c => !keep.some(k => k.id === c.id)));
+  const fresh = cands.filter(c => !old.has(c.id)), same = cands.filter(c => old.has(c.id));
+  [fresh, same].forEach(list => list.forEach(c => { if (out.length < target && hbCardFits(c, out)) out.push(c); }));
+  dr.sel = out.map(c => c.id);
+}
+function hbAdmHead(open, what) {
+  return `<div class="k r j"><div class="g"><b>${open ? '✅ مفتوح للاعبين' : '📝 مسودة (اللاعبين مش شايفينها)'}</b><div class="m">${open ? 'الأسئلة اتفتحت وماينفعش تتعدل.' : what}</div></div></div>`;
+}
+function hbAdmC() {
+  const C = S.hb.c, gw = C.gw, chips = hbGwChips(hbGws(), gw, 'hcgw'), dr = C.draft[gw], op = !!C.deck[gw], A = S.hb.adm;
+  if (!dr && !op) return chips + '<div class="f"><div class="k ctr">مفيش مسودة للجولة دي. بتتولد مع المزامنة (syncDaily) قبل الجولة.</div></div>';
+  if (op) return chips + `<div class="f">${hbAdmHead(true)}${hbPlayC().replace(/^[\s\S]*?<div class="f">/, '').replace(/<\/div>$/, '')}</div>`;
+  const sel = hbDraftCards(dr), selSet = new Set(dr.sel);
+  const card = c => `<div class="k r" style="padding:8px;gap:8px;${A.pin[c.id] ? 'border:2px solid #f5b301;' : ''}"><span style="font-size:22px;flex:none">${c.ic}</span><div class="g" style="min-width:0"><div class="nm" style="font-size:14px;line-height:1.4">${esc(c.t)}</div><div class="sub">${hbFxLabel(c)} · ${esc(fmtTime(c.ko))}</div><div class="r" style="gap:5px;margin-top:4px">${hbPtsPill(c.p, c.n)}</div></div>
+    <div class="r" style="gap:4px;flex:none"><button class="bt" style="width:38px;height:38px;padding:0" data-act="hacpin" data-id="${c.id}" aria-label="تثبيت">${A.pin[c.id] ? '📌' : '📍'}</button><button class="bt" style="width:38px;height:38px;padding:0" data-act="hacswap" data-id="${c.id}" aria-label="بدّل">🎲</button><button class="bt" style="width:38px;height:38px;padding:0" data-act="hacdel" data-id="${c.id}" aria-label="شيل">✕</button></div></div>`;
+  const byDay = {}; sel.forEach(c => { (byDay[c.d] = byDay[c.d] || []).push(c); });
+  const rest = dr.pool.filter(c => !selSet.has(c.id));
+  const byFx = {}; rest.forEach(c => { (byFx[c.fid] = byFx[c.fid] || []).push(c); });
+  const q = (A.q || '').trim();
+  return chips + `<div class="f">${hbAdmHead(false, 'راجع الكروت: 📍 ثبّت اللي عاجبك، 🎲 بدّل كارت واحد، أو اعمل قرعة لباقي الكروت. لما تخلص دوس "فتح للاعبين".')}
+  <div class="k r j"><b>${N(sel.length)} كارت مختار</b><div class="r" style="gap:6px"><button class="bt on" style="height:40px;padding:0 12px" data-act="hacroll">🎲 قرعة لغير المثبّت</button></div></div>
+  ${Object.keys(byDay).sort().map(k => `<div class="m" style="font-weight:700">${esc(hbDayLbl(k))}</div>${byDay[k].map(card).join('')}`).join('')}
+  <button class="bt" style="height:44px" data-act="hacpool">${A.pool ? 'إخفاء المخزون' : '＋ إضافة كارت من المخزون (' + N(rest.length) + ')'}</button>
+  ${A.pool ? `<div class="k"><input class="in" data-in="hacq" placeholder="ابحث في الأسئلة (اسم لاعب أو فريق)" aria-label="بحث" value="${esc(A.q)}"></div><div id="hacl" style="display:flex;flex-direction:column;gap:6px">${hbAdmPoolC(rest, q)}</div>` : ''}
+  <button class="bt on" style="height:50px;font-size:16px" data-act="hacopen">فتح الكروت للاعبين ✓</button></div>`;
+}
+const hbAdmPoolC = (rest, q) => rest.filter(c => !q || c.t.includes(q) || hbFxLabel(c).toLowerCase().includes(q.toLowerCase())).map(c => `<button class="k r" style="padding:8px;gap:8px" data-act="hacadd" data-id="${c.id}"><span style="font-size:20px">${c.ic}</span><span class="g" style="font-size:13px">${esc(c.t)}<span class="sub" style="display:block">${hbFxLabel(c)}</span></span>${hbPtsPill(c.p, c.n)}<b>＋</b></button>`).join('') || '<div class="k ctr m">مفيش نتايج.</div>';
+
+/* صنفلي */
+const hbSItems = (dr, k) => { const pool = k === 'a' ? dr.pa : k === 'b' ? dr.pb : dr.pc, idf = x => String(hbItemId(k, x)), by = Object.fromEntries(pool.map(x => [idf(x), x])); return { pool, idf, sel: (dr.sel[k] || []).map(id => by[String(id)]).filter(Boolean) }; };
+async function hbSaveDraftS(day) { const dr = S.hb.s.draft[day]; try { await updateDoc(doc(db, 'sdraft', day), { sel: dr.sel }); } catch (e) { toast('مقدرتش أحفظ المسودة: ' + (e.code || e.message)); } }
+function hbRollS(dr, k, pins) {
+  const { pool, idf, sel } = hbSItems(dr, k), target = k === 'c' ? Math.max(3, Math.min(5, sel.length || 5, pool.length)) : 5;
+  const keep = sel.filter(x => pins[k + idf(x)]), out = keep.slice();
+  const old = new Set(sel.map(idf));
+  const cands = hbShuf(pool.filter(x => !keep.includes(x)));
+  const okTeam = x => k === 'c' || out.filter(y => y.tm === x.tm).length < 2;
+  [cands.filter(x => !old.has(idf(x))), cands.filter(x => old.has(idf(x)))].forEach(l => l.forEach(x => { if (out.length < target && okTeam(x)) out.push(x); }));
+  dr.sel[k] = out.map(idf).map(id => k === 'c' ? id : Number(id));
+}
+function hbAdmS() {
+  const SS = S.hb.s, day = SS.day, days = hbDays(), A = S.hb.adm, dr = day && SS.draft[day], op = day && SS.decks[day];
+  const gch = hbGwChips(hbSGws(), SS.gw, 'hsgw'), dtabs = `<div class="tg eq">${days.map(k => `<button class="bt dy ${k === day ? 'on' : ''}" data-act="hsday" data-k="${k}"><span>${esc(fmtWd(Date.parse(k + 'T12:00:00Z')))}</span><small>${esc(fmtDm(Date.parse(k + 'T12:00:00Z')))}</small></button>`).join('')}</div>`;
+  if (!dr && !op) return gch + dtabs + '<div class="f"><div class="k ctr">مفيش مسودة لليوم ده. بتتولد مع المزامنة (syncDaily) قبل الجولة.</div></div>';
+  if (op) return gch + dtabs + `<div class="f">${hbAdmHead(true)}${hbPlayS().replace(/^[\s\S]*?<div class="f">/, '').replace(/<\/div>$/, '')}</div>`;
+  const lockMs = hbLockMs(dr);
+  const sec = k => {
+    const { pool, idf, sel } = hbSItems(dr, k), tgt = k === 'c' ? '٣ لـ ٥ ماتشات' : '٥ لاعبين';
+    const open = A['p' + k], q = (A['q' + k] || '').trim().toLowerCase();
+    const row = (x, picked) => {
+      const id = idf(x), nmv = k === 'c' ? `${esc(x.h.sn)} ضد ${esc(x.a.sn)}` : `${esc(x.n)} <span class="sub" style="display:inline">${esc(x.t)} · ${POS[x.p]}${x.pr ? ' · £' + (x.pr / 10).toFixed(1) : ''}</span>`;
+      return picked
+        ? `<div class="k r" style="padding:8px;gap:8px;${A.pin[k + id] ? 'border:2px solid #f5b301;' : ''}"><span class="g nm" style="font-size:14px">${nmv}</span><button class="bt" style="width:38px;height:38px;padding:0" data-act="haspin" data-k="${k}" data-id="${esc(id)}">${A.pin[k + id] ? '📌' : '📍'}</button><button class="bt" style="width:38px;height:38px;padding:0" data-act="hasdel" data-k="${k}" data-id="${esc(id)}">✕</button></div>`
+        : `<button class="k r" style="padding:8px;gap:8px" data-act="hasadd" data-k="${k}" data-id="${esc(id)}"><span class="g nm" style="font-size:14px">${nmv}</span><b>＋</b></button>`;
+    };
+    const rest = pool.filter(x => !sel.includes(x) && (!q || (k === 'c' ? (x.h.name + x.a.name + x.h.sn + x.a.sn) : (x.n + x.t)).toLowerCase().includes(q)));
+    return `<div class="k" style="padding:12px"><div class="r j"><div class="g"><b>${HB_SEC[k].t}</b><div class="m">${N(sel.length)} مختار · المطلوب ${tgt}${k === 'c' ? ' (نقطها بتقل عن اللاعبين: ٥ ماتشات = ١٠، ٤ = ٨، ٣ = ٦)' : ''}</div></div><button class="bt on" style="height:38px;padding:0 10px;font-size:13px" data-act="hasroll" data-k="${k}">🎲 قرعة</button></div>
+      <div style="display:flex;flex-direction:column;gap:6px;margin-top:8px">${sel.map(x => row(x, true)).join('') || '<div class="m ctr">مفيش مختار</div>'}</div>
+      <button class="bt" style="height:40px;margin-top:8px" data-act="haspool" data-k="${k}">${open ? 'إخفاء المخزون' : '＋ اختار بإيدك من المخزون (' + N(pool.length - sel.length) + ')'}</button>
+      ${open ? `${k === 'c' ? '' : `<div style="margin-top:8px"><input class="in" data-in="hasq" data-k="${k}" placeholder="ابحث باسم اللاعب أو الفريق" aria-label="بحث" value="${esc(A['q' + k] || '')}"></div>`}<div id="hasl_${k}" style="display:flex;flex-direction:column;gap:6px;margin-top:8px;max-height:340px;overflow:auto">${rest.map(x => row(x, false)).join('') || '<div class="m ctr">مفيش نتايج</div>'}</div>` : ''}</div>`;
+  };
+  return gch + dtabs + `<div class="f">${hbAdmHead(false, 'اللاعبين بيتقفلوا ' + fmtTime(lockMs) + '. اختار بإيدك أو اعمل قرعة، ولو فيه ٣ ماتشات أو أكتر هيظهر ترتيب الماتشات. لما تخلص دوس "فتح اليوم".')}
+  ${['a', 'b', 'c'].map(sec).join('')}
+  <button class="bt on" style="height:50px;font-size:16px" data-act="hasopen">فتح اليوم للاعبين ✓</button></div>`;
+}
+
+Object.assign(ACTIONS, {
+  hacpin(el) { const p = S.hb.adm.pin; p[el.dataset.id] = !p[el.dataset.id]; render(); },
+  async hacroll() { const gw = S.hb.c.gw, dr = S.hb.c.draft[gw]; hbRollC(dr, S.hb.adm.pin); render(); await hbSaveDraftC(gw); },
+  async hacswap(el) { const gw = S.hb.c.gw, dr = S.hb.c.draft[gw]; hbRollC(dr, S.hb.adm.pin, el.dataset.id); render(); await hbSaveDraftC(gw); },
+  async hacdel(el) { const gw = S.hb.c.gw, dr = S.hb.c.draft[gw]; dr.sel = dr.sel.filter(x => x !== el.dataset.id); render(); await hbSaveDraftC(gw); },
+  async hacadd(el) { const gw = S.hb.c.gw, dr = S.hb.c.draft[gw]; if (!dr.sel.includes(el.dataset.id)) dr.sel.push(el.dataset.id); render(); await hbSaveDraftC(gw); },
+  hacpool() { S.hb.adm.pool = !S.hb.adm.pool; render(); },
+  async hacopen() {
+    const gw = S.hb.c.gw, dr = S.hb.c.draft[gw], cards = hbDraftCards(dr);
+    if (cards.length < HAB.pick) return toast('لازم على الأقل ' + N(HAB.pick) + ' كروت');
+    if (!confirm('تفتح ' + cards.length + ' كارت للاعبين؟ بعد الفتح ماتتعدلش.')) return;
+    const clean = cards.map(c => { const o = { ...c }; delete o.fam; delete o.sel; return o; });
+    const ko = {}; clean.forEach(c => { ko[c.id] = new Date(c.ko); });
+    try {
+      await setDoc(doc(db, 'cdeck', 'gw_' + gw), { gw, cards: clean, ids: clean.map(c => c.id), ko, createdAt: serverTimestamp() });
+      await updateDoc(doc(db, 'cdraft', 'gw_' + gw), { open: true, sel: dr.sel });
+      S.hb.c.deck[gw] = { gw, cards: clean, ids: clean.map(c => c.id) }; dr.open = true; toast('اتفتحت الكروت للاعبين ✓');
+    } catch (e) { toast('مقدرتش أفتح: ' + (e.code || e.message)); }
+    render();
+  },
+  haspin(el) { const p = S.hb.adm.pin, k = el.dataset.k + el.dataset.id; p[k] = !p[k]; render(); },
+  async hasroll(el) { const day = S.hb.s.day, dr = S.hb.s.draft[day]; hbRollS(dr, el.dataset.k, S.hb.adm.pin); render(); await hbSaveDraftS(day); },
+  async hasdel(el) { const day = S.hb.s.day, dr = S.hb.s.draft[day], k = el.dataset.k; dr.sel[k] = (dr.sel[k] || []).filter(x => String(x) !== el.dataset.id); render(); await hbSaveDraftS(day); },
+  async hasadd(el) {
+    const day = S.hb.s.day, dr = S.hb.s.draft[day], k = el.dataset.k, lim = k === 'c' ? 5 : 5;
+    if ((dr.sel[k] || []).length >= lim) return toast('الحد الأقصى ' + N(lim) + ' — شيل واحد الأول');
+    (dr.sel[k] = dr.sel[k] || []).push(k === 'c' ? el.dataset.id : Number(el.dataset.id)); render(); await hbSaveDraftS(day);
+  },
+  haspool(el) { const A = S.hb.adm, k = 'p' + el.dataset.k; A[k] = !A[k]; render(); },
+  async hasopen() {
+    const day = S.hb.s.day, dr = S.hb.s.draft[day];
+    const L = k => (dr.sel[k] || []).length, ok = (L('a') === 0 || L('a') === 5) && (L('b') === 0 || L('b') === 5) && (L('c') === 0 || (L('c') >= 3 && L('c') <= 5)) && (L('a') + L('b') + L('c') > 0);
+    if (!ok) return toast('اللاعبين ٥ بالظبط (أو فاضي)، والماتشات من ٣ لـ ٥ (أو فاضي)');
+    if (!confirm('تفتح صنفلي ليوم ' + hbDayLbl(day) + ' للاعبين؟ بعد الفتح ماتتعدلش.')) return;
+    const pick = k => hbShuf(hbSItems(dr, k).sel);
+    const a = pick('a'), b = pick('b'), c = pick('c');
+    const out = { day, gw: dr.gw, lock: new Date(hbLockMs(dr)), a, b, c, aids: a.map(x => x.i), bids: b.map(x => x.i), cids: c.map(x => x.id), createdAt: serverTimestamp() };
+    try {
+      await setDoc(doc(db, 'sdeck', day), out);
+      await updateDoc(doc(db, 'sdraft', day), { open: true, sel: dr.sel });
+      S.hb.s.decks[day] = { ...out, lock: new Date(hbLockMs(dr)).toISOString() }; dr.open = true; toast('اتفتح صنفلي للاعبين ✓');
+    } catch (e) { toast('مقدرتش أفتح: ' + (e.code || e.message)); }
+    render();
+  }
+});
+INPUTS.hacq = t => { S.hb.adm.q = t.value; const gw = S.hb.c.gw, dr = S.hb.c.draft[gw], l = $('#hacl'); if (l && dr) setHtml(l, hbAdmPoolC(dr.pool.filter(c => !dr.sel.includes(c.id)), t.value.trim())); };
+INPUTS.hasq = t => { const k = t.dataset.k; S.hb.adm['q' + k] = t.value; render(); };
+
 INPUTS.hopp = t => { S.hb.cmp.oq = t.value; const q = t.value.trim().toLowerCase(), l = $('#hol'); if (l) setHtml(l, hbOppRows(hbOthers().filter(u => !q || nm(u).toLowerCase().includes(q)))); };
 /* دخول حبشتكنات من الشريط السفلي */
 const hbNavOrig = ACTIONS.nav;
@@ -3959,7 +4147,7 @@ ACTIONS.nav = async function (el) {
 };
 /* أثناء الماتشات: التحديث كل دقيقة (لو مفيش شيت مفتوح) */
 setInterval(async () => {
-  if (!S.user || S.view !== 'hab' || S.hb.sheet) return;
+  if (!S.user || S.view !== 'hab' || S.hb.sheet || S.hb.dragging) return;
   const now = Date.now(), d = S.hb.c.deck[S.hb.c.gw], live = (d && d.cards.some(c => now >= c.ko && now <= c.ko + END_AFTER)) || Object.values(S.hb.s.decks).some(x => now >= hbLockMs(x) && now <= hbLockMs(x) + 8 * 3600000);
   if (!live) return;
   await hbLoadAll(); if (S.view === 'hab' && !S.hb.sheet) render();
