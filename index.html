@@ -684,7 +684,7 @@ function render() {
   const same = v === lastView, rows = same ? [...root.querySelectorAll('.tg')].map(t => t.scrollLeft) : [], y = window.scrollY;
   setHtml(root, (views[v] || vLoading)() + (nonav ? '' : nav()));   // تحديث مكاني بدل إعادة بناء الصفحة (علشان مفيش وميض)
   if (v === 'match') renderMatchBody();
-  if (v === 'stats') renderStatsBody();
+  if (v === 'stats' || (v === 'round' && S.rt === 's')) renderStatsBody();
   if (v === 'shop') renderShopSheet();
   if (v === 'pred') renderSheet();
   root.querySelectorAll('.tg').forEach((t, i) => {
@@ -730,7 +730,7 @@ try { history.replaceState(null, ''); } catch (e) { /* مش مهم */ }
 function nav() {
   const t = S.view === 'admin' ? 'account' : (S.view === 'tdet' || S.view === 'tnew') ? 'tour' : S.view === 'udet' ? 'round' : S.view;
   const b = (k, label, svg) => `<button class="n ${t === k ? 'on' : ''}" data-act="nav" data-v="${k}"><svg viewBox="0 0 24 24">${svg}</svg>${label}</button>`;
-  return `<nav class="nv">${b('round', 'الجولة', '<path d="M3 5h18v14H3zM3 10h18"/>')}${b('pred', 'التوقعات', '<rect x="3" y="6" width="7" height="12" rx="2"/><rect x="14" y="6" width="7" height="12" rx="2"/>')}${b('tour', 'البطولات', '<path d="M8 4h8v5a4 4 0 01-8 0zM8 6H4v2a3 3 0 003 3M16 6h4v2a3 3 0 01-3 3M12 13v4M8 20h8"/>')}${b('hab', 'حبشتكنات', '<rect x="4" y="5" width="9" height="13" rx="2"/><path d="M15 8l4 1-2 9-4-1"/>')}${b('stats', 'الإحصائيات', '<path d="M12 3v9h9M20 15a9 9 0 11-11-11"/>')}${b('shop', 'المحل', '<path d="M5 8h14l-1 12H6zM9 8V6a3 3 0 016 0v2"/>')}${b('account', 'حسابي', '<circle cx="12" cy="8" r="4"/><path d="M4 21c1-6 15-6 16 0"/>')}</nav>`;
+  return `<nav class="nv">${b('round', 'الجولة', '<path d="M3 5h18v14H3zM3 10h18"/>')}${b('pred', 'التوقعات', '<rect x="3" y="6" width="7" height="12" rx="2"/><rect x="14" y="6" width="7" height="12" rx="2"/>')}${b('tour', 'البطولات', '<path d="M8 4h8v5a4 4 0 01-8 0zM8 6H4v2a3 3 0 003 3M16 6h4v2a3 3 0 01-3 3M12 13v4M8 20h8"/>')}${b('hab', 'حبشتكنات', '<rect x="4" y="5" width="9" height="13" rx="2"/><path d="M15 8l4 1-2 9-4-1"/>')}${b('shop', 'المحل', '<path d="M5 8h14l-1 12H6zM9 8V6a3 3 0 016 0v2"/>')}${b('account', 'حسابي', '<circle cx="12" cy="8" r="4"/><path d="M4 21c1-6 15-6 16 0"/>')}</nav>`;
 }
 const vLoading = () => `<div class="login ctr"><img class="logo" src="icon-192.png" alt="" style="margin:0 auto;display:block"><div class="m">جاري التحميل…</div></div>`;
 const vError = () => `<div class="login ctr"><div>حصلت مشكلة في تحميل البيانات</div><button class="bt on" data-act="retry">حاول تاني</button><button class="lnk" data-act="logout">تسجيل الخروج</button></div>`;
@@ -772,10 +772,10 @@ function vSetup() {
   </div>`;
 }
 
-const rtTabs = () => `<div class="tg eq"><button class="bt ${S.rt !== 'b' ? 'on' : ''}" data-act="rtab" data-k="m">الماتشات</button><button class="bt ${S.rt === 'b' ? 'on' : ''}" data-act="rtab" data-k="b">الترتيب</button></div>`;
+const rtTabs = () => `<div class="tg eq"><button class="bt ${S.rt !== 'b' && S.rt !== 's' ? 'on' : ''}" data-act="rtab" data-k="m">الماتشات</button><button class="bt ${S.rt === 'b' ? 'on' : ''}" data-act="rtab" data-k="b">الترتيب</button><button class="bt ${S.rt === 's' ? 'on' : ''}" data-act="rtab" data-k="s">الإحصائيات</button></div>`;
 function vRound() {
   const g = S.gw;
-  if (g == null) return `<div class="h"><b>الجولة</b></div>${rtTabs()}` + (S.rt === 'b' ? vBoard() : `<div class="f"><div class="k ctr">مفيش جولات متاحة لسه. استنى لحد ما الإدارة تفعّل الجولة الجاية.</div></div>`);
+  if (g == null) return `<div class="h"><b>الجولة</b></div>${rtTabs()}` + (S.rt === 'b' ? vBoard() : S.rt === 's' ? vStats(true) : `<div class="f"><div class="k ctr">مفيش جولات متاحة لسه. استنى لحد ما الإدارة تفعّل الجولة الجاية.</div></div>`);
   const nums = gwNums();
   const days = daysOf(g);
   const cur = days.find(d => d.key === S.day) || days[0];
@@ -785,7 +785,7 @@ function vRound() {
   const rest = `  ${nums.length > 1 ? `<div class="tg eq">${nums.map(n => `<button class="bt ${n === g ? 'on' : ''}" data-act="gw" data-g="${n}">الجولة ${N(n)}</button>`).join('')}</div>` : ''}
   <div class="tg eq">${days.map(d => `<button class="bt dy ${cur && d.key === cur.key ? 'on' : ''}" data-act="day" data-k="${d.key}" aria-label="${esc(d.label)}">${d.ms ? `<span>${esc(fmtWd(d.ms))}</span><small>${esc(fmtDm(d.ms))}</small>` : `<span>${esc(d.label)}</span>`}</button>`).join('')}</div>
   <div class="f">${cur ? cur.list.map(card).join('') : ''}</div>`;
-  return head + rtTabs() + (S.rt === 'b' ? vBoard() : rest);
+  return head + rtTabs() + (S.rt === 'b' ? vBoard() : S.rt === 's' ? vStats(true) : rest);
 }
 
 function card(f) {
@@ -1037,7 +1037,7 @@ function makeUnits(scope, start, R, K, per = 1) {
 
 async function loadTours() {
   const s = await getDocs(collection(db, 'tournaments'));
-  S.tours = s.docs.map(d => ({ id: d.id, ...d.data() })).filter(t => S.admin || t.status !== 'draft').sort((a, b) => (tsMs(b.createdAt) || 0) - (tsMs(a.createdAt) || 0));
+  S.tours = s.docs.map(d => ({ id: d.id, ...d.data() })).filter(t => S.admin || (t.status !== 'draft' && !t.archived)).sort((a, b) => (tsMs(b.createdAt) || 0) - (tsMs(a.createdAt) || 0));
 }
 async function loadUsersList() {
   const s = await getDocs(collection(db, 'users'));
@@ -1342,15 +1342,15 @@ function aggStats() {
 }
 const othersList = () => [...aggStats().users].filter(u => u !== S.user.uid).sort((a, b) => byName(nm(a), nm(b)));
 
-function vStats() {
+function vStats(embed) {
   const st = S.st;
-  if (S.gw == null) return `<div class="h"><b>الإحصائيات</b></div><div class="f"><div class="k ctr">مفيش جولات لسه.</div></div>`;
+  if (S.gw == null) return (embed ? '' : `<div class="h"><b>الإحصائيات</b></div>`) + `<div class="f"><div class="k ctr">مفيش جولات لسه.</div></div>`;
   const all = startedFx(S.gw), days = [...new Set(all.map(f => dayKey(koOf(f))))];
   const tabs = [['players', 'اللاعبين'], ['caps', 'الكباتن'], ['chips', 'الخواص'], ['combo', 'الكومبو'], ['cmp', 'مقارنة'], ['care', 'العناية المركزة']];
   const sub = st.kind === 'match'
     ? `<div class="tg">${all.map(f => `<button class="bt ${String(st.fid) === String(f.id) ? 'on' : ''}" data-act="sfx" data-fid="${f.id}" style="font-size:13px">${esc(f.h.sn)} ضد ${esc(f.a.sn)}</button>`).join('')}</div>`
     : st.kind === 'day' ? `<div class="tg">${days.map(k => `<button class="bt ${st.day === k ? 'on' : ''}" data-act="sday" data-k="${k}" style="font-size:13px">${esc(fmtDay(Date.parse(k + 'T12:00:00Z')))}</button>`).join('')}</div>` : '';
-  return `<div class="h"><b>الإحصائيات</b><span class="m">بعد بداية الماتش</span></div>
+  return (embed ? '<div class="m" style="padding:0 16px 4px">الإحصائيات بتظهر بعد بداية الماتش</div>' : `<div class="h"><b>الإحصائيات</b><span class="m">بعد بداية الماتش</span></div>`) + `
   <div class="tg"><button class="bt ${st.kind === 'match' ? 'on' : ''}" data-act="ssc" data-k="match">ماتش معين</button><button class="bt ${st.kind === 'day' ? 'on' : ''}" data-act="ssc" data-k="day">اليوم</button><button class="bt ${st.kind === 'gw' ? 'on' : ''}" data-act="ssc" data-k="gw">الجولة كلها</button></div>
   ${sub}
   <div class="m" style="padding:0 16px 8px">النطاق: ${esc(scopeLabel())}</div>
@@ -1914,9 +1914,39 @@ function usageHtml() {
   <div class="tg eq"><button class="bt ${byN ? '' : 'on'}" data-act="usagesort" data-k="secs">الأكتر وقت</button><button class="bt ${byN ? 'on' : ''}" data-act="usagesort" data-k="n">الأكتر دخول</button></div>
   ${body}`;
 }
+/* ───────── تحكم الإدارة في نقط أسئلة التوقعات لكل ماتش (حتى بعد ما الجولة تشتغل) ───────── */
+function pqaHtml() {
+  const A = S.pqa;
+  if (!A.on) return '<button class="bt" style="height:44px" data-act="pqaopen">⚙️ تحكم في نقط أسئلة التوقعات (لكل ماتش)</button>';
+  const gw = A.gw, gws = Object.keys(S.gws).map(Number).sort((a, b) => a - b), i = gws.indexOf(gw), ov = S.pqo[gw] || {};
+  const fxs = gwFixtures(gw).filter(f => f.ko).slice().sort((a, b) => koOf(a) - koOf(b));
+  const bt = (d, lbl, ok) => `<button class="bt" style="height:34px;width:40px;padding:0" data-act="pqagw" data-d="${d}" ${ok ? '' : 'disabled'} aria-label="${lbl}">${d < 0 ? '▶' : '◀'}</button>`;
+  const baseTxt = b => Array.isArray(b) ? 'نعم ' + N(b[0]) + ' / لا ' + N(b[1]) : N(b);
+  const row = f => {
+    const fid = String(f.id), d = S.fxdocs[fid], open = A.open === fid, nOv = ov[fid] ? Object.keys(ov[fid]).length : 0;
+    let body = '';
+    if (open) {
+      const ed = A.ed[fid], ks = d ? (d.q || []).concat(d.q3 ? [d.q3] : []).filter(k => PQ[k]) : [];
+      if (!d || !ed) body = '<div class="m ctr">جاري التحميل…</div>';
+      else body = ks.map(k => {
+        const v = ed[k], b = qptBase(k, d), ch = JSON.stringify(v) !== JSON.stringify(b);
+        const st = Array.isArray(v)
+          ? hbStep('pqastep', `data-fid="${fid}" data-k="${k}" data-i="0"`, 'نعم', 'var(--ac)', v[0]) + hbStep('pqastep', `data-fid="${fid}" data-k="${k}" data-i="1"`, 'لا', 'inherit', v[1])
+          : hbStep('pqastep', `data-fid="${fid}" data-k="${k}" data-i="0"`, 'نقط', 'var(--ac)', v);
+        return `<div class="k" style="padding:10px;display:flex;flex-direction:column;gap:6px"><div class="nm" style="font-size:13px">${esc(PQ[k].t(d))}</div><div class="sub">الأصلي: ${baseTxt(b)}${ch ? ' · <b>متعدّل</b>' : ''}</div><div class="r" style="gap:12px;flex-wrap:wrap">${st}</div></div>`;
+      }).join('') + `<div class="r" style="gap:8px"><button class="bt on" style="flex:1;height:40px" data-act="pqasave" data-id="${fid}">حفظ نقط الماتش</button><button class="bt" style="height:40px" data-act="pqareset" data-id="${fid}">رجّع الأصلي</button></div>`;
+    }
+    return `<div class="k" style="padding:0"><button class="r j" style="width:100%;padding:10px 12px;background:none;border:0;color:inherit;font:inherit;cursor:pointer" data-act="pqafx" data-id="${fid}"><b class="g" style="text-align:start">${esc(f.h.sn)} - ${esc(f.a.sn)}</b>${nOv ? '<span class="pl">معدّل (' + N(nOv) + ')</span>' : ''}<span class="m">${esc(fmtDay(koOf(f)))} ${esc(fmtTime(koOf(f)))}</span></button>${open ? `<div style="padding:0 10px 10px;display:flex;flex-direction:column;gap:8px">${body}</div>` : ''}</div>`;
+  };
+  return `<div class="r j"><b>نقط أسئلة التوقعات</b><button class="bt" style="height:34px;padding:0 12px" data-act="pqaclose">إغلاق</button></div>
+  <div class="r j" style="gap:8px">${bt(-1, 'السابقة', i > 0)}<b>الجولة ${N(gw)}</b>${bt(1, 'التالية', i >= 0 && i < gws.length - 1)}</div>
+  <div class="m">اضغط على ماتش وعدّل نقط أسئلته (حتى لو بدأ). النقط بتتحسب تاني لوحدها في أول تحديث للجولة الشغالة. للجولة اللي خلصت شغّل rescorePreds في Apps Script.</div>
+  ${fxs.length ? fxs.map(row).join('') : '<div class="k ctr m">مفيش ماتشات في الجولة دي.</div>'}`;
+}
 function vAdmin() {
   return `<div class="h"><div><b>الإدارة</b><div class="m">${N(S.users.length)} مسجل</div></div><button class="bt" data-act="nav" data-v="account">رجوع</button></div>
   <div class="f" style="flex:none" id="ilist">${invitesHtml()}</div>
+  <div class="f" style="flex:none" id="pqabox">${pqaHtml()}</div>
   <div class="f" style="flex:none" id="usagebox">${usageHtml()}</div>
   <div class="r j" style="padding:0 16px 8px"><b>اللاعبين</b></div>
   <div style="padding:0 16px 10px"><input class="in" data-in="usearch" placeholder="ابحث باسم المستخدم" aria-label="بحث" value="${esc(S.uq)}"></div>
@@ -1996,7 +2026,7 @@ const ACTIONS = {
     S.q = '';
     if (v === 'board' || (v === 'round' && S.rt === 'b')) { if (v === 'board') { S.view = 'round'; S.rt = 'b'; } render(); await Promise.all([loadBoard('total'), S.gw != null ? loadBoard('gw_' + S.gw) : null, loadNames()]); }
     else if (v === 'tour') { render(); await loadTours().catch(() => {}); }
-    else if (v === 'stats') { initStats(); S.st.loading = true; render(); await loadStatsScope(); S.st.loading = false; }
+    else if (v === 'stats') { S.view = 'round'; S.rt = 's'; initStats(); S.st.loading = true; render(); await loadStatsScope(); S.st.loading = false; }
     else if (v === 'account') { render(); await Promise.all([S.boards.total ? null : loadBoard('total').catch(() => {}), loadFcm(), loadNames()]); }
     else if (v === 'round') { await loadPicks().catch(() => {}); await loadMyPts(); }
     else if (v === 'shop') { S.shop.sheet = null; S.shop.loading = true; render(); await Promise.all([loadShop().catch(() => {}), loadNames()]); S.shop.loading = false; }
@@ -2009,6 +2039,7 @@ const ACTIONS = {
   async rtab(el) {
     S.rt = el.dataset.k; render();
     if (S.rt === 'b') { await Promise.all([loadBoard('total'), S.gw != null ? loadBoard('gw_' + S.gw) : null, loadNames()]).catch(() => {}); render(); }
+    if (S.rt === 's') { initStats(); S.st.loading = true; render(); try { await loadStatsScope(); } catch (e) { /* نكمّل */ } S.st.loading = false; render(); }
   },
   async gw(el) { S.gw = Number(el.dataset.g); await Promise.all([loadPicks(), loadMyPts()]); chooseDay(); render(); },
   day(el) { S.day = el.dataset.k; render(); },
@@ -2228,6 +2259,37 @@ const ACTIONS = {
     const from = Math.max(Date.now(), tsMs(i.until) || 0);
     await setInvite(i, { active: true, until: new Date(from + 7 * 86400000) }, 'اتمدّت ٧ أيام');
   },
+  pqaopen() { S.pqa.on = true; S.pqa.gw = S.gw != null ? S.gw : Math.max(...Object.keys(S.gws).map(Number)); render(); loadPqo(S.pqa.gw).then(render); },
+  pqaclose() { S.pqa.on = false; S.pqa.open = null; render(); },
+  pqagw(el) { const gws = Object.keys(S.gws).map(Number).sort((a, b) => a - b), i = gws.indexOf(S.pqa.gw) + Number(el.dataset.d); if (i < 0 || i >= gws.length) return; S.pqa.gw = gws[i]; S.pqa.open = null; render(); loadPqo(S.pqa.gw).then(render); },
+  async pqafx(el) {
+    const fid = String(el.dataset.id); if (S.pqa.open === fid) { S.pqa.open = null; return render(); }
+    S.pqa.open = fid; render();
+    try { await loadFixture(fid, false); } catch (e) { toast('مقدرتش أحمّل الماتش'); }
+    const d = S.fxdocs[fid];
+    if (d) { const ed = {}; (d.q || []).concat(d.q3 ? [d.q3] : []).forEach(k => { if (PQ[k]) { const v = qpt(k, d); ed[k] = Array.isArray(v) ? v.slice() : v; } }); S.pqa.ed[fid] = ed; }
+    render();
+  },
+  pqastep(el) {
+    const ed = S.pqa.ed[el.dataset.fid]; if (!ed) return;
+    const k = el.dataset.k, i = Number(el.dataset.i), dl = Number(el.dataset.d), cl = v => Math.min(30, Math.max(0, v + dl));
+    if (Array.isArray(ed[k])) ed[k][i] = cl(ed[k][i]); else ed[k] = cl(ed[k]);
+    render();
+  },
+  async pqasave(el) {
+    const gw = S.pqa.gw, fid = String(el.dataset.id), d = S.fxdocs[fid], ed = S.pqa.ed[fid]; if (!d || !ed) return;
+    const m = {}; Object.keys(ed).forEach(k => { if (JSON.stringify(qptBase(k, d)) !== JSON.stringify(ed[k])) m[k] = ed[k]; });
+    const all = { ...(S.pqo[gw] || {}) }; if (Object.keys(m).length) all[fid] = m; else delete all[fid];
+    try { await setDoc(doc(db, 'pqo', 'gw_' + gw), { o: all, updatedAt: serverTimestamp() }); S.pqo[gw] = all; toast(Object.keys(m).length ? 'اتحفظت النقط ✓ هتتحسب في أول تحديث' : 'رجعت للنقط الأصلية ✓'); }
+    catch (e) { toast('مقدرتش أحفظ: ' + (e.code || e.message)); }
+    render();
+  },
+  async pqareset(el) {
+    const fid = String(el.dataset.id), d = S.fxdocs[fid], ed = S.pqa.ed[fid]; if (!d || !ed) return;
+    if (!confirm('ترجّع نقط أسئلة الماتش ده للأصلية؟')) return;
+    Object.keys(ed).forEach(k => { const b = qptBase(k, d); ed[k] = Array.isArray(b) ? b.slice() : b; });
+    await ACTIONS.pqasave(el);
+  },
   async invdel(el) {
     const i = S.invites[el.dataset.c]; if (!i || canJoin(i)) return;
     if (!confirm('تحذف رابط التجربة ده (' + (i.name || i.id) + ')؟ اللي دخلوا بيه هيفضلوا مقفول عليهم زي ما هم، بس مش هتقدر تمدّه تاني.')) return;
@@ -2401,7 +2463,15 @@ const PQ = {
 };
 /* نقط النظام القديم (الجولات اللي قبل نظام الأسئلة الجديد: الماتش اللي فيه qv = 3 هو الجديد) */
 const PQ_OLD = { scorer: 3, assist: 4, motm: 5, og: [5, 1] };
-const qpt = (k, d) => { const q = PQ[k]; return d && d.qv === 3 ? (q.yn || q.pts) : (k in PQ_OLD ? PQ_OLD[k] : (q.yn || q.pts)); };
+S.pqo = S.pqo || {};   // تعديل نقط الأسئلة من الإدارة: S.pqo[جولة][ماتش][سؤال] = نقط أو [أيوه، لأ]
+S.pqa = { on: false, gw: null, open: null, ed: {} };
+const qptBase = (k, d) => { const q = PQ[k]; return d && d.qv === 3 ? (q.yn || q.pts) : (k in PQ_OLD ? PQ_OLD[k] : (q.yn || q.pts)); };
+const qpt = (k, d) => { const m = d && S.pqo[d.gw] && S.pqo[d.gw][String(d.id)]; if (m && m[k] !== undefined && m[k] !== null) return m[k]; return qptBase(k, d); };
+async function loadPqo(g) {
+  if (g == null) return;
+  try { const r = await getDoc(doc(db, 'pqo', 'gw_' + g)); S.pqo[g] = r.exists() ? (r.data().o || {}) : {}; }
+  catch (e) { S.pqo[g] = S.pqo[g] || {}; }
+}
 const qOpts = (k, d) => { const q = PQ[k]; if (q.yn) { const p = qpt(k, d); return PYN(p[0], p[1]); } return q.opts(d); };
 /* أرقام بالسالب: الإشارة قبل الرقم حتى في الاتجاه العربي */
 const sN = v => v < 0 ? `<bdi dir="ltr">−${N(-v)}</bdi>` : N(v);
@@ -2463,7 +2533,7 @@ async function loadAllPb() {
 async function predLoad() {
   if (S.gw == null) return;
   S.pr.loading = true;
-  await Promise.all([loadPreds().catch(e => console.error(e)), loadPst(), loadPb(S.gw), loadPtotal(), loadNames()]);
+  await Promise.all([loadPreds().catch(e => console.error(e)), loadPst(), loadPb(S.gw), loadPtotal(), loadNames(), loadPqo(S.gw)]);
   if (S.pr.tab === 'b') await loadAllPb();
   S.pr.loading = false;
 }
@@ -2503,13 +2573,13 @@ function pcard(f) {
   const boxes = started || !k
     ? `<div class="r" style="gap:10px">${box(p ? p.h : '–')}${box(p ? p.a : '–')}</div>`
     : `<button class="r" style="gap:10px;border:0;background:none;padding:0" data-act="popen" data-fid="${fid}" aria-label="اكتب توقعك">${box(p ? p.h : '+')}${box(p ? p.a : '+')}</button>`;
-  let mid = '';
+  let mid = '', popRow = '';
   if (!k) mid = '<span class="m">مواعيده لسه مش معروفة</span>';
   else if (!started) {
     const dist = pDist(fid), pops = pPops(dist);
-    mid = p ? `<span class="m">جاوبت ${N(Object.keys(p.ans || {}).length)} من سؤالين</span>`
-      : (pops.length ? `<div class="m" style="font-size:11px">التوقعات الشائعة</div><div class="r" style="gap:8px;justify-content:center">${pops.map(o => `<div class="ctr"><span class="pc">${scoreHtml(o.h, o.a)}</span><div class="m" style="font-size:11px">${N(o.pct)}٪</div></div>`).join('')}</div>`
-        : `<span class="m">معاه سؤالين</span>`);
+    mid = p ? `<span class="m">جاوبت ${N(Object.keys(p.ans || {}).length)} من سؤالين</span>` : `<span class="m">معاه سؤالين</span>`;
+    /* التوقعات الشائعة: صف لوحده جوا الكارت تحت الفريقين (اللوجوهات والخانتين مكانهم ثابت). لو زادوا عن المساحة بيتلفوا ويتوسّطوا */
+    if (!p && pops.length) popRow = `<div style="margin-top:14px;display:flex;flex-direction:column;align-items:center;gap:6px"><div class="m" style="font-size:11px">التوقعات الشائعة</div><div style="display:flex;flex-wrap:wrap;justify-content:center;gap:8px 12px">${pops.map(o => `<div class="ctr"><span class="pc">${scoreHtml(o.h, o.a)}</span><div class="m" style="font-size:11px">${N(o.pct)}٪</div></div>`).join('')}</div></div>`;
   } else if (x) {
     const exact = p && x.st === 'ft' && p.h === x.r[0] && p.a === x.r[1];
     mid = x.st === 'live'
@@ -2533,7 +2603,7 @@ function pcard(f) {
   }
   return `<div class="k pk ${x && p && x.st === 'ft' && p.h === x.r[0] && p.a === x.r[1] ? 'ex' : ''}">
     <div class="ctr m" style="font-size:14px;margin-bottom:12px">${k ? fmtTime(k) : '—'}</div>
-    <div class="pkr">${team(f.h)}<div style="display:flex;flex-direction:column;align-items:center;gap:10px">${boxes}${mid}</div>${team(f.a)}</div>${foot ? `<div class="pft">${foot}</div>` : ''}</div>`;
+    <div class="pkr">${team(f.h)}<div style="display:flex;flex-direction:column;align-items:center;gap:10px">${boxes}${mid}</div>${team(f.a)}</div>${popRow}${foot ? `<div class="pft">${foot}</div>` : ''}</div>`;
 }
 const BOLT = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M13 2L4 14h7l-1 8 9-12h-7z"/></svg>';
 const INFO_SVG = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5"/></svg>';
@@ -2920,7 +2990,7 @@ setInterval(async () => {
   if (!S.user || (S.view !== 'pred' && S.view !== 'ppl') || S.pr.sheet || S.pr.dt || S.gw == null) return;
   const now = Date.now();
   if (!gwFixtures(S.gw).some(f => koOf(f) && now >= koOf(f) && now <= koOf(f) + END_AFTER)) return;
-  await loadPb(S.gw);
+  await Promise.all([loadPb(S.gw), loadPqo(S.gw)]);
   if (S.view === 'pred' && S.pr.tab === 'b') await loadPtotal();
   if (!S.pr.sheet && !S.pr.dt && !S.pr.info) render();
 }, 60000);
@@ -3121,7 +3191,7 @@ function vShop() {
   const H = S.shop, cur = H.cur, bal = balOf(cur);
   const head = `<div class="h"><b>المحل</b><div class="ctr"><div class="m">توكن ${curName(cur)}</div><div class="d" style="font-size:24px">${COIN} ${N(bal)}</div></div></div>`;
   const curTabs = HAS_PRED ? `<div class="tg eq" style="grid-template-columns:1fr 1fr">${['f', 'p'].map(c => `<button class="bt ${cur === c ? 'on' : ''}" style="flex:1 0 calc((100% - 6px) / 2)" data-act="shcur" data-c="${c}">${c === 'f' ? 'الفانتاسي' : 'التوقعات'}</button>`).join('')}</div>` : '';
-  const secs = [['shop', 'المحل'], ['mine', 'حاجاتي'], ['earn', 'اازاي تكسب كوينز']];
+  const secs = [['shop', 'المحل'], ['mine', 'حاجاتي'], ['earn', 'ازاي تكسب كوينز']];
   const secTabs = `<div class="tg eq">${secs.map(([k, l]) => `<button class="bt ${H.sec === k ? 'on' : ''}" data-act="shsec" data-k="${k}">${l}</button>`).join('')}</div>`;
   const body = H.loading && !H.w && !H.buys.length ? '<div class="k ctr">جاري التحميل…</div>' : H.sec === 'mine' ? shopMine(cur) : H.sec === 'earn' ? shopEarn(cur) : shopList(cur);
   return head + curTabs + secTabs + `<div class="f">${body}</div><div id="ssh"></div>`;
@@ -4382,20 +4452,27 @@ Object.assign(ACTIONS, {
   thide(el) { const s = hiddenTours(); s.add(el.dataset.id); saveHidden(s); toast('اتشالت من القايمة (تقدر تشوفها من "عرض المخفية")'); render(); },
   tunhide(el) { const s = hiddenTours(); s.delete(el.dataset.id); saveHidden(s); render(); },
   tshowhid() { S.showHid = !S.showHid; render(); },
+  async tdelid(el) {
+    const t = S.tours.find(x => x.id === el.dataset.id); if (!t) return;
+    if (!confirm('تحذف بطولة "' + t.name + '" نهائياً؟ الجدول والنتايج هيتمسحوا.')) return;
+    try { await deleteDoc(doc(db, 'tournaments', t.id)); try { await deleteDoc(doc(db, 'tstate', t.id)); } catch (e) { /* مفيش حالة */ } S.tours = S.tours.filter(x => x.id !== t.id); toast('اتحذفت ✓'); }
+    catch (e) { toast('مقدرتش أحذفها: ' + (e.code || e.message)); }
+    render();
+  },
   async tarch(el) {
     const t = S.tours.find(x => x.id === el.dataset.id); if (!t) return;
     const to = !t.archived;
-    if (!confirm(to ? 'تشيل "' + t.name + '" من الواجهة عند كل اللاعبين؟ (البيانات بتفضل موجودة)' : 'ترجّع البطولة للواجهة عند الكل؟')) return;
-    try { await updateDoc(doc(db, 'tournaments', t.id), { archived: to }); t.archived = to; toast(to ? 'اتأرشفت ✓' : 'اترجعت ✓'); } catch (e) { toast('مقدرتش: ' + (e.code || e.message)); }
+    if (!confirm(to ? 'تخفي "' + t.name + '" عن كل الأعضاء؟ (البيانات بتفضل موجودة وإنت لسه شايفها)' : 'تظهر "' + t.name + '" للأعضاء؟')) return;
+    try { await updateDoc(doc(db, 'tournaments', t.id), { archived: to }); t.archived = to; toast(to ? 'اتخفت عن الأعضاء ✓' : 'ظهرت للأعضاء ✓'); } catch (e) { toast('مقدرتش: ' + (e.code || e.message)); }
     render();
   }
 });
 vTourList = function () {
   const hid = hiddenTours(), all = S.tours;
-  const isHid = t => hid.has(t.id) || t.archived;
-  const shown = all.filter(t => S.showHid || !isHid(t)), nh = all.filter(isHid).length;
-  const card = t => `<div class="k" style="${isHid(t) ? 'opacity:.6;' : ''}padding:0"><div class="r"><div class="g" data-act="topen" data-id="${esc(t.id)}" style="cursor:pointer;padding:12px"><div class="r j"><b style="font-size:17px">${esc(t.name)}</b>${t.status === 'draft' ? '<span class="pl">مسودة</span>' : '<span class="pl ok">شغالة</span>'}</div><div class="m mt">${t.teams ? N(Object.keys(t.teams).length) + ' فريق (' + N(t.team.size) + ' ضد ' + N(t.team.size) + ')' : N(Object.keys(t.players || {}).length) + ' لاعب'} · ${t.cfg.groups === 1 ? 'دوري واحد' : N(t.cfg.groups) + ' مجموعات'} · ${SRC_LBL[t.src] ? SRC_LBL[t.src] + ' · ' : ''}${t.scope === 'day' ? 'مواجهات بنقط اليوم' : 'مواجهات بنقط الجولة'}${t.archived ? ' · متأرشفة' : ''}</div></div>
-    <div style="display:flex;flex-direction:column;gap:4px;padding:8px;flex:none">${hid.has(t.id) ? `<button class="bt" style="height:34px;padding:0 10px;font-size:12px" data-act="tunhide" data-id="${esc(t.id)}">رجّعها</button>` : `<button class="bt" style="height:34px;padding:0 10px;font-size:12px" data-act="thide" data-id="${esc(t.id)}" aria-label="إخفاء من القايمة">إخفاء ✕</button>`}${S.admin ? `<button class="bt" style="height:34px;padding:0 10px;font-size:12px" data-act="tarch" data-id="${esc(t.id)}">${t.archived ? 'رجّع للكل' : 'أرشفة للكل'}</button>` : ''}</div></div></div>`;
+  const isHid = t => S.admin ? !!t.archived : hid.has(t.id);
+  const shown = S.admin ? all : all.filter(t => S.showHid || !isHid(t)), nh = S.admin ? 0 : all.filter(isHid).length;
+  const card = t => `<div class="k" style="${isHid(t) ? 'opacity:.6;' : ''}padding:0"><div class="r"><div class="g" data-act="topen" data-id="${esc(t.id)}" style="cursor:pointer;padding:12px"><div class="r j"><b style="font-size:17px">${esc(t.name)}</b>${t.status === 'draft' ? '<span class="pl">مسودة</span>' : '<span class="pl ok">شغالة</span>'}</div><div class="m mt">${t.teams ? N(Object.keys(t.teams).length) + ' فريق (' + N(t.team.size) + ' ضد ' + N(t.team.size) + ')' : N(Object.keys(t.players || {}).length) + ' لاعب'} · ${t.cfg.groups === 1 ? 'دوري واحد' : N(t.cfg.groups) + ' مجموعات'} · ${SRC_LBL[t.src] ? SRC_LBL[t.src] + ' · ' : ''}${t.scope === 'day' ? 'مواجهات بنقط اليوم' : 'مواجهات بنقط الجولة'}${t.archived ? ' · <b>مخفية عن الأعضاء</b>' : ''}</div></div>
+    <div style="display:flex;flex-direction:column;gap:4px;padding:8px;flex:none">${S.admin ? `<button class="bt ${t.archived ? '' : 'on'}" style="height:34px;padding:0 10px;font-size:12px" data-act="tarch" data-id="${esc(t.id)}">${t.archived ? '🚫 مخفية · اظهرها' : '👁️ ظاهرة · اخفيها'}</button><button class="bt red" style="height:34px;padding:0 10px;font-size:12px" data-act="tdelid" data-id="${esc(t.id)}">🗑️ حذف</button>` : hid.has(t.id) ? `<button class="bt" style="height:34px;padding:0 10px;font-size:12px" data-act="tunhide" data-id="${esc(t.id)}">رجّعها</button>` : `<button class="bt" style="height:34px;padding:0 10px;font-size:12px" data-act="thide" data-id="${esc(t.id)}" aria-label="إخفاء من القايمة">إخفاء ✕</button>`}</div></div>`;
   return `<div class="h"><b>البطولات</b>${S.admin ? '<button class="bt on" style="height:36px;padding:0 12px" data-act="tnew">+ بطولة جديدة</button>' : ''}</div>
   <div class="f">${shown.length ? shown.map(card).join('') : '<div class="k ctr">' + (all.length ? 'كل البطولات مخفية.' : 'مفيش بطولات لسه.') + '</div>'}${nh ? `<button class="lnk" data-act="tshowhid">${S.showHid ? 'إخفاء المخفية' : 'عرض المخفية (' + N(nh) + ')'}</button>` : ''}</div>`;
 };
