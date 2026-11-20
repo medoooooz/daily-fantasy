@@ -13,7 +13,7 @@ try {
   firebase.messaging();   // بيعرض التنبيهات اللي فيها notification تلقائياً
 } catch (e) { /* مفيش نت وقت التثبيت: التطبيق لسه شغال، والتنبيهات هتشتغل بعد ما الـ worker يتحدث */ }
 
-const CACHE = 'daily-fantasy-v8';
+const CACHE = 'daily-fantasy-v9';
 self.addEventListener('install', () => self.skipWaiting());
 self.addEventListener('activate', e => e.waitUntil(
   caches.keys().then(ks => Promise.all(ks.filter(k => k !== CACHE).map(k => caches.delete(k)))).then(() => self.clients.claim())
