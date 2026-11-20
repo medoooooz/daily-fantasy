@@ -3541,7 +3541,7 @@ function showIntro() {
 const HAB = { pick: 8, total: 15, sortFull: { players: 10, matches: { 3: 6, 4: 8, 5: 10 } } };
 const hbFull = (k, n, d) => (d && d.pts && d.pts[k] != null) ? d.pts[k] : (k === 'c' ? (HAB.sortFull.matches[n] || HAB.sortFull.matches[3]) : HAB.sortFull.players);
 const hbNo = c => c.n == null ? 2 : c.n;
-const CARD_FAM = { win: 'r', draw: 'r', win2: 'r', cs: 'r', over25: 'g', over45: 'g', btts: 'g', team2: 'g', red: 'x', yellow4: 'y', og: 'x', pen: 'x', pl_goal: 'p', pl_assist: 'p', pl_involve: 'p', pl_pts7: 'p', pl_brace: 'p', gk_saves: 'k', def_dc: 'd', pl_yellow: 'y' };
+const CARD_FAM = { win: 'r', draw: 'r', win2: 'r', cs: 'r', over25: 'g', over45: 'g', btts: 'g', team2: 'g', red: 'x', yellow4: 'y', og: 'x', pen: 'x', pl_goal: 'p', pl_assist: 'p', pl_involve: 'p', pl_pts7: 'p', pl_brace: 'p', gk_saves: 'k', def_dc: 'd', pl_yellow: 'y', over15: 'g', under25: 'g', nolose: 'r', team1: 'g', custom: 'u' };
 const HGAMES = [
   { id: 'cards', n: 'الكروت', ic: '🃏', tabs: [['play', 'لعب'], ['rank', 'الترتيب'], ['stats', 'إحصائيات'], ['cmp', 'مقارنة']] },
   { id: 'sort', n: 'صنفلي', ic: '🎚️', tabs: [['play', 'لعب'], ['rank', 'الترتيب'], ['stats', 'إحصائيات'], ['cmp', 'مقارنة']] }
@@ -3554,7 +3554,7 @@ const HB_SEC = {
 S.hb = { g: 'all', tab: 'play', sheet: null, loading: false, rk: { c: 'total', s: 'total', cg: null, sg: null, sd: null },
   c: { gw: null, deck: {}, draft: {}, mine: {}, pub: {}, board: {}, total: null },
   s: { gw: null, day: null, decks: {}, draft: {}, mine: {}, pub: {}, board: {}, total: null, work: {} },
-  st: { c: 'pop', s: 'a', q: '' }, cmp: { opp: null, oq: '' }, combo: [], adm: { pin: {}, pool: false, q: '' } };
+  st: { c: 'pop', s: 'a', q: '' }, cmp: { opp: null, oq: '' }, combo: [], adm: { pin: {}, pool: false, q: '', cu: null, cuOpen: false } };
 
 const hbDayLbl = k => fmtDay(Date.parse(k + 'T12:00:00Z'));
 const hbMe = () => S.user.uid;
@@ -3776,6 +3776,13 @@ function hbCmpC() {
 
 /* ───── صنفلي: لعب ───── */
 const hbItemId = (k, it) => k === 'c' ? String(it.id) : it.i;
+/** سطر اللاعب في صنفلي: ناديه ضد الفريق اللي هيلعب قدامه (من ماتش اللاعب). */
+function hbPlSub(x) {
+  const f = x.fid != null ? fxInfo(x.fid) : null;
+  if (f && f.h && f.a) { const mine = String(x.tm) === String(f.h.id) ? f.h : f.a, opp = mine === f.h ? f.a : f.h; return `${esc(teamName(mine))} ضد ${esc(teamName(opp))}`; }
+  return esc(x.t || '') + (x.o ? ' ضد ' + esc(x.o) : '');
+}
+const HB_EMOJI = ['❓', '⚽', '🎯', '👟', '🟨', '🟥', '🧤', '🛡️', '🔥', '⭐', '🚀', '🏆', '🤝', '💪', '🥅', '⚡', '🤦', '🎲', '👑', '💥'];
 function hbOrder(day, k) {
   const SS = S.hb.s, deck = SS.decks[day], items = deck[k] || [];
   const w = SS.work[day] && SS.work[day][k];
@@ -3788,7 +3795,7 @@ const hbSaved = (day, k) => { const m = S.hb.s.mine[day] && S.hb.s.mine[day][k],
 function hbItemRow(k, it, i, n, o) {
   const body = k === 'c'
     ? `<div class="r" style="gap:6px">${crest(it.h, 30)}<b>${esc(it.h.sn)}</b><span class="m">ضد</span><b>${esc(it.a.sn)}</b>${crest(it.a, 30)}</div>`
-    : `<div class="r" style="gap:8px">${photo({ t: it.tm, c: it.c })}<div><div class="nm">${esc(it.n)}</div><div class="sub">${esc(it.t)} · ${POS[it.p]}</div></div></div>`;
+    : `<div class="r" style="gap:8px">${photo({ t: it.tm, c: it.c })}<div><div class="nm">${esc(it.n)}</div><div class="sub">${hbPlSub(it)}</div></div></div>`;
   const val = o.val != null ? `<span class="pl ${o.ok === true ? 'ok' : o.ok === false ? 'bad' : ''}">${N(o.val)} ${HB_SEC[k].u}</span>` : '';
   const mv = o.lock ? '' : `<div data-drag="${k}" aria-label="اسحب لتغيير المكان" style="touch-action:none;cursor:grab;flex:none;width:52px;height:46px;display:flex;align-items:center;justify-content:center;font-size:26px;line-height:1;color:var(--mu);border-radius:12px;background:rgba(var(--fg),.12);user-select:none;-webkit-user-select:none">⠿</div>`;
   return `<div class="k r" data-row="1" data-id="${esc(String(hbItemId(k, it)))}" style="padding:8px 10px;gap:10px;${o.lock ? '' : 'user-select:none;-webkit-user-select:none;'}${o.ok === true ? 'border-color:var(--af)' : o.ok === false ? 'border-color:#d63a3f' : ''}"><span class="d" style="width:22px;font-size:18px;color:var(--mu)">${N(i + 1)}</span><div class="g" style="min-width:0">${body}</div>${val}${mv}</div>`;
@@ -3846,7 +3853,7 @@ function hbStatsS() {
   } else {
     const k = st.s, items = deck[k] || [], b = SS.board[day], vals = b && b.sec && b.sec[k] && b.sec[k].vals;
     const rows = items.map(it => { const id = String(hbItemId(k, it)), pos = list.filter(x => (x.o[k] || []).length).map(x => (x.o[k] || []).map(String).indexOf(id) + 1).filter(p => p > 0); const avg = pos.length ? pos.reduce((a, c) => a + c, 0) / pos.length : 0; return { it, id, avg, n1: pos.filter(p => p === 1).length, n: pos.length }; }).sort((a, c) => a.avg - c.avg);
-    body = `<div class="m">${HB_SEC[k].t} · متوسط مكان الناس لكل واحد (١ = الأول) · اضغط تشوف مين حطه فين</div>` + rows.map(r => `<button class="k r" data-act="hsit" data-k="${k}" data-id="${esc(r.id)}" style="padding:10px"><div class="g">${k === 'c' ? `<b>${esc(r.it.h.sn)} ضد ${esc(r.it.a.sn)}</b>` : `<div class="nm">${esc(r.it.n)}</div><div class="sub">${esc(r.it.t)}</div>`}<div class="sub">${N(r.n1)} حطوه الأول${vals ? ' · الحقيقي: ' + N(vals[r.id] || 0) + ' ' + HB_SEC[k].u : ''}</div></div><span class="d" style="font-size:20px">${(Math.round(r.avg * 10) / 10).toLocaleString('ar-EG')}</span></button>`).join('');
+    body = `<div class="m">${HB_SEC[k].t} · متوسط مكان الناس لكل واحد (١ = الأول) · اضغط تشوف مين حطه فين</div>` + rows.map(r => `<button class="k r" data-act="hsit" data-k="${k}" data-id="${esc(r.id)}" style="padding:10px"><div class="g">${k === 'c' ? `<b>${esc(r.it.h.sn)} ضد ${esc(r.it.a.sn)}</b>` : `<div class="nm">${esc(r.it.n)}</div><div class="sub">${hbPlSub(r.it)}</div>`}<div class="sub">${N(r.n1)} حطوه الأول${vals ? ' · الحقيقي: ' + N(vals[r.id] || 0) + ' ' + HB_SEC[k].u : ''}</div></div><span class="d" style="font-size:20px">${(Math.round(r.avg * 10) / 10).toLocaleString('ar-EG')}</span></button>`).join('');
   }
   return chips + days + tabs + `<div class="f">${body}</div>`;
 }
@@ -4022,7 +4029,7 @@ function hbCardFits(c, chosen) {
 function hbDraftCards(dr) { const by = Object.fromEntries(dr.pool.map(c => [c.id, c])); return dr.sel.map(id => by[id]).filter(Boolean).sort((a, b) => a.ko - b.ko || a.fid - b.fid); }
 async function hbSaveDraftC(gw) { const dr = S.hb.c.draft[gw]; try { await updateDoc(doc(db, 'cdraft', 'gw_' + gw), { sel: dr.sel }); } catch (e) { toast('مقدرتش أحفظ المسودة: ' + (e.code || e.message)); } }
 function hbRollC(dr, pins, onlyId) {
-  const sel = hbDraftCards(dr), keep = onlyId ? sel.filter(c => c.id !== onlyId) : sel.filter(c => pins[c.id]);
+  const sel = hbDraftCards(dr), keep = onlyId ? sel.filter(c => c.id !== onlyId) : sel.filter(c => pins[c.id] || c.k === 'custom');
   const target = onlyId ? sel.length : Math.max(sel.length, HAB.total);
   const old = new Set(sel.map(c => c.id)), out = keep.slice();
   const cands = hbShuf(dr.pool.filter(c => !keep.some(k => k.id === c.id)));
@@ -4038,11 +4045,11 @@ function hbAdmC() {
   if (!dr && !op) return chips + '<div class="f"><div class="k ctr">مفيش مسودة للجولة دي. بتتولد مع المزامنة (syncDaily) قبل الجولة.</div></div>';
   if (op) {
     const started = C.deck[gw].cards.some(c => Date.now() >= c.ko);
-    return chips + `<div class="f">${hbAdmHead(true, started ? 'الجولة بدأت، ماينفعش تتعدل.' : 'لسه مبدأتش: تقدر ترجّعها مسودة وتعدّل، أو تعمل ريسيت بقرعة جديدة.')}${started ? '' : '<div class="r" style="gap:8px"><button class="bt on" style="flex:1;height:44px" data-act="hacreopen">↩︎ رجّعها مسودة وعدّل</button><button class="bt" style="flex:1;height:44px" data-act="hacreset">🔄 ريسيت (قرعة جديدة)</button></div>'}${hbPlayC().replace(/^[\s\S]*?<div class="f">/, '').replace(/<\/div>$/, '')}</div>`;
+    return chips + `<div class="f">${hbAdmHead(true, started ? 'الجولة بدأت، ماينفعش تتعدل.' : 'لسه مبدأتش: تقدر ترجّعها مسودة وتعدّل، أو تعمل ريسيت بقرعة جديدة.')}${hbCustAns(gw)}${started ? '' : '<div class="r" style="gap:8px"><button class="bt on" style="flex:1;height:44px" data-act="hacreopen">↩︎ رجّعها مسودة وعدّل</button><button class="bt" style="flex:1;height:44px" data-act="hacreset">🔄 ريسيت (قرعة جديدة)</button></div>'}${hbPlayC().replace(/^[\s\S]*?<div class="f">/, '').replace(/<\/div>$/, '')}</div>`;
   }
   const sel = hbDraftCards(dr), selSet = new Set(dr.sel);
   const card = c => `<div class="k r" style="padding:8px;gap:8px;${A.pin[c.id] ? 'border:2px solid #f5b301;' : ''}"><span style="font-size:22px;flex:none">${c.ic}</span><div class="g" style="min-width:0"><div class="nm" style="font-size:14px;line-height:1.4">${esc(c.t)}</div><div class="sub">${hbFxLabel(c)} · ${esc(fmtTime(c.ko))}</div><div class="r" style="gap:10px;margin-top:6px;flex-wrap:wrap">${hbStep('hacpt', 'data-id="' + c.id + '" data-w="p"', 'نعم', 'var(--ac)', c.p)}${hbStep('hacpt', 'data-id="' + c.id + '" data-w="n"', 'لا', 'var(--neg)', hbNo(c))}</div></div>
-    <div class="r" style="gap:4px;flex:none"><button class="bt" style="width:38px;height:38px;padding:0" data-act="hacpin" data-id="${c.id}" aria-label="تثبيت">${A.pin[c.id] ? '📌' : '📍'}</button><button class="bt" style="width:38px;height:38px;padding:0" data-act="hacswap" data-id="${c.id}" aria-label="بدّل">🎲</button><button class="bt" style="width:38px;height:38px;padding:0" data-act="hacdel" data-id="${c.id}" aria-label="شيل">✕</button></div></div>`;
+    <div class="r" style="gap:4px;flex:none"><button class="bt" style="width:38px;height:38px;padding:0" data-act="hacpin" data-id="${c.id}" aria-label="تثبيت">${A.pin[c.id] ? '📌' : '📍'}</button>${c.k === 'custom' ? `<button class="bt" style="width:38px;height:38px;padding:0" data-act="hcuedit" data-id="${c.id}" aria-label="تعديل">✏️</button>` : `<button class="bt" style="width:38px;height:38px;padding:0" data-act="hacswap" data-id="${c.id}" aria-label="بدّل">🎲</button>`}<button class="bt" style="width:38px;height:38px;padding:0" data-act="hacdel" data-id="${c.id}" aria-label="شيل">✕</button></div></div>`;
   const byDay = {}; sel.forEach(c => { (byDay[c.d] = byDay[c.d] || []).push(c); });
   const rest = dr.pool.filter(c => !selSet.has(c.id));
   const byFx = {}; rest.forEach(c => { (byFx[c.fid] = byFx[c.fid] || []).push(c); });
@@ -4050,12 +4057,40 @@ function hbAdmC() {
   return chips + `<div class="f">${hbAdmHead(false, 'راجع الكروت: 📍 ثبّت اللي عاجبك، 🎲 بدّل كارت واحد، أو اعمل قرعة لباقي الكروت. لما تخلص دوس "فتح للاعبين".')}
   <div class="k r j"><b>${N(sel.length)} كارت مختار</b><div class="r" style="gap:6px;flex-wrap:wrap"><button class="bt on" style="height:40px;padding:0 12px" data-act="hacroll">🎲 قرعة لغير المثبّت</button><button class="bt" style="height:40px;padding:0 12px" data-act="hacresetall">🔄 ريسيت للكل</button></div></div>
   ${Object.keys(byDay).sort().map(k => `<div class="m" style="font-weight:700">${esc(hbDayLbl(k))}</div>${byDay[k].map(card).join('')}`).join('')}
-  <button class="bt" style="height:44px" data-act="hacpool">${A.pool ? 'إخفاء المخزون' : '＋ إضافة كارت من المخزون (' + N(rest.length) + ')'}</button>
-  ${A.pool ? `<div class="k"><input class="in" data-in="hacq" placeholder="ابحث في الأسئلة (اسم لاعب أو فريق)" aria-label="بحث" value="${esc(A.q)}"></div><div id="hacl" style="display:flex;flex-direction:column;gap:6px">${hbAdmPoolC(rest, q)}</div>` : ''}
+  ${hbCustForm(gw)}
+  <button class="bt" style="height:44px" data-act="hacpool">${A.pool ? 'إخفاء المخزون' : '＋ إضافة كارت من المخزون (' + N(rest.length) + ' كارت)'}</button>
+  ${A.pool ? `<div class="k"><input class="in" data-in="hacq" placeholder="ابحث في المخزون (لاعب أو فريق أو نوع السؤال)" aria-label="بحث" value="${esc(A.q)}"></div><div id="hacl" style="display:flex;flex-direction:column;gap:6px">${hbAdmPoolC(rest, q)}</div>` : ''}
   <button class="bt on" style="height:50px;font-size:16px" data-act="hacopen">فتح الكروت للاعبين ✓</button></div>`;
 }
 const hbStep = (act, attrs, lbl, col, v) => `<span class="r" style="gap:3px"><span class="m" style="color:${col}">${lbl}</span><button class="bt" style="width:30px;height:30px;padding:0" data-act="${act}" ${attrs} data-d="-1" aria-label="أقل">−</button><b class="d" style="min-width:22px;text-align:center">${N(v)}</b><button class="bt" style="width:30px;height:30px;padding:0" data-act="${act}" ${attrs} data-d="1" aria-label="أكتر">+</button></span>`;
-const hbAdmPoolC = (rest, q) => rest.filter(c => !q || c.t.includes(q) || hbFxLabel(c).toLowerCase().includes(q.toLowerCase())).map(c => `<button class="k r" style="padding:8px;gap:8px" data-act="hacadd" data-id="${c.id}"><span style="font-size:20px">${c.ic}</span><span class="g" style="font-size:13px">${esc(c.t)}<span class="sub" style="display:block">${hbFxLabel(c)}</span></span>${hbPtsPill(c.p, hbNo(c))}<b>＋</b></button>`).join('') || '<div class="k ctr m">مفيش نتايج.</div>';
+const hbAdmPoolC = (rest, q) => {
+  const ql = (q || '').toLowerCase(), list = rest.filter(c => !ql || c.t.toLowerCase().includes(ql) || hbFxLabel(c).toLowerCase().includes(ql));
+  if (!list.length) return '<div class="k ctr m">مفيش نتايج.</div>';
+  const by = {}; list.forEach(c => { (by[c.fid] = by[c.fid] || []).push(c); });
+  return Object.keys(by).sort((x, y) => (by[x][0].ko - by[y][0].ko) || (x - y)).map(fid => `<div class="m" style="font-weight:700;margin-top:6px">${hbFxLabel(by[fid][0]) || 'ماتش'} · ${esc(fmtTime(by[fid][0].ko))} <span style="font-weight:400">(${N(by[fid].length)})</span></div>${by[fid].map(c => `<button class="k r" style="padding:8px;gap:8px" data-act="hacadd" data-id="${c.id}"><span style="font-size:20px">${c.ic}</span><span class="g" style="font-size:13px">${esc(c.t)}</span>${hbPtsPill(c.p, hbNo(c))}<b>＋</b></button>`).join('')}`).join('');
+};
+/** نموذج: سؤال من عندك (ايموجي + نص + ماتش + نقط نعم/لا). الإجابة بتتحدد من الأدمن بعد الماتش. */
+function hbCustForm(gw) {
+  const A = S.hb.adm, cu = A.cu, fxs = gwFixtures(gw).filter(f => f.ko).slice().sort((x, y) => koOf(x) - koOf(y));
+  if (!A.cuOpen || !cu) return '<button class="bt" style="height:44px" data-act="hcuopen">✍️ ضيف سؤال من عندك</button>';
+  const st = (w, lbl, col, v) => hbStep('hcupt', 'data-w="' + w + '"', lbl, col, v);
+  return `<div class="k" style="padding:12px;display:flex;flex-direction:column;gap:10px;border:2px dashed var(--ac)">
+    <div class="r j"><b>${cu.id ? '✏️ تعديل سؤالك' : '✍️ سؤال من عندك'}</b><button class="bt" style="height:32px;padding:0 10px" data-act="hcuclose">إلغاء</button></div>
+    <div><div class="m" style="margin-bottom:4px">الإيموجي (اكتب أي إيموجي أو اختار)</div>
+      <div class="r" style="gap:8px"><input class="in" style="width:64px;text-align:center;font-size:22px;flex:none" data-in="hcuic" maxlength="4" value="${esc(cu.ic)}" aria-label="الإيموجي"><div class="tg" style="flex:1">${HB_EMOJI.map(e => `<button class="bt ${e === cu.ic ? 'on' : ''}" style="flex:none;min-width:40px;padding:0 6px;font-size:20px" data-act="hcuem" data-e="${e}">${e}</button>`).join('')}</div></div></div>
+    <div><div class="m" style="margin-bottom:4px">نص السؤال</div><input class="in" data-in="hcut" maxlength="120" placeholder="مثال: صلاح يسجل ويصنع في نفس الماتش" aria-label="نص السؤال" value="${esc(cu.t)}"></div>
+    <div><div class="m" style="margin-bottom:4px">الماتش (الكارت بيتقفل مع بدايته)</div><select class="in" data-in="hcufx" aria-label="الماتش">${fxs.map(f => `<option value="${f.id}" ${String(f.id) === String(cu.fid) ? 'selected' : ''}>${esc(f.h.sn)} - ${esc(f.a.sn)} · ${esc(hbDayLbl(dayKey(koOf(f))))} ${esc(fmtTime(koOf(f)))}</option>`).join('')}</select></div>
+    <div class="r" style="gap:14px;flex-wrap:wrap">${st('p', 'نقط نعم', 'var(--ac)', cu.p)}${st('n', 'نقط لا', 'var(--neg)', cu.n)}</div>
+    <div class="m">الصح بياخد نقط اختياره والغلط صفر. بعد الماتش إنت اللي بتحدد الإجابة (حصل / ما حصلش) من تبويب الإدارة.</div>
+    <button class="bt on" style="height:46px" data-act="hcusave">${cu.id ? 'حفظ التعديل' : 'ضيف الكارت للمسودة'} ✓</button></div>`;
+}
+/** إجابة أسئلتك بعد الماتش (النقط بتتحسب في أول مزامنة). */
+function hbCustAns(gw) {
+  const d = S.hb.c.deck[gw], cs = d ? d.cards.filter(c => c.k === 'custom') : [];
+  if (!cs.length) return '';
+  return `<div class="k" style="padding:12px;display:flex;flex-direction:column;gap:8px"><b>إجابة أسئلتك</b><div class="m">حدد حصل / ما حصلش بعد الماتش. النقط بتتحسب في أول مزامنة (syncDaily).</div>${cs.map(c => `<div class="r" style="gap:8px"><span style="font-size:20px">${esc(c.ic)}</span><div class="g"><div class="nm" style="font-size:13px">${esc(c.t)}</div><div class="sub">${hbFxLabel(c)} · ${esc(fmtTime(c.ko))}</div></div>
+    <div class="r" style="gap:4px;flex:none"><button class="bt ${c.ans === 1 ? 'on' : ''}" style="height:36px;padding:0 10px" data-act="hcuans" data-id="${c.id}" data-v="1">✅ حصل</button><button class="bt ${c.ans === 0 ? 'on' : ''}" style="height:36px;padding:0 10px" data-act="hcuans" data-id="${c.id}" data-v="0">❌ لأ</button><button class="bt" style="height:36px;width:36px;padding:0" data-act="hcuans" data-id="${c.id}" data-v="x" aria-label="مسح">↺</button></div></div>`).join('')}</div>`;
+}
 
 /* صنفلي */
 const hbSItems = (dr, k) => { const pool = k === 'a' ? dr.pa : k === 'b' ? dr.pb : dr.pc, idf = x => String(hbItemId(k, x)), by = Object.fromEntries(pool.map(x => [idf(x), x])); return { pool, idf, sel: (dr.sel[k] || []).map(id => by[String(id)]).filter(Boolean) }; };
@@ -4083,17 +4118,18 @@ function hbAdmS() {
     const open = A['p' + k], q = (A['q' + k] || '').trim().toLowerCase();
     const full = dr.pts && dr.pts[k] != null ? dr.pts[k] : hbFull(k, sel.length);
     const row = (x, picked) => {
-      const id = idf(x), nmv = k === 'c' ? `${esc(x.h.sn)} ضد ${esc(x.a.sn)}` : `${esc(x.n)} <span class="sub" style="display:inline">${esc(x.t)} · ${POS[x.p]}${x.pr ? ' · £' + (x.pr / 10).toFixed(1) : ''}</span>`;
+      const id = idf(x), nmv = k === 'c' ? `${esc(x.h.sn)} ضد ${esc(x.a.sn)}` : `${esc(x.n)} <span class="sub" style="display:inline">${hbPlSub(x)}</span>`;
       return picked
         ? `<div class="k r" style="padding:8px;gap:8px;${A.pin[k + id] ? 'border:2px solid #f5b301;' : ''}"><span class="g nm" style="font-size:14px">${nmv}</span><button class="bt" style="width:38px;height:38px;padding:0" data-act="haspin" data-k="${k}" data-id="${esc(id)}">${A.pin[k + id] ? '📌' : '📍'}</button><button class="bt" style="width:38px;height:38px;padding:0" data-act="hasdel" data-k="${k}" data-id="${esc(id)}">✕</button></div>`
         : `<button class="k r" style="padding:8px;gap:8px" data-act="hasadd" data-k="${k}" data-id="${esc(id)}"><span class="g nm" style="font-size:14px">${nmv}</span><b>＋</b></button>`;
     };
-    const rest = pool.filter(x => !sel.includes(x) && (!q || (k === 'c' ? (x.h.name + x.a.name + x.h.sn + x.a.sn) : (x.n + x.t)).toLowerCase().includes(q)));
+    const posF = A['pos' + k] || 0, hay = x => (k === 'c' ? (x.h.name + x.a.name + x.h.sn + x.a.sn) : (x.n + ' ' + x.t + ' ' + hbPlSub(x).replace(/<[^>]*>/g, ''))).toLowerCase();
+    const restAll = pool.filter(x => !sel.includes(x) && (!posF || x.p === posF) && (!q || hay(x).includes(q))), LIM = 60, rest = restAll.slice(0, LIM);
     return `<div class="k" style="padding:12px"><div class="r j"><div class="g"><b>${HB_SEC[k].t}</b><div class="m">${N(sel.length)} مختار · المطلوب ${tgt}</div></div><button class="bt on" style="height:38px;padding:0 10px;font-size:13px" data-act="hasroll" data-k="${k}">🎲 قرعة</button></div>
       <div class="r mt" style="gap:8px;flex-wrap:wrap">${hbStep('haspt', 'data-k="' + k + '"', 'نقط الترتيب الكامل', 'var(--tx)', full)}<span class="m">ناقص واحد ${N(Math.round(full / 2))} · ولا واحد −${N(Math.round(full / 2))}</span></div>
       <div style="display:flex;flex-direction:column;gap:6px;margin-top:8px">${sel.map(x => row(x, true)).join('') || '<div class="m ctr">مفيش مختار</div>'}</div>
       <button class="bt" style="height:40px;margin-top:8px" data-act="haspool" data-k="${k}">${open ? 'إخفاء المخزون' : '＋ اختار بإيدك من المخزون (' + N(pool.length - sel.length) + ')'}</button>
-      ${open ? `${k === 'c' ? '' : `<div style="margin-top:8px"><input class="in" data-in="hasq" data-k="${k}" placeholder="ابحث باسم اللاعب أو الفريق" aria-label="بحث" value="${esc(A['q' + k] || '')}"></div>`}<div id="hasl_${k}" style="display:flex;flex-direction:column;gap:6px;margin-top:8px;max-height:340px;overflow:auto">${rest.map(x => row(x, false)).join('') || '<div class="m ctr">مفيش نتايج</div>'}</div>` : ''}</div>`;
+      ${open ? `${k === 'c' ? '' : `<div style="margin-top:8px"><input class="in" data-in="hasq" data-k="${k}" placeholder="ابحث باسم اللاعب أو الفريق (${N(pool.length)} لاعب في المخزون)" aria-label="بحث" value="${esc(A['q' + k] || '')}"></div><div class="tg" style="margin-top:6px">${[[0, 'الكل'], [1, 'حراس'], [2, 'مدافعين'], [3, 'وسط'], [4, 'مهاجمين']].map(([pp, lb]) => `<button class="bt ${posF === pp ? 'on' : ''}" style="flex:none;height:34px;padding:0 12px" data-act="haspos" data-k="${k}" data-p="${pp}">${lb}</button>`).join('')}</div>`}<div id="hasl_${k}" style="display:flex;flex-direction:column;gap:6px;margin-top:8px;max-height:340px;overflow:auto">${rest.map(x => row(x, false)).join('') || '<div class="m ctr">مفيش نتايج</div>'}${restAll.length > LIM ? `<div class="m ctr">فيه ${N(restAll.length - LIM)} كمان. اكتب في البحث أو اختار المركز علشان تضيّق.</div>` : ''}</div>` : ''}</div>`;
   };
   return gch + dtabs + `<div class="f">${hbAdmHead(false, 'اللاعبين بيتقفلوا ' + fmtTime(lockMs) + '. اختار بإيدك أو اعمل قرعة، ولو فيه ٣ ماتشات أو أكتر هيظهر ترتيب الماتشات. لما تخلص دوس "فتح اليوم".')}
   <button class="bt" style="height:40px" data-act="hasresetall">🔄 ريسيت (قرعة لكل الأقسام)</button>
@@ -4123,6 +4159,34 @@ Object.assign(ACTIONS, {
     render();
   },
   haspin(el) { const p = S.hb.adm.pin, k = el.dataset.k + el.dataset.id; p[k] = !p[k]; render(); },
+  haspos(el) { S.hb.adm['pos' + el.dataset.k] = Number(el.dataset.p); render(); },
+  /* أسئلة من عندك */
+  hcuopen() { const gw = S.hb.c.gw, fx = gwFixtures(gw).filter(f => f.ko).sort((x, y) => koOf(x) - koOf(y))[0]; S.hb.adm.cu = { id: null, ic: '❓', t: '', fid: fx ? fx.id : '', p: 4, n: 2 }; S.hb.adm.cuOpen = true; render(); },
+  hcuclose() { S.hb.adm.cuOpen = false; S.hb.adm.cu = null; render(); },
+  hcuem(el) { S.hb.adm.cu.ic = el.dataset.e; render(); },
+  hcupt(el) { const cu = S.hb.adm.cu, w = el.dataset.w; cu[w] = Math.min(20, Math.max(1, cu[w] + Number(el.dataset.d))); render(); },
+  hcuedit(el) {
+    const dr = S.hb.c.draft[S.hb.c.gw], c = dr && dr.pool.find(x => x.id === el.dataset.id); if (!c) return;
+    S.hb.adm.cu = { id: c.id, ic: c.ic, t: c.t, fid: c.fid, p: c.p, n: hbNo(c) }; S.hb.adm.cuOpen = true; render();
+  },
+  async hcusave() {
+    const gw = S.hb.c.gw, dr = S.hb.c.draft[gw], cu = S.hb.adm.cu; if (!dr || !cu) return;
+    const t = (cu.t || '').trim(), ic = [...(cu.ic || '').trim()].slice(0, 2).join('') || '❓', f = gwFixtures(gw).find(x => String(x.id) === String(cu.fid));
+    if (t.length < 3) return toast('اكتب نص السؤال');
+    if (!f || !f.ko) return toast('اختار الماتش');
+    const ko = koOf(f), base = { k: 'custom', ic, t, p: cu.p, n: cu.n, fid: Number(f.id), ko, d: dayKey(ko), fam: 'u' };
+    if (cu.id) { const i = dr.pool.findIndex(x => x.id === cu.id); if (i >= 0) dr.pool[i] = { ...dr.pool[i], ...base }; }
+    else { const id = 'u' + Date.now().toString(36); dr.pool.push({ id, ...base }); dr.sel.push(id); }
+    S.hb.adm.cuOpen = false; S.hb.adm.cu = null; render();
+    try { await updateDoc(doc(db, 'cdraft', 'gw_' + gw), { pool: dr.pool, sel: dr.sel }); toast('اتحفظ سؤالك ✓'); } catch (e) { toast('مقدرتش أحفظ: ' + (e.code || e.message)); }
+  },
+  async hcuans(el) {
+    const gw = S.hb.c.gw, d = S.hb.c.deck[gw]; if (!d) return;
+    const c = d.cards.find(x => x.id === el.dataset.id); if (!c) return;
+    const v = el.dataset.v; if (v === 'x') delete c.ans; else c.ans = Number(v);
+    render();
+    try { await updateDoc(doc(db, 'cdeck', 'gw_' + gw), { cards: d.cards }); toast('اتحفظت الإجابة ✓'); } catch (e) { toast('مقدرتش أحفظ: ' + (e.code || e.message)); }
+  },
   async hasroll(el) { const day = S.hb.s.day, dr = S.hb.s.draft[day]; hbRollS(dr, el.dataset.k, S.hb.adm.pin); render(); await hbSaveDraftS(day); },
   async hasdel(el) { const day = S.hb.s.day, dr = S.hb.s.draft[day], k = el.dataset.k; dr.sel[k] = (dr.sel[k] || []).filter(x => String(x) !== el.dataset.id); render(); await hbSaveDraftS(day); },
   async hasadd(el) {
@@ -4221,6 +4285,9 @@ Object.assign(ACTIONS, {
 });
 INPUTS.hacq = t => { S.hb.adm.q = t.value; const gw = S.hb.c.gw, dr = S.hb.c.draft[gw], l = $('#hacl'); if (l && dr) setHtml(l, hbAdmPoolC(dr.pool.filter(c => !dr.sel.includes(c.id)), t.value.trim())); };
 INPUTS.hasq = t => { const k = t.dataset.k; S.hb.adm['q' + k] = t.value; render(); };
+INPUTS.hcut = t => { if (S.hb.adm.cu) S.hb.adm.cu.t = t.value; };
+INPUTS.hcuic = t => { if (S.hb.adm.cu) S.hb.adm.cu.ic = t.value; };
+INPUTS.hcufx = t => { if (S.hb.adm.cu) S.hb.adm.cu.fid = t.value; };
 
 INPUTS.hopp = t => { S.hb.cmp.oq = t.value; const q = t.value.trim().toLowerCase(), l = $('#hol'); if (l) setHtml(l, hbOppRows(hbOthers().filter(u => !q || nm(u).toLowerCase().includes(q)))); };
 /* دخول حبشتكنات من الشريط السفلي */
