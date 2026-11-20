@@ -1835,7 +1835,7 @@ function invStatus(i) {
 function invitesHtml() {
   const list = Object.values(S.invites).filter(Boolean).sort((a, b) => (tsMs(b.createdAt) || 0) - (tsMs(a.createdAt) || 0));
   const cnt = code => S.users.filter(u => u.invite === code).length;
-  const iv = S.inv, liveTests = list.filter(i => i.kind === 'test' && canJoin(i));
+  const iv = S.inv, liveTests = list.filter(i => i.kind === 'test' && canJoin(i)), deadTests = list.filter(i => i.kind === 'test' && !canJoin(i));
   const create = `<div class="k"><b>رابط دعوة جديد</b>
     <input class="in mt" data-in="invname" placeholder="اسم الرابط (مثلاً: تجربة الشلة)" value="${esc(iv.name)}" aria-label="اسم الرابط">
     <div class="r mt" style="gap:6px"><button class="bt g ${iv.kind === 'test' ? 'on' : ''}" data-act="invkind" data-k="test" style="padding:0">تجربة مؤقتة</button><button class="bt g ${iv.kind === 'full' ? 'on' : ''}" data-act="invkind" data-k="full" style="padding:0">لاعبين دايمين</button></div>
@@ -1847,9 +1847,10 @@ function invitesHtml() {
     <div class="r mt" style="gap:6px;flex-wrap:wrap">
       <button class="bt" data-act="invcopy" data-c="${esc(i.id)}" style="height:36px;padding:0 12px">نسخ الرابط</button>
       ${i.kind === 'test' ? `<button class="bt" data-act="invext" data-c="${esc(i.id)}" style="height:36px;padding:0 12px">مدّها ٧ أيام</button>` : ''}
+      ${i.kind === 'test' && !canJoin(i) ? `<button class="bt red" data-act="invdel" data-c="${esc(i.id)}" style="height:36px;padding:0 12px">🗑️ حذف</button>` : ''}
       ${i.active === true ? `<button class="bt red" data-act="invstop" data-c="${esc(i.id)}" style="height:36px;padding:0 12px">${i.kind === 'test' ? 'إنهاء التجربة' : 'قفل التسجيل'}</button>` : `<button class="bt" data-act="invon" data-c="${esc(i.id)}" style="height:36px;padding:0 12px">${i.kind === 'test' ? 'رجّع التجربة' : 'افتح التسجيل'}</button>`}
     </div></div>`).join('');
-  return `<div class="r j"><b>روابط الدعوة</b>${liveTests.length > 1 ? '<button class="bt red" data-act="invstopall" style="height:36px;padding:0 12px">إنهاء كل التجارب</button>' : ''}</div>${create}${rows}`;
+  return `<div class="r j"><b>روابط الدعوة</b><div class="r" style="gap:6px;flex-wrap:wrap">${deadTests.length ? `<button class="bt red" data-act="invdelall" style="height:36px;padding:0 12px">🗑️ مسح المنتهية (${N(deadTests.length)})</button>` : ''}${liveTests.length > 1 ? '<button class="bt red" data-act="invstopall" style="height:36px;padding:0 12px">إنهاء كل التجارب</button>' : ''}</div></div>${create}${rows}`;
 }
 function fmtDur(sec) {
   sec = Math.round(sec || 0);
@@ -2226,6 +2227,22 @@ const ACTIONS = {
     const i = S.invites[el.dataset.c]; if (!i) return;
     const from = Math.max(Date.now(), tsMs(i.until) || 0);
     await setInvite(i, { active: true, until: new Date(from + 7 * 86400000) }, 'اتمدّت ٧ أيام');
+  },
+  async invdel(el) {
+    const i = S.invites[el.dataset.c]; if (!i || canJoin(i)) return;
+    if (!confirm('تحذف رابط التجربة ده (' + (i.name || i.id) + ')؟ اللي دخلوا بيه هيفضلوا مقفول عليهم زي ما هم، بس مش هتقدر تمدّه تاني.')) return;
+    try { await deleteDoc(doc(db, 'invites', i.id)); delete S.invites[i.id]; toast('اتحذف الرابط ✓'); }
+    catch (e) { toast('مقدرتش أحذف: ' + (e.code || e.message)); }
+    S.namesAt = 0; render();
+  },
+  async invdelall() {
+    const list = Object.values(S.invites).filter(i => i && i.kind === 'test' && !canJoin(i));
+    if (!list.length || !confirm('تحذف كل روابط التجارب المنتهية (' + list.length + ')؟ اللي دخلوا بيها هيفضلوا مقفول عليهم، وروابط اللاعبين الدايمين مش هتتأثر.')) return;
+    try {
+      for (let k = 0; k < list.length; k += 400) { const b = writeBatch(db); list.slice(k, k + 400).forEach(i => b.delete(doc(db, 'invites', i.id))); await b.commit(); }
+      list.forEach(i => { delete S.invites[i.id]; }); toast('اتحذف ' + N(list.length) + ' رابط ✓');
+    } catch (e) { toast('مقدرتش: ' + (e.code || e.message)); }
+    S.namesAt = 0; render();
   },
   async invstopall() {
     const list = Object.values(S.invites).filter(i => i && i.kind === 'test' && canJoin(i));
@@ -3104,7 +3121,7 @@ function vShop() {
   const H = S.shop, cur = H.cur, bal = balOf(cur);
   const head = `<div class="h"><b>المحل</b><div class="ctr"><div class="m">توكن ${curName(cur)}</div><div class="d" style="font-size:24px">${COIN} ${N(bal)}</div></div></div>`;
   const curTabs = HAS_PRED ? `<div class="tg eq" style="grid-template-columns:1fr 1fr">${['f', 'p'].map(c => `<button class="bt ${cur === c ? 'on' : ''}" style="flex:1 0 calc((100% - 6px) / 2)" data-act="shcur" data-c="${c}">${c === 'f' ? 'الفانتاسي' : 'التوقعات'}</button>`).join('')}</div>` : '';
-  const secs = [['shop', 'المحل'], ['mine', 'حاجاتي'], ['earn', 'ازاي تكسب كوينز']];
+  const secs = [['shop', 'المحل'], ['mine', 'حاجاتي'], ['earn', 'اازاي تكسب كوينز']];
   const secTabs = `<div class="tg eq">${secs.map(([k, l]) => `<button class="bt ${H.sec === k ? 'on' : ''}" data-act="shsec" data-k="${k}">${l}</button>`).join('')}</div>`;
   const body = H.loading && !H.w && !H.buys.length ? '<div class="k ctr">جاري التحميل…</div>' : H.sec === 'mine' ? shopMine(cur) : H.sec === 'earn' ? shopEarn(cur) : shopList(cur);
   return head + curTabs + secTabs + `<div class="f">${body}</div><div id="ssh"></div>`;
