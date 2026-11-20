@@ -3547,9 +3547,9 @@ const HGAMES = [
   { id: 'sort', n: 'صنفلي', ic: '🎚️', tabs: [['play', 'لعب'], ['rank', 'الترتيب'], ['stats', 'إحصائيات'], ['cmp', 'مقارنة']] }
 ];
 const HB_SEC = {
-  a: { t: '٥ لاعبين بريميوم', q: 'رتّبهم من الأكتر نقط فانتازي للأقل', u: 'نقطة' },
-  b: { t: '٥ لاعبين أساسيين', q: 'رتّبهم من الأكتر مساهمات دفاعية للأقل', u: 'مساهمة' },
-  c: { t: 'ماتشات اليوم', q: 'رتّبها من الأكتر أهدافاً للأقل', u: 'هدف' }
+  a: { t: '٥ لاعبين بريميوم', q: 'رتّب اللاعبين دي من الأكثر نقاطاً للأقل', u: 'نقطة', i: 'بتتحسب نقاط كل لاعب بنقاط الفانتازي الرسمية (FPL) في ماتش النهارده: أهداف وأسيست وكلين شيت وكروت وباقي النقط. اللي هتحطه في الأول هو اللي تتوقع إنه ياخد أكتر نقاط.' },
+  b: { t: '٥ لاعبين أساسيين', q: 'رتّب اللاعبين دي من الأكثر مساهمات دفاعية للأقل', u: 'مساهمة', i: 'المساهمة الدفاعية هي اللقطات الدفاعية اللي الفانتازي بيحسبها للاعب في الماتش: تدخلات (Tackles) واعتراضات (Interceptions) وإبعاد كرات (Clearances) وقطع تسديدات (Blocks)، وللاعبين الوسط واستخلاص الكرات كمان. اللي هتحطه في الأول هو اللي تتوقع إنه يعمل أكتر لقطات دفاعية.' },
+  c: { t: 'ماتشات اليوم', q: 'رتّب الماتشات من الأكثر أهدافاً للأقل', u: 'هدف', i: 'الماتش بيتقيّم بمجموع أهداف الفريقين فيه (الفريق الأول + التاني). اللي هتحطه في الأول هو الماتش اللي تتوقع إنه يتسجل فيه أكتر أهداف.' }
 };
 S.hb = { g: 'all', tab: 'play', sheet: null, loading: false, rk: { c: 'total', s: 'total', cg: null, sg: null, sd: null },
   c: { gw: null, deck: {}, draft: {}, mine: {}, pub: {}, board: {}, total: null },
@@ -3819,7 +3819,7 @@ function hbSecHtml(day, k) {
   if (!lock) foot = `<button class="bt ${dirty || !saved ? 'on' : ''}" style="height:46px" data-act="hssave" data-k="${k}">${saved && !dirty ? 'اتحفظ ✓' : saved ? 'حفظ التعديل' : 'حفظ الترتيب'}</button>`;
   else if (!saved) foot = '<div class="k ctr m">ما رتبتش القسم ده قبل القفل (مفيش نقط ولا خصم).</div>';
   else if (mp) foot = `<div class="k r j"><span class="m">${mp[0] === -1 ? 'النقط لسه (الماتشات شغالة)' : N(mp[1]) + ' مكان صح'}</span><b class="d" style="font-size:20px;color:${mp[0] > 0 ? 'var(--ac)' : mp[0] < 0 ? 'var(--neg)' : 'var(--tx)'}">${mp[0] === -1 ? '…' : sN(mp[0])}</b></div>`;
-  return `<div class="k" style="padding:12px"><b>${HB_SEC[k].t}</b><div class="m">${HB_SEC[k].q}${lock ? (vals && !done ? ' · القيم مؤقتة' : '') : ' · اسحب ⠿ بصباعك وغيّر المكان'}</div><div class="m" style="margin-bottom:8px">النقط: الكل صح <b>${N(hbFull(k, items.length, deck))}</b> · ناقص واحد <b>${N(Math.round(hbFull(k, items.length, deck) / 2))}</b> · ولا واحد صح <b>−${N(Math.round(hbFull(k, items.length, deck) / 2))}</b></div><div data-list="${k}" style="display:flex;flex-direction:column;gap:6px">${rows}</div><div style="margin-top:8px">${foot}</div></div>`;
+  return `<div class="k" style="padding:12px"><div class="r j"><b>${HB_SEC[k].t}</b><button class="ib" style="height:30px;width:30px" data-act="hsinfo" data-k="${k}" aria-label="شرح القسم">${INFO_SVG}</button></div><div class="m">${HB_SEC[k].q}${lock ? (vals && !done ? ' · القيم مؤقتة' : '') : ' · اسحب ⠿ بصباعك وغيّر المكان'}</div><div class="m" style="margin-bottom:8px">النقط: الكل صح <b>${N(hbFull(k, items.length, deck))}</b> · ناقص واحد <b>${N(Math.round(hbFull(k, items.length, deck) / 2))}</b> · ولا واحد صح <b>−${N(Math.round(hbFull(k, items.length, deck) / 2))}</b></div><div data-list="${k}" style="display:flex;flex-direction:column;gap:6px">${rows}</div><div style="margin-top:8px">${foot}</div></div>`;
 }
 function hbPlayS() {
   const SS = S.hb.s, gws = hbSGws(), days = hbDays(), day = SS.day, deck = day && SS.decks[day];
@@ -3892,6 +3892,15 @@ function hbSheetHtml() {
     else body = lst(r === 1 ? by.y : by.n, 'كسبوا ✓ (+' + (r === 1 ? c.p : hbNo(c)) + ')') + lst(r === 1 ? by.n : by.y, '🔥 اتلسعوا (غلط · صفر)');
     return ov(`<div class="r" style="gap:10px"><span style="font-size:30px">${c.ic}</span><div class="g"><b>${esc(c.t)}</b><div class="sub">${hbFxLabel(c)} · ${esc(fmtTime(c.ko))}</div></div></div><div class="r" style="gap:6px">${hbPtsPill(c.p, hbNo(c))}${r === 1 ? '<span class="pl ok">✓ حصل</span>' : r === 0 ? '<span class="pl bad">✗ ما حصلش</span>' : ''}</div>${body}<button class="bt" data-act="hshx">إغلاق</button>`, 'hshx');
   }
+  if (sh.t === 'sinfo') {
+    const k = sh.k, SS = S.hb.s, deck = SS.decks[SS.day], n = ((deck && deck[k]) || []).length || 5, full = hbFull(k, n, deck), half = Math.round(full / 2);
+    return ov(`<b>${HB_SEC[k].t}</b><div class="m" style="color:var(--tx)">${HB_SEC[k].q}</div><div class="m">${HB_SEC[k].i}</div>
+      <div class="k" style="padding:10px;display:flex;flex-direction:column;gap:4px"><b>النقط</b>
+        <div class="m">الترتيب كله صح: <b>${N(full)}</b></div><div class="m">غلطة واحدة بس: <b>${N(half)}</b></div><div class="m">ولا مكان صح: <b>−${N(half)}</b></div><div class="m">غير كده: نسبة من ${N(half)} على قد الأماكن الصح.</div></div>
+      <div class="m">لو لاعبين (أو ماتشين) قيمتهم متساوية فبيتحسبوا صح في أي ترتيب، فالتعادل مش بيظلمك.</div>
+      <div class="m">اسحب ⠿ وغيّر الأماكن قبل ما اليوم يتقفل. النتيجة بتظهر بعد ما الماتشات تخلص.</div>
+      <button class="bt" data-act="hshx">تمام</button>`, 'hshx');
+  }
   if (sh.t === 'item') {
     const SS = S.hb.s, day = SS.day, deck = SS.decks[day], k = sh.k, it = (deck[k] || []).find(x => String(hbItemId(k, x)) === String(sh.id)); if (!it) return '';
     const list = hbPubS(day), by = {};
@@ -3937,6 +3946,7 @@ Object.assign(ACTIONS, {
     render(); hbQueueSave(gw, m.ids.slice(), m.nos.slice(), c.id);
   },
   hcinfo(el) { S.hb.sheet = { t: 'card', id: el.dataset.id }; render(); },
+  hsinfo(el) { S.hb.sheet = { t: 'sinfo', k: el.dataset.k }; render(); },
   hshx() { S.hb.sheet = null; render(); },
   hu(el) { S.hb.sheet = { t: 'user', u: el.dataset.u }; render(); },
   hcmpu(el) { S.hb.cmp.opp = el.dataset.u; S.hb.tab = 'cmp'; if (S.hb.g === 'all') S.hb.g = 'cards'; S.hb.sheet = null; render(); },
