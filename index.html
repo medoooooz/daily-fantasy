@@ -4187,10 +4187,15 @@ function hbCustForm(gw) {
 }
 /** إجابة أسئلتك بعد الماتش (النقط بتتحسب في أول مزامنة). */
 function hbCustAns(gw) {
-  const d = S.hb.c.deck[gw], cs = d ? d.cards.filter(c => c.k === 'custom') : [];
-  if (!cs.length) return '';
-  return `<div class="k" style="padding:12px;display:flex;flex-direction:column;gap:8px"><b>إجابة أسئلتك</b><div class="m">حدد حصل / ما حصلش بعد الماتش. النقط بتتحسب في أول مزامنة (syncDaily).</div>${cs.map(c => `<div class="r" style="gap:8px"><span style="font-size:20px">${esc(c.ic)}</span><div class="g"><div class="nm" style="font-size:13px">${esc(c.t)}</div><div class="sub">${hbFxLabel(c)} · ${esc(fmtTime(c.ko))}</div></div>
-    <div class="r" style="gap:4px;flex:none"><button class="bt ${c.ans === 1 ? 'on' : ''}" style="height:36px;padding:0 10px" data-act="hcuans" data-id="${c.id}" data-v="1">✅ حصل</button><button class="bt ${c.ans === 0 ? 'on' : ''}" style="height:36px;padding:0 10px" data-act="hcuans" data-id="${c.id}" data-v="0">❌ لأ</button><button class="bt" style="height:36px;width:36px;padding:0" data-act="hcuans" data-id="${c.id}" data-v="x" aria-label="مسح">↺</button></div></div>`).join('')}</div>`;
+  const d = S.hb.c.deck[gw], A = S.hb.adm;
+  if (!d) return '';
+  const cs = d.cards.filter(c => c.k === 'custom'), started = d.cards.filter(c => c.k !== 'custom' && Date.now() >= c.ko);
+  const rowH = (c, auto) => `<div class="r" style="gap:8px"><span style="font-size:20px">${esc(c.ic)}</span><div class="g"><div class="nm" style="font-size:13px">${esc(c.t)}</div><div class="sub">${hbFxLabel(c)} · ${esc(fmtTime(c.ko))}${auto ? ' · ' + (c.ans === 1 || c.ans === 0 ? 'تصحيح يدوي' : 'الأوتوماتيك: ' + (hbRes(gw, c.id) === 1 ? 'حصل' : hbRes(gw, c.id) === 0 ? 'ما حصلش' : 'لسه')) : ''}</div></div>
+    <div class="r" style="gap:4px;flex:none"><button class="bt ${c.ans === 1 ? 'on' : ''}" style="height:36px;padding:0 10px" data-act="hcuans" data-id="${c.id}" data-v="1">✅ حصل</button><button class="bt ${c.ans === 0 ? 'on' : ''}" style="height:36px;padding:0 10px" data-act="hcuans" data-id="${c.id}" data-v="0">❌ لأ</button><button class="bt" style="height:36px;width:36px;padding:0" data-act="hcuans" data-id="${c.id}" data-v="x" aria-label="${auto ? 'رجّع للأوتوماتيك' : 'مسح'}">↺</button></div></div>`;
+  let h = '';
+  if (cs.length) h += `<div class="k" style="padding:12px;display:flex;flex-direction:column;gap:8px"><b>إجابة أسئلتك</b><div class="m">حدد حصل / ما حصلش بعد الماتش. النقط بتتحسب في أول مزامنة (syncDaily).</div>${cs.map(c => rowH(c, false)).join('')}</div>`;
+  if (started.length) h += `<div class="k" style="padding:12px;display:flex;flex-direction:column;gap:8px"><button class="r j" style="background:none;border:0;color:inherit;font:inherit;padding:0;cursor:pointer;width:100%" data-act="hcuovr"><b>🛠️ تصحيح كارت أوتوماتيك</b><span class="m">${A.ovr ? 'إخفاء ▴' : 'عرض ▾'}</span></button>${A.ovr ? `<div class="m">لو كارت اتصحح غلط، حدد الإجابة الصح بإيدك (بتغلب الأوتوماتيك). ↺ بيرجّعه للأوتوماتيك. النقط بتتعدل في أول مزامنة (syncDaily).</div>${started.map(c => rowH(c, true)).join('')}` : ''}</div>`;
+  return h;
 }
 
 /* صنفلي */
@@ -4262,6 +4267,7 @@ Object.assign(ACTIONS, {
   haspos(el) { S.hb.adm['pos' + el.dataset.k] = Number(el.dataset.p); render(); },
   /* أسئلة من عندك */
   hcuopen() { const gw = S.hb.c.gw, fx = gwFixtures(gw).filter(f => f.ko).sort((x, y) => koOf(x) - koOf(y))[0]; S.hb.adm.cu = { id: null, ic: '❓', t: '', fid: fx ? fx.id : '', p: 4, n: 2 }; S.hb.adm.cuOpen = true; render(); },
+  hcuovr() { S.hb.adm.ovr = !S.hb.adm.ovr; render(); },
   hcuclose() { S.hb.adm.cuOpen = false; S.hb.adm.cu = null; render(); },
   hcuem(el) { S.hb.adm.cu.ic = el.dataset.e; render(); },
   hcupt(el) { const cu = S.hb.adm.cu, w = el.dataset.w; cu[w] = Math.min(20, Math.max(1, cu[w] + Number(el.dataset.d))); render(); },
