@@ -730,7 +730,7 @@ try { history.replaceState(null, ''); } catch (e) { /* مش مهم */ }
 function nav() {
   const t = S.view === 'admin' ? 'account' : (S.view === 'tdet' || S.view === 'tnew') ? 'tour' : S.view === 'udet' ? 'round' : S.view;
   const b = (k, label, svg) => `<button class="n ${t === k ? 'on' : ''}" data-act="nav" data-v="${k}"><svg viewBox="0 0 24 24">${svg}</svg>${label}</button>`;
-  return `<nav class="nv">${b('round', 'الفانتاسي', '<path d="M3 5h18v14H3zM3 10h18"/>')}${b('pred', 'التوقعات', '<rect x="3" y="6" width="7" height="12" rx="2"/><rect x="14" y="6" width="7" height="12" rx="2"/>')}${b('tour', 'البطولات', '<path d="M8 4h8v5a4 4 0 01-8 0zM8 6H4v2a3 3 0 003 3M16 6h4v2a3 3 0 01-3 3M12 13v4M8 20h8"/>')}${b('hab', 'حبشتكنات', '<rect x="4" y="5" width="9" height="13" rx="2"/><path d="M15 8l4 1-2 9-4-1"/>')}${b('shop', 'المحل', '<path d="M5 8h14l-1 12H6zM9 8V6a3 3 0 016 0v2"/>')}${b('account', 'حسابي', '<circle cx="12" cy="8" r="4"/><path d="M4 21c1-6 15-6 16 0"/>')}</nav>`;
+  return `<nav class="nv">${b('round', 'الجولة', '<path d="M3 5h18v14H3zM3 10h18"/>')}${b('pred', 'التوقعات', '<rect x="3" y="6" width="7" height="12" rx="2"/><rect x="14" y="6" width="7" height="12" rx="2"/>')}${b('tour', 'البطولات', '<path d="M8 4h8v5a4 4 0 01-8 0zM8 6H4v2a3 3 0 003 3M16 6h4v2a3 3 0 01-3 3M12 13v4M8 20h8"/>')}${b('hab', 'حبشتكنات', '<rect x="4" y="5" width="9" height="13" rx="2"/><path d="M15 8l4 1-2 9-4-1"/>')}${b('shop', 'المحل', '<path d="M5 8h14l-1 12H6zM9 8V6a3 3 0 016 0v2"/>')}${b('account', 'حسابي', '<circle cx="12" cy="8" r="4"/><path d="M4 21c1-6 15-6 16 0"/>')}</nav>`;
 }
 const vLoading = () => `<div class="login ctr"><img class="logo" src="icon-192.png" alt="" style="margin:0 auto;display:block"><div class="m">جاري التحميل…</div></div>`;
 const vError = () => `<div class="login ctr"><div>حصلت مشكلة في تحميل البيانات</div><button class="bt on" data-act="retry">حاول تاني</button><button class="lnk" data-act="logout">تسجيل الخروج</button></div>`;
@@ -3017,26 +3017,26 @@ const COS_ITEMS = [
 ];
 const SHOP_ITEMS = {
   f: [
-    { k: 'tc', n: 'تريبل كابتن ', p: 210, s: 'day', d: 'الكابتن بتاعك ×٣ بدل ×٢ في اليوم اللي تختاره.' },
-    { k: 'safe', n: 'شبكة أمان ', p: 195, s: 'day', d: 'لو نقط يومك طلعت أقل من متوسط اللي لعبوا اليوم ده، بتاخد المتوسط.' },
-    { k: 'dcap', n: 'كابتن مزدوج ', p: 175, s: 'day', d: 'كابتنين في نفس اليوم في ماتشين مختلفين، والاتنين ×٢.' },
-    { k: 'chip3', n: 'خاصية تالتة ', p: 175, s: 'fx', d: 'خاصية زيادة في الماتش اللي تختاره، فوق الخاصيتين بتوع الجولة. لازم تكون مختلفة عنهم.' },
-    { k: 'p5', n: 'لاعب خامس ', p: 160, s: 'fx', d: '٥ لاعبين بدل ٤ في الماتش اللي تختاره. مركز واحد بس ممكن يتكرر، و٣ من فريق بحد أقصى.' },
-    { k: 'goals', n: ' يوم الأهداف ', p: 160, s: 'day', d: 'أي لاعب من اختياراتك يجيب جون في اليوم ده ياخد +٣ لكل جون.' },
-    { k: 'asst', n: 'يوم الأسيستات ', p: 150, s: 'day', d: 'أي لاعب من اختياراتك يعمل أسيست في اليوم ده ياخد +٢ لكل أسيست.' },
-    { k: 'cs', n: ' يوم الكلين شيت ', p: 150, s: 'day', d: 'أي حارس أو مدافع من اختياراتك يخرج بكلين شيت في اليوم ده ياخد +٢.' },
-    { k: 'dup', n: 'خاصية مكررة ', p: 140, s: 'fx', d: 'تستخدم خاصية استخدمتها قبل كده في الجولة مرة تانية، في الماتش اللي تختاره.' },
-    { k: 'bench', n: ' احتياطي ', p: 125, s: 'fx', d: 'تختار لاعب احتياطي في الماتش، ولو حد من اختياراتك ملعبش ولا دقيقة، الاحتياطي بينزل مكانه بعد نهاية الماتش.' },
-    { k: 'capins', n: ' تأمين الكابتن ', p: 105, s: 'day', d: 'لو الكابتن ملعبش، الكابتنية بتروح لأعلى لاعب لعب من اختياراتك في نفس الماتش.' }
+    { k: 'tc', n: 'تريبل كابتن', p: 210, s: 'day', d: 'الكابتن بتاعك ×٣ بدل ×٢ في اليوم اللي تختاره.' },
+    { k: 'safe', n: 'شبكة أمان', p: 195, s: 'day', d: 'لو نقط يومك طلعت أقل من متوسط اللي لعبوا اليوم ده، بتاخد المتوسط.' },
+    { k: 'dcap', n: 'كابتن مزدوج', p: 175, s: 'day', d: 'كابتنين في نفس اليوم في ماتشين مختلفين، والاتنين ×٢.' },
+    { k: 'chip3', n: 'خاصية تالتة', p: 175, s: 'fx', d: 'خاصية زيادة في الماتش اللي تختاره، فوق الخاصيتين بتوع الجولة. لازم تكون مختلفة عنهم.' },
+    { k: 'p5', n: 'لاعب خامس', p: 160, s: 'fx', d: '٥ لاعبين بدل ٤ في الماتش اللي تختاره. مركز واحد بس ممكن يتكرر، و٣ من فريق بحد أقصى.' },
+    { k: 'goals', n: 'يوم الأهداف', p: 160, s: 'day', d: 'أي لاعب من اختياراتك يجيب جون في اليوم ده ياخد +٣ لكل جون.' },
+    { k: 'asst', n: 'يوم الأسيستات', p: 150, s: 'day', d: 'أي لاعب من اختياراتك يعمل أسيست في اليوم ده ياخد +٢ لكل أسيست.' },
+    { k: 'cs', n: 'يوم الكلين شيت', p: 150, s: 'day', d: 'أي حارس أو مدافع من اختياراتك يخرج بكلين شيت في اليوم ده ياخد +٢.' },
+    { k: 'dup', n: 'خاصية مكررة', p: 140, s: 'fx', d: 'تستخدم خاصية استخدمتها قبل كده في الجولة مرة تانية، في الماتش اللي تختاره.' },
+    { k: 'bench', n: 'احتياطي', p: 125, s: 'fx', d: 'تختار لاعب احتياطي في الماتش، ولو حد من اختياراتك ملعبش ولا دقيقة، الاحتياطي بينزل مكانه بعد نهاية الماتش.' },
+    { k: 'capins', n: 'تأمين الكابتن', p: 105, s: 'day', d: 'لو الكابتن ملعبش، الكابتنية بتروح لأعلى لاعب لعب من اختياراتك في نفس الماتش.' }
   ],
   p: [
     { k: 'pb3', n: 'معزز ×٣', p: 150, s: 'fx', d: 'الماتش اللي تختاره بـ ×٣. لو المعزز العادي على نفس الماتش، بيبقى ×٣ مش ×٦.' },
-    { k: 'dbl', n: 'توقع مزدوج ', p: 140, s: 'fx', d: 'تحط نتيجتين للماتش، ويتحسبلك الأحسن فيهم.' },
+    { k: 'dbl', n: 'توقع مزدوج', p: 140, s: 'fx', d: 'تحط نتيجتين للماتش، ويتحسبلك الأحسن فيهم.' },
     { k: 'gold', n: 'النتيجة الذهبية', p: 120, s: 'fx', d: 'لو جبت النتيجة بالظبط في الماتش ده، تاخد ١٥ بدل ١٠.' },
-    { k: 'pb2', n: 'معزز تاني ', p: 90, s: 'fx', d: 'ماتش تاني بـ ×٢ في الجولة، فوق المعزز العادي.' },
+    { k: 'pb2', n: 'معزز تاني', p: 90, s: 'fx', d: 'ماتش تاني بـ ×٢ في الجولة، فوق المعزز العادي.' },
     { k: 'q2x', n: 'أسئلة ×٢', p: 90, s: 'fx', d: 'نقط أسئلة الماتش ده ×٢.' },
-    { k: 'q3', n: 'سؤال تالت ', p: 75, s: 'fx', d: 'سؤال زيادة في الماتش ده بنقطه.' },
-    { k: 'psafe', n: 'شبكة أمان ', p: 75, s: 'fx', d: 'لو جبت صفر في الماتش ده، تاخد ٣ نقط.' }
+    { k: 'q3', n: 'سؤال تالت', p: 75, s: 'fx', d: 'سؤال زيادة في الماتش ده بنقطه.' },
+    { k: 'psafe', n: 'شبكة أمان', p: 75, s: 'fx', d: 'لو جبت صفر في الماتش ده، تاخد ٣ نقط.' }
   ]
 };
 const LOOK = {
@@ -3191,7 +3191,7 @@ function vShop() {
   const H = S.shop, cur = H.cur, bal = balOf(cur);
   const head = `<div class="h"><b>المحل</b><div class="ctr"><div class="m">توكن ${curName(cur)}</div><div class="d" style="font-size:24px">${COIN} ${N(bal)}</div></div></div>`;
   const curTabs = HAS_PRED ? `<div class="tg eq" style="grid-template-columns:1fr 1fr">${['f', 'p'].map(c => `<button class="bt ${cur === c ? 'on' : ''}" style="flex:1 0 calc((100% - 6px) / 2)" data-act="shcur" data-c="${c}">${c === 'f' ? 'الفانتاسي' : 'التوقعات'}</button>`).join('')}</div>` : '';
-  const secs = [['shop', 'المحل'], ['mine', 'حاجاتي'], ['earn', 'ازاي تكسب كوينز']];
+  const secs = [['shop', 'المحل'], ['mine', 'حاجاتي'], ['earn', 'الكسب']];
   const secTabs = `<div class="tg eq">${secs.map(([k, l]) => `<button class="bt ${H.sec === k ? 'on' : ''}" data-act="shsec" data-k="${k}">${l}</button>`).join('')}</div>`;
   const body = H.loading && !H.w && !H.buys.length ? '<div class="k ctr">جاري التحميل…</div>' : H.sec === 'mine' ? shopMine(cur) : H.sec === 'earn' ? shopEarn(cur) : shopList(cur);
   return head + curTabs + secTabs + `<div class="f">${body}</div><div id="ssh"></div>`;
@@ -3607,7 +3607,7 @@ function showIntro() {
   el.id = 'intro'; el.className = 'gt';
   el.innerHTML = `<i class="gorb o1"></i><i class="gorb o2"></i><i class="gorb o3"></i><i class="gring"></i>
     <div class="gcard"><img class="glg" src="icon-192.png" alt=""><div class="gtt">Mido’s Fantasy</div><div class="gst">اختار ٤ لاعبين من كل ماتش ونافس واثبتلهم انك التوب</div>
-    <button class="gbt" type="button"><span>لم حسنات وصلي ع النبي</span></button><div class="gsl">اللهم صلّ وسلّم وبارك على سيدنا محمد ﷺ</div></div>`;
+    <button class="gbt" type="button"><span>م تصلي ع النبي</span></button><div class="gsl">اللهم صلّ وسلّم وبارك على سيدنا محمد ﷺ</div></div>`;
   document.body.appendChild(el);
   const ctx = prefOn('snd') ? audio() : null;
   if (ctx) { loadSound('click'); loadSound('intro'); }
@@ -3625,8 +3625,11 @@ function showIntro() {
 /* ═════════════════════ حبشتكنات (ألعاب إضافية) ═════════════════════
    الألعاب: الكروت (على مدار الجولة) وصنفلي (كل يوم). لإضافة لعبة جديدة: ضيف عنصر في HGAMES، ودالة بتعرض تبويباتها في hbBody.
    لازم تطابق HAB في Code.gs. البيانات: cdeck/cpick/cpub/cboard و sdeck/spick/spub/sboard. */
-const HAB = { pick: 8, total: 15, sortFull: { players: 10, matches: { 3: 6, 4: 8, 5: 10 } } };
-const hbFull = (k, n, d) => (d && d.pts && d.pts[k] != null) ? d.pts[k] : (k === 'c' ? (HAB.sortFull.matches[n] || HAB.sortFull.matches[3]) : HAB.sortFull.players);
+const HAB = { pick: 8, total: 15, sortFull: 12, sortNone: -3, sortTable: { a: [-3, 0, 4, 8, 10, 12], b: [-3, 0, 3, 6, 9, 12], c: [-3, 0, 4, 8, 10, 12] } };
+/* نقط صنفلي (لازم تطابق habSortPts_ في Code.gs): c = عدد الأماكن الصح من n */
+const hbSortPts = (k, c, n) => { if (n < 2) return 0; const f = Math.min(n, 5) / 5; if (c >= n) return Math.round(HAB.sortFull * f); if (c <= 0) return Math.round(HAB.sortNone * f); return Math.round((HAB.sortTable[k] || HAB.sortTable.a)[Math.min(c, 5)] * f); };
+/* "ناقص واحد" مستحيل في الترتيب (لو n-1 صح يبقى الأخير صح كمان)، فمش بنعرضه */
+const hbSortLine = (k, n) => { const out = []; for (let c = n; c >= 0; c--) { if (c === n - 1) continue; if (c === n) out.push(`الدسته (${N(c)} صح) <b>${N(hbSortPts(k, c, n))}</b>`); else if (c === 0) out.push(`ولا واحد صح <b>${sN(hbSortPts(k, c, n))}</b>`); else out.push(`${N(c)} صح <b>${N(hbSortPts(k, c, n))}</b>`); } return out.join(' · '); };
 const hbNo = c => c.n == null ? 2 : c.n;
 const CARD_FAM = { win: 'r', draw: 'r', win2: 'r', cs: 'r', over25: 'g', over45: 'g', btts: 'g', team2: 'g', red: 'x', yellow4: 'y', og: 'x', pen: 'x', pl_goal: 'p', pl_assist: 'p', pl_involve: 'p', pl_pts7: 'p', pl_brace: 'p', gk_saves: 'k', def_dc: 'd', pl_yellow: 'y', over15: 'g', under25: 'g', nolose: 'r', team1: 'g', custom: 'u' };
 const HGAMES = [
@@ -3906,7 +3909,7 @@ function hbSecHtml(day, k) {
   if (!lock) foot = `<button class="bt ${dirty || !saved ? 'on' : ''}" style="height:46px" data-act="hssave" data-k="${k}">${saved && !dirty ? 'اتحفظ ✓' : saved ? 'حفظ التعديل' : 'حفظ الترتيب'}</button>`;
   else if (!saved) foot = '<div class="k ctr m">ما رتبتش القسم ده قبل القفل (مفيش نقط ولا خصم).</div>';
   else if (mp) foot = `<div class="k r j"><span class="m">${mp[0] === -1 ? 'النقط لسه (الماتشات شغالة)' : N(mp[1]) + ' مكان صح'}</span><b class="d" style="font-size:20px;color:${mp[0] > 0 ? 'var(--ac)' : mp[0] < 0 ? 'var(--neg)' : 'var(--tx)'}">${mp[0] === -1 ? '…' : sN(mp[0])}</b></div>`;
-  return `<div class="k" style="padding:12px"><div class="r j"><b>${HB_SEC[k].t}</b><button class="ib" style="height:30px;width:30px" data-act="hsinfo" data-k="${k}" aria-label="شرح القسم">${INFO_SVG}</button></div><div class="m">${HB_SEC[k].q}${lock ? (vals && !done ? ' · القيم مؤقتة' : '') : ' · اسحب ⠿ بصباعك وغيّر المكان'}</div><div class="m" style="margin-bottom:8px">النقط: الكل صح <b>${N(hbFull(k, items.length, deck))}</b> · ناقص واحد <b>${N(Math.round(hbFull(k, items.length, deck) / 2))}</b> · ولا واحد صح <b>−${N(Math.round(hbFull(k, items.length, deck) / 2))}</b></div><div data-list="${k}" style="display:flex;flex-direction:column;gap:6px">${rows}</div><div style="margin-top:8px">${foot}</div></div>`;
+  return `<div class="k" style="padding:12px"><div class="r j"><b>${HB_SEC[k].t}</b><button class="ib" style="height:30px;width:30px" data-act="hsinfo" data-k="${k}" aria-label="شرح القسم">${INFO_SVG}</button></div><div class="m">${HB_SEC[k].q}${lock ? (vals && !done ? ' · القيم مؤقتة' : '') : ' · اسحب ⠿ بصباعك وغيّر المكان'}</div><div class="m" style="margin-bottom:8px">النقط: ${hbSortLine(k, items.length)}</div><div data-list="${k}" style="display:flex;flex-direction:column;gap:6px">${rows}</div><div style="margin-top:8px">${foot}</div></div>`;
 }
 function hbPlayS() {
   const SS = S.hb.s, gws = hbSGws(), days = hbDays(), day = SS.day, deck = day && SS.decks[day];
@@ -3980,10 +3983,11 @@ function hbSheetHtml() {
     return ov(`<div class="r" style="gap:10px"><span style="font-size:30px">${c.ic}</span><div class="g"><b>${esc(c.t)}</b><div class="sub">${hbFxLabel(c)} · ${esc(fmtTime(c.ko))}</div></div></div><div class="r" style="gap:6px">${hbPtsPill(c.p, hbNo(c))}${r === 1 ? '<span class="pl ok">✓ حصل</span>' : r === 0 ? '<span class="pl bad">✗ ما حصلش</span>' : ''}</div>${body}<button class="bt" data-act="hshx">إغلاق</button>`, 'hshx');
   }
   if (sh.t === 'sinfo') {
-    const k = sh.k, SS = S.hb.s, deck = SS.decks[SS.day], n = ((deck && deck[k]) || []).length || 5, full = hbFull(k, n, deck), half = Math.round(full / 2);
+    const k = sh.k, SS = S.hb.s, deck = SS.decks[SS.day], n = ((deck && deck[k]) || []).length || 5, rowsT = [];
+    for (let c = n; c >= 0; c--) if (c !== n - 1) rowsT.push(`<div class="m">${c === n ? 'الدسته (الترتيب كله صح)' : c === 0 ? 'ولا مكان صح' : N(c) + ' أماكن صح'}: <b>${sN(hbSortPts(k, c, n))}</b></div>`);
     return ov(`<b>${HB_SEC[k].t}</b><div class="m" style="color:var(--tx)">${HB_SEC[k].q}</div><div class="m">${HB_SEC[k].i}</div>
       <div class="k" style="padding:10px;display:flex;flex-direction:column;gap:4px"><b>النقط</b>
-        <div class="m">الترتيب كله صح: <b>${N(full)}</b></div><div class="m">غلطة واحدة بس: <b>${N(half)}</b></div><div class="m">ولا مكان صح: <b>−${N(half)}</b></div><div class="m">غير كده: نسبة من ${N(half)} على قد الأماكن الصح.</div></div>
+        ${rowsT.join('')}</div>
       <div class="m">لو لاعبين (أو ماتشين) قيمتهم متساوية فبيتحسبوا صح في أي ترتيب، فالتعادل مش بيظلمك.</div>
       <div class="m">اسحب ⠿ وغيّر الأماكن قبل ما اليوم يتقفل. النتيجة بتظهر بعد ما الماتشات تخلص.</div>
       <button class="bt" data-act="hshx">تمام</button>`, 'hshx');
@@ -4213,7 +4217,6 @@ function hbAdmS() {
   const sec = k => {
     const { pool, idf, sel } = hbSItems(dr, k), tgt = k === 'c' ? '٣ لـ ٥ ماتشات' : '٥ لاعبين';
     const open = A['p' + k], q = (A['q' + k] || '').trim().toLowerCase();
-    const full = dr.pts && dr.pts[k] != null ? dr.pts[k] : hbFull(k, sel.length);
     const row = (x, picked) => {
       const id = idf(x), nmv = k === 'c' ? `${esc(x.h.sn)} ضد ${esc(x.a.sn)}` : `${esc(x.n)} <span class="sub" style="display:inline">${hbPlSub(x)}</span>`;
       return picked
@@ -4223,7 +4226,7 @@ function hbAdmS() {
     const posF = A['pos' + k] || 0, hay = x => (k === 'c' ? (x.h.name + x.a.name + x.h.sn + x.a.sn) : (x.n + ' ' + x.t + ' ' + hbPlSub(x).replace(/<[^>]*>/g, ''))).toLowerCase();
     const restAll = pool.filter(x => !sel.includes(x) && (!posF || x.p === posF) && (!q || hay(x).includes(q))), LIM = 60, rest = restAll.slice(0, LIM);
     return `<div class="k" style="padding:12px"><div class="r j"><div class="g"><b>${HB_SEC[k].t}</b><div class="m">${N(sel.length)} مختار · المطلوب ${tgt}</div></div><button class="bt on" style="height:38px;padding:0 10px;font-size:13px" data-act="hasroll" data-k="${k}">🎲 قرعة</button></div>
-      <div class="r mt" style="gap:8px;flex-wrap:wrap">${hbStep('haspt', 'data-k="' + k + '"', 'نقط الترتيب الكامل', 'var(--tx)', full)}<span class="m">ناقص واحد ${N(Math.round(full / 2))} · ولا واحد −${N(Math.round(full / 2))}</span></div>
+      <div class="m mt">${hbSortLine(k, k === 'c' ? (sel.length || 5) : 5)}</div>
       <div style="display:flex;flex-direction:column;gap:6px;margin-top:8px">${sel.map(x => row(x, true)).join('') || '<div class="m ctr">مفيش مختار</div>'}</div>
       <button class="bt" style="height:40px;margin-top:8px" data-act="haspool" data-k="${k}">${open ? 'إخفاء المخزون' : '＋ اختار بإيدك من المخزون (' + N(pool.length - sel.length) + ')'}</button>
       ${open ? `${k === 'c' ? '' : `<div style="margin-top:8px"><input class="in" data-in="hasq" data-k="${k}" placeholder="ابحث باسم اللاعب أو الفريق (${N(pool.length)} لاعب في المخزون)" aria-label="بحث" value="${esc(A['q' + k] || '')}"></div><div class="tg" style="margin-top:6px">${[[0, 'الكل'], [1, 'حراس'], [2, 'مدافعين'], [3, 'وسط'], [4, 'مهاجمين']].map(([pp, lb]) => `<button class="bt ${posF === pp ? 'on' : ''}" style="flex:none;height:34px;padding:0 12px" data-act="haspos" data-k="${k}" data-p="${pp}">${lb}</button>`).join('')}</div>`}<div id="hasl_${k}" style="display:flex;flex-direction:column;gap:6px;margin-top:8px;max-height:340px;overflow:auto">${rest.map(x => row(x, false)).join('') || '<div class="m ctr">مفيش نتايج</div>'}${restAll.length > LIM ? `<div class="m ctr">فيه ${N(restAll.length - LIM)} كمان. اكتب في البحث أو اختار المركز علشان تضيّق.</div>` : ''}</div>` : ''}</div>`;
@@ -4299,7 +4302,7 @@ Object.assign(ACTIONS, {
     if (!confirm('تفتح صنفلي ليوم ' + hbDayLbl(day) + ' للاعبين؟ بعد الفتح ماتتعدلش.')) return;
     const pick = k => hbShuf(hbSItems(dr, k).sel);
     const a = pick('a'), b = pick('b'), c = pick('c');
-    const pts = {}; ['a', 'b', 'c'].forEach(k => { if (L(k)) pts[k] = dr.pts && dr.pts[k] != null ? dr.pts[k] : hbFull(k, L(k)); });
+    const pts = {};
     const out = { day, gw: dr.gw, lock: new Date(hbLockMs(dr)), a, b, c, aids: a.map(x => x.i), bids: b.map(x => x.i), cids: c.map(x => x.id), pts, createdAt: serverTimestamp() };
     try {
       await setDoc(doc(db, 'sdeck', day), out);
@@ -4373,12 +4376,6 @@ Object.assign(ACTIONS, {
   hasreopen() { return hbUnopenS(false); },
   hasreset() { return hbUnopenS(true); },
   async hasresetall() { const day = S.hb.s.day, dr = S.hb.s.draft[day]; S.hb.adm.pin = {}; ['a', 'b', 'c'].forEach(k => hbRollS(dr, k, {})); render(); await hbSaveDraftS(day); },
-  haspt(el) {
-    const day = S.hb.s.day, dr = S.hb.s.draft[day], k = el.dataset.k, cur = dr.pts && dr.pts[k] != null ? dr.pts[k] : hbFull(k, hbSItems(dr, k).sel.length);
-    dr.pts = { ...(dr.pts || {}), [k]: Math.min(40, Math.max(2, cur + Number(el.dataset.d))) };
-    render(); clearTimeout(hbPtT);
-    hbPtT = setTimeout(() => updateDoc(doc(db, 'sdraft', day), { pts: dr.pts }).catch(e => toast('مقدرتش أحفظ النقط: ' + (e.code || e.message))), 600);
-  }
 });
 INPUTS.hacq = t => { S.hb.adm.q = t.value; const gw = S.hb.c.gw, dr = S.hb.c.draft[gw], l = $('#hacl'); if (l && dr) setHtml(l, hbAdmPoolC(dr.pool.filter(c => !dr.sel.includes(c.id)), t.value.trim())); };
 INPUTS.hasq = t => { const k = t.dataset.k; S.hb.adm['q' + k] = t.value; render(); };
