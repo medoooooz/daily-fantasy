@@ -311,7 +311,7 @@ const VAPID_KEY = 'BJCvYHRpVeKdXwapyT7aKp0nMnw5Y7ZhTkIv8Dips-sYm9lXHEw96ff3ZloT2
    لو سبته فاضي بيشتغل الصوت المتولّد بالكود. vol من 0 (صامت) لـ 1 (أعلى صوت). */
 const SOUND_LINKS = {
   click: { url: 'https://cdn.pixabay.com/download/audio/2024/01/16/audio_fb4eef1715.mp3', vol: 0.35 },   // صوت الضغط على الأزرار (يفضّل أقل من نص ثانية)
-  intro: { url: 'https://cdn.pixabay.com/download/audio/2025/08/11/audio_6f1914dab5.mp3', vol: 0.8 }     // صوت شاشة الدخول
+  intro: { url: 'https://cdn.pixabay.com/download/audio/2026/11/21/audio_336be5dce4.mp3', vol: 0.8 }     // صوت شاشة الدخول
 };
 const TZ = 'Africa/Cairo';   // لازم تكون زي TZ في Code.gs
 const CAP_MULT = 2;          // لازم يكون زي CAPTAIN_MULT في Code.gs
@@ -730,7 +730,7 @@ try { history.replaceState(null, ''); } catch (e) { /* مش مهم */ }
 function nav() {
   const t = S.view === 'admin' ? 'account' : (S.view === 'tdet' || S.view === 'tnew') ? 'tour' : S.view === 'udet' ? 'round' : S.view;
   const b = (k, label, svg) => `<button class="n ${t === k ? 'on' : ''}" data-act="nav" data-v="${k}"><svg viewBox="0 0 24 24">${svg}</svg>${label}</button>`;
-  return `<nav class="nv">${b('round', 'الجولة', '<path d="M3 5h18v14H3zM3 10h18"/>')}${b('pred', 'التوقعات', '<rect x="3" y="6" width="7" height="12" rx="2"/><rect x="14" y="6" width="7" height="12" rx="2"/>')}${b('tour', 'البطولات', '<path d="M8 4h8v5a4 4 0 01-8 0zM8 6H4v2a3 3 0 003 3M16 6h4v2a3 3 0 01-3 3M12 13v4M8 20h8"/>')}${b('hab', 'حبشتكنات', '<rect x="4" y="5" width="9" height="13" rx="2"/><path d="M15 8l4 1-2 9-4-1"/>')}${b('shop', 'المحل', '<path d="M5 8h14l-1 12H6zM9 8V6a3 3 0 016 0v2"/>')}${b('account', 'حسابي', '<circle cx="12" cy="8" r="4"/><path d="M4 21c1-6 15-6 16 0"/>')}</nav>`;
+  return `<nav class="nv">${b('round', 'الجولة', '<path d="M3 5h18v14H3zM3 10h18"/>')}${b('pred', 'التوقعات', '<rect x="3" y="6" width="7" height="12" rx="2"/><rect x="14" y="6" width="7" height="12" rx="2"/>')}${b('tour', 'البطولات', '<path d="M8 4h8v5a4 4 0 01-8 0zM8 6H4v2a3 3 0 003 3M16 6h4v2a3 3 0 01-3 3M12 13v4M8 20h8"/>')}${b('hab', 'ربع مشكل', '<rect x="4" y="5" width="9" height="13" rx="2"/><path d="M15 8l4 1-2 9-4-1"/>')}${b('shop', 'المحل', '<path d="M5 8h14l-1 12H6zM9 8V6a3 3 0 016 0v2"/>')}${b('account', 'حسابي', '<circle cx="12" cy="8" r="4"/><path d="M4 21c1-6 15-6 16 0"/>')}</nav>`;
 }
 const vLoading = () => `<div class="login ctr"><img class="logo" src="icon-192.png" alt="" style="margin:0 auto;display:block"><div class="m">جاري التحميل…</div></div>`;
 const vError = () => `<div class="login ctr"><div>حصلت مشكلة في تحميل البيانات</div><button class="bt on" data-act="retry">حاول تاني</button><button class="lnk" data-act="logout">تسجيل الخروج</button></div>`;
@@ -3622,7 +3622,7 @@ function showIntro() {
   });
 }
 
-/* ═════════════════════ حبشتكنات (ألعاب إضافية) ═════════════════════
+/* ═════════════════════ ربع مشكل (ألعاب إضافية) ═════════════════════
    الألعاب: الكروت (على مدار الجولة) وصنفلي (كل يوم). لإضافة لعبة جديدة: ضيف عنصر في HGAMES، ودالة بتعرض تبويباتها في hbBody.
    لازم تطابق HAB في Code.gs. البيانات: cdeck/cpick/cpub/cboard و sdeck/spick/spub/sboard. */
 const HAB = { pick: 8, total: 15, sortFull: 12, sortNone: -3, sortTable: { a: [-3, 0, 4, 8, 10, 12], b: [-3, 0, 3, 6, 9, 12], c: [-3, 0, 4, 8, 10, 12] } };
@@ -3690,7 +3690,7 @@ function vHab() {
   const H = S.hb;
   const games = [{ id: 'all', n: 'الكل', ic: '🏆' }, ...HGAMES];
   const g = games.find(x => x.id === H.g) || games[0];
-  const head = `<div class="h"><div><div class="m">Mido’s Fantasy</div><b>حبشتكنات</b></div><div class="ctr"><div class="m">نقطك</div><div class="d" style="font-size:24px">${sN(hbMyTotal())}</div></div></div>
+  const head = `<div class="h"><div><div class="m">Mido’s Fantasy</div><b>ربع مشكل</b></div><div class="ctr"><div class="m">نقطك</div><div class="d" style="font-size:24px">${sN(hbMyTotal())}</div></div></div>
   <div class="tg">${games.map(x => `<button class="bt ${x.id === g.id ? 'on' : ''}" data-act="hgame" data-k="${x.id}">${x.ic} ${x.n}</button>`).join('')}</div>
   ${g.id === 'all' ? '' : `<div class="tg">${g.tabs.concat(S.admin ? [['adm', '⚙️ إدارة']] : []).map(([k, l]) => `<button class="bt ${H.tab === k ? 'on' : ''}" data-act="htab" data-k="${k}" style="font-size:13px">${l}</button>`).join('')}</div>`}`;
   return head + (H.loading && !Object.keys(H.c.deck).length && !Object.keys(H.s.decks).length ? '<div class="f"><div class="k ctr">جاري التحميل…</div></div>' : hbBody(g.id)) + hbSheetHtml();
@@ -3724,7 +3724,7 @@ function hbAll() {
   const add = (t, k) => ((t && t.rows) || []).forEach(r => { const o = m[r.uid] = m[r.uid] || { uid: r.uid, name: r.name, pts: 0, h: 0, c: 0, s: 0 }; o.pts += r.pts; o.h += r.h || 0; o[k] += r.pts; });
   add(H.c.total, 'c'); add(H.s.total, 's');
   const rows = hbRanked(Object.values(m));
-  return `<div class="f"><div class="m">الترتيب العام لكل حبشتكنات (مجموع نقط الكروت وصنفلي) · اضغط على أي لاعب تشوف تفاصيله</div>
+  return `<div class="f"><div class="m">الترتيب العام لكل ربع مشكل (مجموع نقط الكروت وصنفلي) · اضغط على أي لاعب تشوف تفاصيله</div>
   ${rows.map(r => hbRowHtml(r, r.rank, `<span class="pl">🃏 ${sN(r.c)}</span> <span class="pl">🎚️ ${sN(r.s)}</span>`, r.pts)).join('') || '<div class="k ctr">لسه مفيش نقط.</div>'}</div>`;
 }
 
@@ -4384,7 +4384,7 @@ INPUTS.hcuic = t => { if (S.hb.adm.cu) S.hb.adm.cu.ic = t.value; };
 INPUTS.hcufx = t => { if (S.hb.adm.cu) S.hb.adm.cu.fid = t.value; };
 
 INPUTS.hopp = t => { S.hb.cmp.oq = t.value; const q = t.value.trim().toLowerCase(), l = $('#hol'); if (l) setHtml(l, hbOppRows(hbOthers().filter(u => !q || nm(u).toLowerCase().includes(q)))); };
-/* دخول حبشتكنات من الشريط السفلي */
+/* دخول ربع مشكل من الشريط السفلي */
 const hbNavOrig = ACTIONS.nav;
 ACTIONS.nav = async function (el) {
   if (el.dataset.v !== 'hab') return hbNavOrig(el);
