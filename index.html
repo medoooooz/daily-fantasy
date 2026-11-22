@@ -145,6 +145,10 @@ button.evp{color:var(--tx);border:0;font:inherit;font-size:13px;line-height:1.5}
 .ldot{display:inline-block;width:6px;height:6px;border-radius:50%;background:currentColor;margin-inline-end:5px;vertical-align:middle;animation:ldp 1.2s infinite}
 @keyframes ldp{50%{opacity:.2}}@media (prefers-reduced-motion:reduce){.ldot{animation:none}}
 .sv{font-size:11px}
+/* رأس المقارنة: ثابت فوق وانت بتسكرول */
+.stk{position:sticky;top:env(safe-area-inset-top,0px);z-index:6;background:var(--shbg)!important;border-color:var(--cb)}
+.cmpq{display:grid;grid-template-columns:minmax(0,1fr) 74px minmax(0,1fr);gap:6px;align-items:center;padding:6px 0;border-top:1px solid rgba(var(--fg),.1)}
+.cmpq>span:nth-child(2){text-align:center;font-size:11px;color:var(--mu)}
 #toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%) translateY(20px);background:var(--shbg);border:1px solid rgba(var(--fg),.3);color:var(--tx);padding:10px 16px;border-radius:12px;opacity:0;pointer-events:none;transition:.25s;z-index:20;max-width:90%;text-align:center}
 #toast.show{opacity:1;transform:translateX(-50%)}
 .login{justify-content:center;padding:calc(24px + env(safe-area-inset-top)) 24px 24px;gap:12px;flex:1;display:flex;flex-direction:column}
@@ -1677,7 +1681,7 @@ function cmpHtml(A) {
   }
   const blocks = scopeFx().filter(f => S.stats[f.id] && S.fxdocs[f.id]).map(f => cmpBlock(f, me, st.opp));
   const ta = blocks.reduce((s, x) => s + x.a, 0), tb = blocks.reduce((s, x) => s + x.b, 0);
-  return `<div class="k r j"><div class="r">${avatar(photoOf(me), nm(me))}<b>أنت</b></div><button class="lnk" data-act="sopp0">تغيير</button><div class="r"><b>${esc(nm(st.opp))}</b>${avatar(photoOf(st.opp), nm(st.opp))}</div></div>
+  return `<div class="k r j stk"><div class="r">${avatar(photoOf(me), nm(me))}<div><b>أنت</b><div class="d" style="font-size:18px${ta > tb ? ';color:var(--ac)' : ''}">${N(ta)}</div></div></div><button class="lnk" data-act="sopp0">تغيير</button><div class="r"><div style="text-align:end"><b>${esc(nm(st.opp))}</b><div class="d" style="font-size:18px${tb > ta ? ';color:var(--ac)' : ''}">${N(tb)}</div></div>${avatar(photoOf(st.opp), nm(st.opp))}</div></div>
     <div class="r m"><span style="width:12px;height:12px;border-radius:3px;background:rgba(245,179,1,.45)"></span>لاعب مشترك بينكم</div>
     ${blocks.map(x => x.html).join('')}
     ${blocks.length > 1 ? `<div class="k r j"><span class="d" style="font-size:24px${ta > tb ? ';color:var(--ac)' : ''}">${N(ta)}</span><span class="m">إجمالي ${scopeWord()}</span><span class="d" style="font-size:24px${tb > ta ? ';color:var(--ac)' : ''}">${N(tb)}</span></div>` : ''}`;
@@ -2695,23 +2699,26 @@ function infoHtml() {
     <button class="bt on" style="height:48px" data-act="pinfox">تمام</button>`, 'pinfox');
 }
 function detHtml() {
-  const fid = S.pr.dt, x = pFx(fid), row = pRow(fid), p = S.pr.preds[fid], d = S.fxdocs[fid];
+  const fid = S.pr.dt, me = S.user.uid, uid = S.pr.dtu || me, x = pFx(fid), row = pRow(fid, uid), d = S.fxdocs[fid];
+  const pub = S.pr.pub[fid], p = uid === me ? (S.pr.preds[fid] || (pub && pub.byUser && pub.byUser[me])) : (pub && pub.byUser && pub.byUser[uid]);
   if (!x || !row || !p) return '';
   const out = s => { const t = Math.sign(s[0] - s[1]); return t > 0 ? 'أرض' : t < 0 ? 'ضيف' : 'تعادل'; };
   const pv = v => typeof v === 'string' ? v : v < 0 ? '<span class="m">لسه</span>' : v ? `<b style="color:var(--ac)">+${N(v)}</b>` : '<span class="m">٠</span>';
   const pvn = v => `<b style="color:var(--neg)">${sN(v)}</b>`;
   const tr = (a, sub, r, y, v) => `<div style="display:grid;grid-template-columns:minmax(0,1fr) 54px 54px 56px;align-items:center;min-height:44px;border-bottom:1px solid rgba(var(--fg),.08)"><div><div class="nm" style="font-size:14px">${a}</div>${sub ? `<div class="sub">${sub}</div>` : ''}</div><div class="ctr">${r}</div><div class="ctr">${y}</div><div style="text-align:end">${pv(v)}</div></div>`;
   const qs = (x.q || []).map((k, i) => { const pe = row[9 + i] || 0; return tr(esc(PQ[k] ? PQ[k].s : k), pe === PRED.blank ? 'سبته من غير إجابة' : pe ? 'إجابة غلط' : '', '', esc(pqAnsLabel(k, (p.ans || {})[k], d)), pe ? pvn(pe) : row[6 + i]); }).join('');
-  return ov(`<b style="font-size:20px">${x.st === 'live' ? 'النقط لحد دلوقتي' : 'النتيجة بالتفصيل'}</b>
-    <div style="display:grid;grid-template-columns:minmax(0,1fr) 54px 54px 56px" class="m"><span>البند</span><span class="ctr">النتيجة</span><span class="ctr">توقعك</span><span style="text-align:end">نقط</span></div>
+  const who = uid === me ? '' : `<div class="r" style="gap:8px">${avatar(photoOf(uid), nm(uid), 32)}<b>${esc(nm(uid))}</b></div>`;
+  return ov(`${who}<b style="font-size:20px">${x.st === 'live' ? 'النقط لحد دلوقتي' : 'النتيجة بالتفصيل'}</b>
+    <div class="r j"><span class="m">النتيجة ${scoreHtml(x.r[0], x.r[1])}</span><span class="m">توقعه ${scoreHtml(p.h, p.a)}</span></div>
+    <div style="display:grid;grid-template-columns:minmax(0,1fr) 54px 54px 56px" class="m"><span>البند</span><span class="ctr">النتيجة</span><span class="ctr">توقعه</span><span style="text-align:end">نقط</span></div>
     ${tr('الفايز', '', out(x.r), out([p.h, p.a]), row[1])}${tr('أهداف صاحب الأرض', '', x.r[0], p.h, row[2])}${tr('أهداف الضيف', '', x.r[1], p.a, row[3])}${tr('فارق الأهداف', '', x.r[0] - x.r[1], p.h - p.a, row[4])}${tr('النتيجة النادرة', 'بالظبط وأقل من ' + N(PRED.rarePct) + '٪ توقعوها', '', '', row[5])}${qs}
-    ${row[8] ? `<div class="r j" style="min-height:40px"><span class="nm" style="color:var(--gt)">المعزز</span><b style="color:var(--gt)">×${N(PRED.boost)}</b></div>` : ''}${pItemLines(x, d)}
+    ${row[8] ? `<div class="r j" style="min-height:40px"><span class="nm" style="color:var(--gt)">المعزز</span><b style="color:var(--gt)">×${N(PRED.boost)}</b></div>` : ''}${pItemLines(x, d, uid)}
     <div class="k r j" style="font-weight:800;font-size:16px"><span>${x.st === 'live' ? 'المجموع المؤقت' : 'مجموع النقط'}</span><span>${row[0] ? pn(row[0]) + ' نقطة' : 'مفيش نقط'}</span></div>`, 'pdetx');
 }
 
 /* سطور حاجة المحل في تفاصيل النقط (من pboard: fx.it[uid]) */
-function pItemLines(x, d) {
-  const it = x && x.it && x.it[S.user.uid]; if (!it) return '';
+function pItemLines(x, d, uid) {
+  const it = x && x.it && x.it[uid || S.user.uid]; if (!it) return '';
   const ln = (a, b) => `<div class="r j" style="min-height:36px"><span class="nm" style="color:var(--gt)">${a}</span><b style="color:var(--gt)">${b}</b></div>`;
   const cs = String(it.c || '').split(','), has = c => cs.includes(c);
   let h = cs.map(c => ln(COIN + ' ' + esc(itemDef('p', c).n), '')).join('');
@@ -2960,8 +2967,9 @@ Object.assign(ACTIONS, {
   pinfo() { S.pr.info = true; renderSheet(); },
   pinfox() { S.pr.info = false; renderSheet(); },
   pexp(el) { const fid = String(el.dataset.fid); S.pr.open[fid] = !S.pr.open[fid]; render(); },
-  async pdet(el) { const fid = String(el.dataset.fid); S.pr.dt = fid; try { await loadFixture(fid, false); } catch (e) { /* الأسماء بس */ } renderSheet(); },
-  pdetx() { S.pr.dt = null; renderSheet(); },
+  async pdet(el) { const fid = String(el.dataset.fid); S.pr.dtu = null; S.pr.dt = fid; try { await loadFixture(fid, false); } catch (e) { /* الأسماء بس */ } renderSheet(); },
+  pdetx() { S.pr.dt = null; S.pr.dtu = null; renderSheet(); },
+  async pcdet(el) { const fid = String(el.dataset.fid); S.pr.dtu = el.dataset.u; S.pr.dt = fid; try { await loadFixture(fid, false); } catch (e) { /* الأسماء بس */ } renderSheet(); },
   async ppl(el) { S.pr.pp = String(el.dataset.fid); S.view = 'ppl'; render(); await pplLoad(); render(); },
   async pplfx(el) { S.pr.pp = String(el.dataset.fid); render(); await pplLoad(); render(); },
   pback() { leaveSub(); S.view = 'pred'; render(); },
@@ -3841,7 +3849,7 @@ function hbOppPick(pfx) {
   <div id="hol" style="display:flex;flex-direction:column;gap:8px">${hbOppRows(list)}</div></div>`;
 }
 const hbOppRows = list => list.map(u => `<button class="k r" data-act="hopp" data-u="${esc(u)}">${avatar(photoOf(u), nm(u))}<span class="g nm">${esc(nm(u))}</span><span class="m">قارن ‹</span></button>`).join('') || '<div class="k ctr">مفيش نتايج.</div>';
-const hbCmpHead = u => `<div class="k r j"><div class="r">${avatar(photoOf(hbMe()), nm(hbMe()))}<b>أنت</b></div><button class="lnk" data-act="hopp0">تغيير</button><div class="r"><b>${esc(nm(u))}</b>${avatar(photoOf(u), nm(u))}</div></div>`;
+const hbCmpHead = (u, ta, tb) => `<div class="k r j stk"><div class="r">${avatar(photoOf(hbMe()), nm(hbMe()))}<div><b>أنت</b>${ta != null ? `<div class="d" style="font-size:18px${ta > tb ? ';color:var(--ac)' : ''}">${sN(ta)}</div>` : ''}</div></div><button class="lnk" data-act="hopp0">تغيير</button><div class="r"><div style="text-align:end"><b>${esc(nm(u))}</b>${tb != null ? `<div class="d" style="font-size:18px${tb > ta ? ';color:var(--ac)' : ''}">${sN(tb)}</div>` : ''}</div>${avatar(photoOf(u), nm(u))}</div></div>`;
 function hbPickPts(gw, id, side) {
   const c = hbCard(gw, id), w = hbWin(gw, id, side);
   if (!side) return null;
@@ -3860,7 +3868,7 @@ function hbCmpC() {
     const cell = (s, p) => { if (!s) return '<div class="ctr m" style="padding:6px">—</div>'; const w = r === -1 ? null : p > 0; return `<div class="ctr" style="padding:6px;border-radius:10px;background:${w === true ? 'rgba(var(--afr),.25)' : w === false ? 'rgba(214,58,63,.3)' : 'rgba(var(--fg),.14)'}"><b style="color:${s === 'y' ? 'var(--ac)' : 'var(--neg)'}">${s === 'y' ? 'نعم' : 'لا'}</b>${w === null ? '' : ' · ' + sN(p)}</div>`; };
     return `<div class="k" style="padding:8px"><div class="sub" style="font-size:12px;margin-bottom:6px">${c.ic} ${esc(c.t)} ${r === 1 ? '· حصل' : r === 0 ? '· ما حصلش' : ''}</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">${cell(sa, pa)}${cell(sb, pb)}</div></div>`;
   });
-  return hbGwChips(hbGws(), gw, 'hcgw') + `<div class="f">${hbCmpHead(opp)}${rows.join('') || '<div class="k ctr">لسه مفيش كروت اتقفلت.</div>'}
+  return hbGwChips(hbGws(), gw, 'hcgw') + `<div class="f">${hbCmpHead(opp, ta, tb)}${rows.join('') || '<div class="k ctr">لسه مفيش كروت اتقفلت.</div>'}
   <div class="k r j"><span class="d" style="font-size:22px${ta > tb ? ';color:var(--ac)' : ''}">${sN(ta)}</span><span class="m">مجموع الكروت اللي اتقفلت</span><span class="d" style="font-size:22px${tb > ta ? ';color:var(--ac)' : ''}">${sN(tb)}</span></div></div>`;
 }
 
@@ -3966,7 +3974,7 @@ function hbCmpS() {
     return `<div class="k" style="padding:10px"><b>${HB_SEC[k].t}</b><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px"><div>${col(A)}</div><div>${col(B)}</div></div>${done ? `<div class="r j mt"><b class="d">${pt(pa)}</b><span class="m">نقط القسم</span><b class="d">${pt(pb)}</b></div>` : ''}</div>`;
   }).join('');
   const ra = rowOf(hbMe()), rb = rowOf(opp);
-  return days + `<div class="f">${hbCmpHead(opp)}${secs}<div class="k r j"><span class="d" style="font-size:22px${ra && rb && ra.pts > rb.pts ? ';color:var(--ac)' : ''}">${ra ? sN(ra.pts) : '—'}</span><span class="m">مجموع اليوم</span><span class="d" style="font-size:22px${ra && rb && rb.pts > ra.pts ? ';color:var(--ac)' : ''}">${rb ? sN(rb.pts) : '—'}</span></div></div>`;
+  return days + `<div class="f">${hbCmpHead(opp, ra ? ra.pts : 0, rb ? rb.pts : 0)}${secs}<div class="k r j"><span class="d" style="font-size:22px${ra && rb && ra.pts > rb.pts ? ';color:var(--ac)' : ''}">${ra ? sN(ra.pts) : '—'}</span><span class="m">مجموع اليوم</span><span class="d" style="font-size:22px${ra && rb && rb.pts > ra.pts ? ';color:var(--ac)' : ''}">${rb ? sN(rb.pts) : '—'}</span></div></div>`;
 }
 
 /* ───── الشيتات ───── */
@@ -4417,26 +4425,34 @@ function pCmpHtml() {
   }
   const me = S.user.uid, opp = c.opp, fxs = startedFx(g);
   let ta = 0, tb = 0, same = 0;
+  const qPts = (row, i) => { if (!row) return ''; const pe = row[9 + i] || 0; if (pe) return `<b style="color:var(--neg)">${sN(pe)}</b>`; const v = row[6 + i]; return v < 0 ? '<span class="m">لسه</span>' : v ? `<b style="color:var(--ac)">+${N(v)}</b>` : '<span class="m">٠</span>'; };
   const blocks = fxs.map(f => {
-    const pub = P.pub[f.id], x = pFx(f.id);
+    const pub = P.pub[f.id], x = pFx(f.id), d = S.fxdocs[f.id];
     if (pub === undefined) return '';
     if (!pub) return `<div class="k m">${esc(fxTitle(f))}: التوقعات لسه ما اتنشرتش</div>`;
     const a = pub.byUser && pub.byUser[me], b = pub.byUser && pub.byUser[opp];
     const ra = x && x.rows && x.rows[me], rb = x && x.rows && x.rows[opp];
     const pa = ra ? ra[0] : 0, pb = rb ? rb[0] : 0; ta += pa; tb += pb;
-    const sc = p => p ? scoreHtml(p.h, p.a) : '<span class="m">ما توقعش</span>';
     const eq = a && b && a.h === b.h && a.a === b.a; if (eq) same++;
     const act = x ? (x.st === 'live' ? 'مباشر' : 'انتهى') : '';
+    const side = (p, r, u, w) => `<div class="ctr g">${p ? scoreHtml(p.h, p.a) : '<span class="m">ما توقعش</span>'}${p && p.boost ? ' <span class="pl" style="background:#f5b301;color:#1a1300">×٢</span>' : ''}${p && p.it ? '<div style="margin-top:3px">' + itemPill('p', p.it.c) + '</div>' : ''}<button class="lnk" style="text-decoration:none;display:block;margin:2px auto 0;font-weight:800;font-size:20px;${pa === pb ? '' : w ? 'color:var(--ac)' : ''}" data-act="pcdet" data-fid="${f.id}" data-u="${esc(u)}" aria-label="تفاصيل النقط">${r ? sN(r[0]) : '٠'} <span style="font-size:11px;font-weight:500">تفاصيل ‹</span></button></div>`;
+    const qk = (x && x.q) || pub.q || [];
+    const qrows = qk.map((k, i) => {
+      const ca = a && a.ans && a.ans[k] != null ? esc(pqAnsLabel(k, a.ans[k], d)) : '<span class="m">—</span>', cb = b && b.ans && b.ans[k] != null ? esc(pqAnsLabel(k, b.ans[k], d)) : '<span class="m">—</span>';
+      const same2 = a && b && a.ans && b.ans && a.ans[k] != null && a.ans[k] === b.ans[k];
+      return `<div class="cmpq" style="${same2 ? 'background:rgba(245,179,1,.12)' : ''}"><div style="min-width:0"><div style="font-size:13px">${ca}</div>${qPts(ra, i)}</div><span>${esc(PQ[k] ? PQ[k].s : k)}</span><div style="min-width:0;text-align:end"><div style="font-size:13px">${cb}</div>${qPts(rb, i)}</div></div>`;
+    }).join('');
     return `<div class="k" style="${eq ? 'background:rgba(245,179,1,.16);border-color:rgba(245,179,1,.5)' : ''}"><div class="r j"><b style="font-size:13px">${esc(fxTitle(f))}</b><span class="m">${x ? scoreHtml(x.r[0], x.r[1]) + ' · ' + act : ''}</span></div>
-      <div class="r j mt"><div class="ctr g">${sc(a)}<div class="d" style="font-size:18px;${pa > pb ? 'color:var(--ac)' : ''}">${sN(pa)}</div></div><span class="m">${eq ? 'نفس التوقع' : 'ضد'}</span><div class="ctr g">${sc(b)}<div class="d" style="font-size:18px;${pb > pa ? 'color:var(--ac)' : ''}">${sN(pb)}</div></div></div></div>`;
+      <div class="r j mt">${side(a, ra, me, pa > pb)}<span class="m">${eq ? 'نفس التوقع' : 'ضد'}</span>${side(b, rb, opp, pb > pa)}</div>${qrows ? `<div class="mt">${qrows}</div>` : ''}</div>`;
   }).join('');
-  return chips + `<div class="f"><div class="k r j"><div class="r">${avatar(photoOf(me), nm(me))}<b>أنت</b></div><button class="lnk" data-act="pcopp0">تغيير</button><div class="r"><b>${esc(nm(opp))}</b>${avatar(photoOf(opp), nm(opp))}</div></div>
-    ${blocks || '<div class="k ctr">لسه مفيش ماتشات بدأت في الجولة دي.</div>'}
-    ${fxs.length ? `<div class="k r j"><span class="d" style="font-size:22px${ta > tb ? ';color:var(--ac)' : ''}">${sN(ta)}</span><span class="m">إجمالي الجولة · ${N(same)} توقع متطابق</span><span class="d" style="font-size:22px${tb > ta ? ';color:var(--ac)' : ''}">${sN(tb)}</span></div>` : ''}</div>`;
+  return chips + `<div class="f"><div class="k r j stk"><div class="r">${avatar(photoOf(me), nm(me))}<div><b>أنت</b><div class="d" style="font-size:18px${ta > tb ? ';color:var(--ac)' : ''}">${sN(ta)}</div></div></div><button class="lnk" data-act="pcopp0">تغيير</button><div class="r"><div style="text-align:end"><b>${esc(nm(opp))}</b><div class="d" style="font-size:18px${tb > ta ? ';color:var(--ac)' : ''}">${sN(tb)}</div></div>${avatar(photoOf(opp), nm(opp))}</div></div>
+    <div class="m ctr">${N(same)} توقع متطابق · دوس على رقم النقط في أي ماتش تشوف التفاصيل</div>
+    ${blocks || '<div class="k ctr">لسه مفيش ماتشات بدأت في الجولة دي.</div>'}</div>`;
 }
 const pOppRows = list => list.map(u => `<button class="k r" data-act="pcopp" data-u="${esc(u)}">${avatar(photoOf(u), nm(u))}<span class="g nm">${esc(nm(u))}</span><span class="m">قارن ‹</span></button>`).join('') || '<div class="k ctr">مفيش نتايج.</div>';
 async function pCmpLoad() {
   await loadNames();
+  await Promise.all(startedFx(S.gw).map(f => loadFixture(f.id, false).catch(() => {})));
   await Promise.all(startedFx(S.gw).map(async f => { if (S.pr.pub[f.id] === undefined) { try { const r = await getDoc(doc(db, 'ppub', String(f.id))); S.pr.pub[f.id] = r.exists() ? r.data() : null; } catch (e) { S.pr.pub[f.id] = null; } } }));
 }
 Object.assign(ACTIONS, {
