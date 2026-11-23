@@ -3451,7 +3451,7 @@ const cairoDay = ms => new Intl.DateTimeFormat('en-CA', { timeZone: 'Africa/Cair
 async function usageSend(secs, visit) {
   const u = S.user, p = S.profile; if (!u || !p || p.banned) return;
   const ref = doc(db, 'usage', u.uid), name = String(p.username || '').slice(0, 40);
-  secs = Math.max(0, Math.min(120, Math.round(secs)));
+  secs = Math.max(0, Math.min(400, Math.round(secs)));   // لازم يطابق حد الثواني في firestore.rules
   /* setDoc + merge: بينشئ المستند أول مرة (دخول ١) وبيزوّد العدّادات بعد كده */
   try { await setDoc(ref, { n: increment(visit ? 1 : 0), secs: increment(secs), last: serverTimestamp(), name }, { merge: true }); }
   catch (e) { console.warn('usage', e && e.code, e && e.message); }
@@ -3468,7 +3468,7 @@ function usageStart() {
     const now = Date.now();
     if (document.visibilityState !== 'visible' || !S.user) { usageBeat = now; return; }
     usageSend((now - usageBeat) / 1000, false); usageBeat = now;
-  }, 45000);
+  }, 180000);   // كل ٣ دقايق (كان ٤٥ ثانية): أقل كتابات وقراءات
 }
 document.addEventListener('visibilitychange', () => {
   if (!S.user || usageUid !== S.user.uid) return;
@@ -3651,7 +3651,7 @@ const HB_SEC = {
 };
 S.hb = { g: 'all', tab: 'play', sheet: null, loading: false, rk: { c: 'total', s: 'total', cg: null, sg: null, sd: null },
   c: { gw: null, deck: {}, draft: {}, mine: {}, pub: {}, board: {}, total: null },
-  s: { gw: null, day: null, decks: {}, draft: {}, mine: {}, pub: {}, board: {}, total: null, work: {} },
+  s: { gw: null, day: null, decks: {}, draft: {}, mine: {}, pub: {}, board: {}, total: null, work: {}, ord: { saved: {}, work: {} } },
   st: { c: 'pop', s: 'a', q: '' }, cmp: { opp: null, oq: '' }, combo: [], adm: { pin: {}, pool: false, q: '', cu: null, cuOpen: false } };
 
 const hbDayLbl = k => fmtDay(Date.parse(k + 'T12:00:00Z'));
@@ -3664,7 +3664,7 @@ async function hbLoadAll() {
   const H = S.hb, C = H.c, SS = H.s;
   H.loading = true;
   const adm = S.admin;
-  const [cd, cb, cp, cm, sd, sb, sp, sm, cdr, sdr] = await Promise.all([hbGetAll('cdeck'), hbGetAll('cboard'), hbGetAll('cpub'), hbGetMine('cpick'), hbGetAll('sdeck'), hbGetAll('sboard'), hbGetAll('spub'), hbGetMine('spick'), adm ? hbGetAll('cdraft') : {}, adm ? hbGetAll('sdraft') : {}, loadNames()]);
+  const [cd, cb, cp, cm, sd, sb, sp, sm, cdr, sdr, sor] = await Promise.all([hbGetAll('cdeck'), hbGetAll('cboard'), hbGetAll('cpub'), hbGetMine('cpick'), hbGetAll('sdeck'), hbGetAll('sboard'), hbGetAll('spub'), hbGetMine('spick'), adm ? hbGetAll('cdraft') : {}, adm ? hbGetAll('sdraft') : {}, adm ? hbGetAll('sorder') : {}, loadNames()]);
   C.deck = {}; C.board = {}; C.pub = {}; C.mine = {}; C.draft = {};
   Object.keys(cd).forEach(k => { C.deck[Number(k.replace('gw_', ''))] = cd[k]; });
   Object.keys(cdr).forEach(k => { C.draft[Number(k.replace('gw_', ''))] = cdr[k]; });
@@ -3676,6 +3676,7 @@ async function hbLoadAll() {
   Object.keys(sb).forEach(k => { if (/^\d{4}-/.test(k)) SS.board[k] = sb[k]; });
   Object.keys(sm).forEach(k => { SS.mine[sm[k].day] = { a: sm[k].a || [], b: sm[k].b || [], c: (sm[k].c || []).map(String) }; });
   SS.total = sb.total || { rows: [] };
+  SS.ord.saved = sor || {};   // ترتيب الأدمن اليدوي (تبويب "ترتيبي" في الإحصائيات)
   const cg = hbGws();
   if (C.gw == null || !cg.includes(C.gw)) C.gw = cg.includes(S.gw) ? S.gw : (cg[cg.length - 1] ?? null);
   const gs = hbSGws();
@@ -3939,9 +3940,10 @@ function hbStatsS() {
   if (!deck) return chips + '<div class="f"><div class="k ctr">مفيش صنفلي لليوم ده.</div></div>';
   const list = hbPubS(day);
   if (!list.length) return chips + days + '<div class="f"><div class="k ctr">الإحصائيات بتظهر بعد ما اليوم يتقفل (أول ماتش) بدقيقة.</div></div>';
-  const tabs = `<div class="tg eq">${[['a', 'بريميوم'], ['b', 'أساسيين'], ['c', 'ماتشات'], ['like', 'مين زيي']].map(([k, l]) => `<button class="bt ${st.s === k ? 'on' : ''}" data-act="hsts" data-k="${k}" style="font-size:13px">${l}</button>`).join('')}</div>`;
+  const tabs = `<div class="tg eq">${[['a', 'بريميوم'], ['b', 'أساسيين'], ['c', 'ماتشات'], ['like', 'مين زيي'], ...(S.admin ? [['adm', '🛠 ترتيبي']] : [])].map(([k, l]) => `<button class="bt ${st.s === k ? 'on' : ''}" data-act="hsts" data-k="${k}" style="font-size:${S.admin ? 12 : 13}px;padding-inline:4px">${l}</button>`).join('')}</div>`;
   let body = '';
-  if (st.s === 'like') {
+  if (st.s === 'adm' && S.admin) body = hbAdmHtml(day, deck, list);
+  else if (st.s === 'like') {
     const me = list.find(x => x.u === hbMe());
     if (!me) body = '<div class="k ctr">ما رتبتش اليوم ده قبل القفل.</div>';
     else {
@@ -3954,6 +3956,53 @@ function hbStatsS() {
     body = `<div class="m">${HB_SEC[k].t} · متوسط مكان الناس لكل واحد (١ = الأول) · اضغط تشوف مين حطه فين</div>` + rows.map(r => `<button class="k r" data-act="hsit" data-k="${k}" data-id="${esc(r.id)}" style="padding:10px"><div class="g">${k === 'c' ? `<b>${esc(r.it.h.sn)} ضد ${esc(r.it.a.sn)}</b>` : `<div class="nm">${esc(r.it.n)}</div><div class="sub">${hbPlSub(r.it)}</div>`}<div class="sub">${N(r.n1)} حطوه الأول${vals ? ' · الحقيقي: ' + N(vals[r.id] || 0) + ' ' + HB_SEC[k].u : ''}</div></div><span class="d" style="font-size:20px">${(Math.round(r.avg * 10) / 10).toLocaleString('ar-EG')}</span></button>`).join('');
   }
   return chips + days + tabs + `<div class="f">${body}</div>`;
+}
+
+/* ───── صنفلي: ترتيبي (للأدمن): ترتّب كل قسم بمزاجك بعد القفل وتحفظ، وتشوف كل واحد هياخد كام نقطة ───── */
+const HB_SHORT = { a: 'بريميوم', b: 'أساسيين', c: 'ماتشات' };
+const hbAdmSaved = (day, k) => {
+  const s = S.hb.s.ord.saved[day], n = (((S.hb.s.decks[day] || {})[k]) || []).length, m = s && s[k];
+  return m && n && m.length === n ? m.map(v => k === 'c' ? String(v) : Number(v)) : null;
+};
+function hbAdmReal(day, k) {   // الترتيب الحقيقي من القيم (لو متاحة) وإلا ترتيب اليوم الأصلي
+  const items = S.hb.s.decks[day][k] || [], b = S.hb.s.board[day], vals = b && b.sec && b.sec[k] && b.sec[k].vals;
+  if (!vals) return items.map(it => hbItemId(k, it));
+  return items.map((it, i) => ({ id: hbItemId(k, it), v: vals[hbItemId(k, it)] || 0, i })).sort((x, y) => y.v - x.v || x.i - y.i).map(x => x.id);
+}
+function hbAdmOrder(day, k) {
+  const n = (S.hb.s.decks[day][k] || []).length, w = S.hb.s.ord.work[day] && S.hb.s.ord.work[day][k];
+  if (w && w.length === n) return w;
+  return hbAdmSaved(day, k) || hbAdmReal(day, k);
+}
+function hbAdmSec(day, k) {
+  const SS = S.hb.s, items = SS.decks[day][k] || []; if (!items.length) return '';
+  const order = hbAdmOrder(day, k), saved = hbAdmSaved(day, k), dirty = JSON.stringify(order) !== JSON.stringify(saved || []);
+  const b = SS.board[day], vals = b && b.sec && b.sec[k] && b.sec[k].vals;
+  const rows = order.map((id, i) => {
+    const it = items.find(x => String(hbItemId(k, x)) === String(id)); if (!it) return '';
+    return hbItemRow(k, it, i, order.length, { lock: false, val: vals ? (vals[id] || 0) : null }).replace(`data-drag="${k}"`, `data-drag="${k}" data-adm="1"`);
+  }).join('');
+  return `<div class="k" style="padding:12px"><div class="r j"><b>${HB_SEC[k].t}</b><span class="m">${saved && !dirty ? 'محفوظ ✓' : dirty ? 'فيه تعديل مش محفوظ' : 'لسه ما اتحفظش'}</span></div>
+    <div class="m" style="margin-bottom:8px">${HB_SEC[k].q} · اسحب ⠿ وغيّر المكان${vals ? ' · الرقم جنب كل واحد هو الحقيقي' : ''}</div>
+    <div data-list="${k}" style="display:flex;flex-direction:column;gap:6px">${rows}</div>
+    <div class="r" style="gap:8px;margin-top:8px"><button class="bt ${dirty || !saved ? 'on' : ''}" style="height:46px;flex:1" data-act="hsos" data-k="${k}">${saved && !dirty ? 'اتحفظ ✓' : 'حفظ الترتيب'}</button>${vals ? `<button class="bt" style="height:46px" data-act="hsor" data-k="${k}">↺ الحقيقي</button>` : ''}${saved ? `<button class="bt" style="height:46px" data-act="hsoc" data-k="${k}">مسح</button>` : ''}</div></div>`;
+}
+function hbAdmHtml(day, deck, list) {
+  const secs = ['a', 'b', 'c'].filter(k => hbAdmSaved(day, k));
+  const rows = list.map(x => {
+    let tot = 0, perf = 0; const s = {};
+    secs.forEach(k => {
+      const M = hbAdmSaved(day, k), o = (x.o[k] || []).map(v => k === 'c' ? String(v) : Number(v));
+      if (o.length !== M.length) { s[k] = null; return; }   // ما رتبش القسم ده قبل القفل
+      let c = 0; M.forEach((id, i) => { if (String(o[i]) === String(id)) c++; });
+      const p = hbSortPts(k, c, M.length); s[k] = [p, c]; tot += p; if (c === M.length) perf++;
+    });
+    return { u: x.u, s, tot, perf };
+  }).sort((a, b) => b.tot - a.tot || b.perf - a.perf || byName(nm(a.u), nm(b.u)));
+  const res = !secs.length
+    ? '<div class="k ctr m">احفظ ترتيب قسم واحد على الأقل وهيظهر هنا كل واحد هياخد كام نقطة.</div>'
+    : `<div class="m">النقط بحسب ترتيبك المحفوظ (${secs.map(k => HB_SHORT[k]).join(' + ')}) وبنفس جدول صنفلي · عرض بس ومش بيغيّر النقط الرسمية</div>` + rows.map((r, i) => `<button class="k r" data-act="hu" data-u="${esc(r.u)}" style="padding:10px;gap:10px"><span class="d" style="width:22px;font-size:16px;color:var(--mu)">${N(i + 1)}</span>${avatarL('p', r.u, nm(r.u))}<div class="g"><div class="nm">${decoName('p', r.u, nm(r.u))}</div><div class="sub">${secs.map(k => HB_SHORT[k] + ': ' + (r.s[k] ? N(r.s[k][1]) + ' صح · ' + sN(r.s[k][0]) : 'ما رتبش')).join(' — ')}</div></div><span class="d" style="font-size:20px;color:${r.tot > 0 ? 'var(--ac)' : r.tot < 0 ? 'var(--neg)' : 'var(--tx)'}">${sN(r.tot)}</span></button>`).join('');
+  return `<div class="m">رتّب أي قسم بمزاجك وادوس حفظ، وتحت هتلاقي نقط كل واحد على أساس الترتيب ده (متاح بعد قفل اليوم).</div>${['a', 'b', 'c'].map(k => hbAdmSec(day, k)).join('')}<div class="k" style="padding:12px;display:flex;flex-direction:column;gap:6px"><b>نقط الناس</b>${res}</div>`;
 }
 
 /* ───── صنفلي: مقارنة ───── */
@@ -4064,6 +4113,28 @@ Object.assign(ACTIONS, {
   hcombo(el) { S.hb.combo = el.dataset.k.split('|'); render(); },
   hopp(el) { S.hb.cmp.opp = el.dataset.u; render(); },
   hopp0() { S.hb.cmp.opp = null; render(); },
+  async hsos(el) {   // حفظ ترتيب الأدمن لقسم
+    if (!S.admin) return;
+    const SS = S.hb.s, day = SS.day, k = el.dataset.k, deck = SS.decks[day]; if (!deck) return;
+    const ord = hbAdmOrder(day, k).map(v => k === 'c' ? String(v) : Number(v));
+    try {
+      await setDoc(doc(db, 'sorder', day), { day, gw: deck.gw, [k]: ord, updatedAt: serverTimestamp() }, { merge: true });
+      (SS.ord.saved[day] = SS.ord.saved[day] || { day, gw: deck.gw })[k] = ord;
+      if (SS.ord.work[day]) delete SS.ord.work[day][k];
+      toast('اتحفظ الترتيب ✓'); render();
+    } catch (e) { console.error(e); toast(e.code === 'permission-denied' ? 'الحفظ مرفوض: ارفع firestore.rules الجديد واعمل Publish' : 'مقدرتش أحفظ، تأكد من النت'); }
+  },
+  hsor(el) { const SS = S.hb.s, day = SS.day, k = el.dataset.k; (SS.ord.work[day] = SS.ord.work[day] || {})[k] = hbAdmReal(day, k); render(); },   // رجّع الترتيب الحقيقي (من القيم)
+  async hsoc(el) {   // مسح الترتيب المحفوظ للقسم
+    if (!S.admin) return;
+    const SS = S.hb.s, day = SS.day, k = el.dataset.k, deck = SS.decks[day]; if (!deck) return;
+    try {
+      await setDoc(doc(db, 'sorder', day), { day, gw: deck.gw, [k]: [], updatedAt: serverTimestamp() }, { merge: true });
+      if (SS.ord.saved[day]) SS.ord.saved[day][k] = [];
+      if (SS.ord.work[day]) delete SS.ord.work[day][k];
+      toast('اتمسح'); render();
+    } catch (e) { console.error(e); toast('مقدرتش أمسح، تأكد من النت'); }
+  },
   hsmv(el) {
     const SS = S.hb.s, day = SS.day, k = el.dataset.k, i = Number(el.dataset.i), d = Number(el.dataset.d);
     if (Date.now() >= hbLockMs(SS.decks[day])) return toast('اليوم اتقفل');
@@ -4103,12 +4174,12 @@ function hbDragLoop() {
 document.addEventListener('pointerdown', e => {
   const h = e.target.closest && e.target.closest('[data-drag]'); if (!h || hbDrag) return;
   const row = h.closest('[data-row]'), list = row && row.parentElement; if (!row || !list) return;
-  const SS = S.hb.s; if (Date.now() >= hbLockMs(SS.decks[SS.day])) return;
+  const SS = S.hb.s, adm = h.dataset.adm === '1' && S.admin; if (!adm && Date.now() >= hbLockMs(SS.decks[SS.day])) return;
   e.preventDefault();
   const rows = [...list.querySelectorAll(':scope > [data-row]')], sy = window.scrollY;
   const info = rows.map(r => { const b = r.getBoundingClientRect(); return { c: b.top + sy + b.height / 2, h: b.height }; });
   const i = rows.indexOf(row);
-  hbDrag = { k: h.dataset.drag, rows, info, i, to: i, startY: e.clientY + sy, y: e.clientY, h: info[i].h + 6, raf: 0 };
+  hbDrag = { k: h.dataset.drag, adm, rows, info, i, to: i, startY: e.clientY + sy, y: e.clientY, h: info[i].h + 6, raf: 0 };
   S.hb.dragging = true;
   rows.forEach((r, j) => { r.style.transition = j === i ? 'none' : 'transform .15s'; });
   row.style.position = 'relative'; row.style.zIndex = '5'; row.style.boxShadow = '0 10px 28px rgba(0,0,0,.35)';
@@ -4121,7 +4192,7 @@ function hbDragEnd(cancel) {
   d.rows.forEach(r => { r.style.cssText = ''; });
   if (!cancel && d.to !== d.i) {
     const ids = d.rows.map(r => r.dataset.id), [m] = ids.splice(d.i, 1); ids.splice(d.to, 0, m);
-    const SS = S.hb.s; (SS.work[SS.day] = SS.work[SS.day] || {})[d.k] = ids.map(x => d.k === 'c' ? String(x) : Number(x));
+    const SS = S.hb.s, W = d.adm ? SS.ord.work : SS.work; (W[SS.day] = W[SS.day] || {})[d.k] = ids.map(x => d.k === 'c' ? String(x) : Number(x));
   }
   render();
 }
