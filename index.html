@@ -315,7 +315,7 @@ const VAPID_KEY = 'BJCvYHRpVeKdXwapyT7aKp0nMnw5Y7ZhTkIv8Dips-sYm9lXHEw96ff3ZloT2
    لو سبته فاضي بيشتغل الصوت المتولّد بالكود. vol من 0 (صامت) لـ 1 (أعلى صوت). */
 const SOUND_LINKS = {
   click: { url: 'https://cdn.pixabay.com/download/audio/2024/01/16/audio_fb4eef1715.mp3', vol: 0.35 },   // صوت الضغط على الأزرار (يفضّل أقل من نص ثانية)
-  intro: { url: 'https://cdn.pixabay.com/download/audio/2026/11/21/audio_336be5dce4.mp3', vol: 0.8 }     // صوت شاشة الدخول
+  intro: { url: 'https://cdn.pixabay.com/download/audio/2025/08/11/audio_6f1914dab5.mp3', vol: 0.8 }     // صوت شاشة الدخول
 };
 const TZ = 'Africa/Cairo';   // لازم تكون زي TZ في Code.gs
 const CAP_MULT = 2;          // لازم يكون زي CAPTAIN_MULT في Code.gs
@@ -734,7 +734,7 @@ try { history.replaceState(null, ''); } catch (e) { /* مش مهم */ }
 function nav() {
   const t = S.view === 'admin' ? 'account' : (S.view === 'tdet' || S.view === 'tnew') ? 'tour' : S.view === 'udet' ? 'round' : S.view;
   const b = (k, label, svg) => `<button class="n ${t === k ? 'on' : ''}" data-act="nav" data-v="${k}"><svg viewBox="0 0 24 24">${svg}</svg>${label}</button>`;
-  return `<nav class="nv">${b('round', 'الجولة', '<path d="M3 5h18v14H3zM3 10h18"/>')}${b('pred', 'التوقعات', '<rect x="3" y="6" width="7" height="12" rx="2"/><rect x="14" y="6" width="7" height="12" rx="2"/>')}${b('tour', 'البطولات', '<path d="M8 4h8v5a4 4 0 01-8 0zM8 6H4v2a3 3 0 003 3M16 6h4v2a3 3 0 01-3 3M12 13v4M8 20h8"/>')}${b('hab', 'ربع مشكل', '<rect x="4" y="5" width="9" height="13" rx="2"/><path d="M15 8l4 1-2 9-4-1"/>')}${b('shop', 'المحل', '<path d="M5 8h14l-1 12H6zM9 8V6a3 3 0 016 0v2"/>')}${b('account', 'حسابي', '<circle cx="12" cy="8" r="4"/><path d="M4 21c1-6 15-6 16 0"/>')}</nav>`;
+  return `<nav class="nv">${b('round', 'الفانتاسي', '<path d="M3 5h18v14H3zM3 10h18"/>')}${b('pred', 'التوقعات', '<rect x="3" y="6" width="7" height="12" rx="2"/><rect x="14" y="6" width="7" height="12" rx="2"/>')}${b('tour', 'البطولات', '<path d="M8 4h8v5a4 4 0 01-8 0zM8 6H4v2a3 3 0 003 3M16 6h4v2a3 3 0 01-3 3M12 13v4M8 20h8"/>')}${b('hab', 'ربع مشكل', '<rect x="4" y="5" width="9" height="13" rx="2"/><path d="M15 8l4 1-2 9-4-1"/>')}${b('shop', 'المحل', '<path d="M5 8h14l-1 12H6zM9 8V6a3 3 0 016 0v2"/>')}${b('account', 'حسابي', '<circle cx="12" cy="8" r="4"/><path d="M4 21c1-6 15-6 16 0"/>')}</nav>`;
 }
 const vLoading = () => `<div class="login ctr"><img class="logo" src="icon-192.png" alt="" style="margin:0 auto;display:block"><div class="m">جاري التحميل…</div></div>`;
 const vError = () => `<div class="login ctr"><div>حصلت مشكلة في تحميل البيانات</div><button class="bt on" data-act="retry">حاول تاني</button><button class="lnk" data-act="logout">تسجيل الخروج</button></div>`;
@@ -3199,7 +3199,7 @@ function vShop() {
   const H = S.shop, cur = H.cur, bal = balOf(cur);
   const head = `<div class="h"><b>المحل</b><div class="ctr"><div class="m">توكن ${curName(cur)}</div><div class="d" style="font-size:24px">${COIN} ${N(bal)}</div></div></div>`;
   const curTabs = HAS_PRED ? `<div class="tg eq" style="grid-template-columns:1fr 1fr">${['f', 'p'].map(c => `<button class="bt ${cur === c ? 'on' : ''}" style="flex:1 0 calc((100% - 6px) / 2)" data-act="shcur" data-c="${c}">${c === 'f' ? 'الفانتاسي' : 'التوقعات'}</button>`).join('')}</div>` : '';
-  const secs = [['shop', 'المحل'], ['mine', 'حاجاتي'], ['earn', 'الكسب']];
+  const secs = [['shop', 'المحل'], ['mine', 'حاجاتي'], ['earn', 'ازاي تكسب كوينز']];
   const secTabs = `<div class="tg eq">${secs.map(([k, l]) => `<button class="bt ${H.sec === k ? 'on' : ''}" data-act="shsec" data-k="${k}">${l}</button>`).join('')}</div>`;
   const body = H.loading && !H.w && !H.buys.length ? '<div class="k ctr">جاري التحميل…</div>' : H.sec === 'mine' ? shopMine(cur) : H.sec === 'earn' ? shopEarn(cur) : shopList(cur);
   return head + curTabs + secTabs + `<div class="f">${body}</div><div id="ssh"></div>`;
@@ -3639,7 +3639,7 @@ const hbSortPts = (k, c, n) => { if (n < 2) return 0; const f = Math.min(n, 5) /
 /* "ناقص واحد" مستحيل في الترتيب (لو n-1 صح يبقى الأخير صح كمان)، فمش بنعرضه */
 const hbSortLine = (k, n) => { const out = []; for (let c = n; c >= 0; c--) { if (c === n - 1) continue; if (c === n) out.push(`الدسته (${N(c)} صح) <b>${N(hbSortPts(k, c, n))}</b>`); else if (c === 0) out.push(`ولا واحد صح <b>${sN(hbSortPts(k, c, n))}</b>`); else out.push(`${N(c)} صح <b>${N(hbSortPts(k, c, n))}</b>`); } return out.join(' · '); };
 const hbNo = c => c.n == null ? 2 : c.n;
-const CARD_FAM = { win: 'r', draw: 'r', win2: 'r', cs: 'r', over25: 'g', over45: 'g', btts: 'g', team2: 'g', red: 'x', yellow4: 'y', og: 'x', pen: 'x', pl_goal: 'p', pl_assist: 'p', pl_involve: 'p', pl_pts7: 'p', pl_brace: 'p', gk_saves: 'k', def_dc: 'd', pl_yellow: 'y', over15: 'g', under25: 'g', nolose: 'r', team1: 'g', custom: 'u' };
+const CARD_FAM = { win: 'r', draw: 'r', win2: 'r', cs: 'r', over25: 'g', over45: 'g', btts: 'g', team2: 'g', red: 'x', yellow4: 'y', og: 'x', pen: 'x', pl_goal: 'p', pl_assist: 'p', pl_involve: 'p', pl_pts7: 'p', pl_brace: 'p', gk_saves: 'k', def_dc: 'd', pl_yellow: 'y', over15: 'g', under25: 'g', nolose: 'r', team1: 'g', custom: 'u', goals_even: 'g', goals_odd: 'g', goals_eq2: 'g', goals_eq3: 'g', over35: 'g', nogoals: 'g', team3: 'g', win_nil: 'r', y2: 'y', y3: 'y', y5: 'y', y6: 'y', y7: 'y', y_even: 'y', y_odd: 'y', team_y2: 'y', team_y3: 'y', h1_goal: 'f', h1_2goals: 'f', h1_nogoal: 'f', h1_draw: 'f', h1_win: 'f', h1_btts: 'f', h2_more: 'f', g15: 'f', g30: 'f', g75: 'f', pl_90: 'p', pl_sub: 'p', pl_bonus: 'p', pl_pts5: 'p', pl_pts10: 'p', pl_cs: 'c', gk_saves3: 'k', gk_saves6: 'k' };
 const HGAMES = [
   { id: 'cards', n: 'الكروت', ic: '🃏', tabs: [['play', 'لعب'], ['rank', 'الترتيب'], ['stats', 'إحصائيات'], ['cmp', 'مقارنة']] },
   { id: 'sort', n: 'صنفلي', ic: '🎚️', tabs: [['play', 'لعب'], ['rank', 'الترتيب'], ['stats', 'إحصائيات'], ['cmp', 'مقارنة']] }
@@ -3651,7 +3651,7 @@ const HB_SEC = {
 };
 S.hb = { g: 'all', tab: 'play', sheet: null, loading: false, rk: { c: 'total', s: 'total', cg: null, sg: null, sd: null },
   c: { gw: null, deck: {}, draft: {}, mine: {}, pub: {}, board: {}, total: null },
-  s: { gw: null, day: null, decks: {}, draft: {}, mine: {}, pub: {}, board: {}, total: null, work: {}, ord: { saved: {}, work: {} } },
+  s: { gw: null, day: null, decks: {}, draft: {}, mine: {}, pub: {}, board: {}, total: null, work: {}, ord: { saved: {}, work: {}, wt: {} } },
   st: { c: 'pop', s: 'a', q: '' }, cmp: { opp: null, oq: '' }, combo: [], adm: { pin: {}, pool: false, q: '', cu: null, cuOpen: false } };
 
 const hbDayLbl = k => fmtDay(Date.parse(k + 'T12:00:00Z'));
@@ -3969,6 +3969,21 @@ function hbAdmReal(day, k) {   // الترتيب الحقيقي من القيم 
   if (!vals) return items.map(it => hbItemId(k, it));
   return items.map((it, i) => ({ id: hbItemId(k, it), v: vals[hbItemId(k, it)] || 0, i })).sort((x, y) => y.v - x.v || x.i - y.i).map(x => x.id);
 }
+const hbAdmTies = (day, k) => {   // ids متعلّم عليها "متعادل مع اللي فوقه" يدوي (شغّال ثم محفوظ)
+  const w = S.hb.s.ord.wt[day] && S.hb.s.ord.wt[day][k], sv = S.hb.s.ord.saved[day] && S.hb.s.ord.saved[day][k + 't'];
+  return (w || sv || []).map(String);
+};
+function hbAdmGroups(day, k, order, ties) {   // مجموعات التعادل: تعادل يدوي أو قيمة حقيقية واحدة لجنب بعض
+  const b = S.hb.s.board[day], vals = b && b.sec && b.sec[k] && b.sec[k].vals, T = new Set(ties.map(String)), g = [], auto = [];
+  let cur = 0;
+  order.forEach((id, i) => {
+    const a = i > 0 && !!vals && (vals[id] || 0) === (vals[order[i - 1]] || 0);
+    auto.push(a);
+    if (i > 0 && !(a || T.has(String(id)))) cur++;
+    g.push(cur);
+  });
+  return { g, auto };
+}
 function hbAdmOrder(day, k) {
   const n = (S.hb.s.decks[day][k] || []).length, w = S.hb.s.ord.work[day] && S.hb.s.ord.work[day][k];
   if (w && w.length === n) return w;
@@ -3976,32 +3991,38 @@ function hbAdmOrder(day, k) {
 }
 function hbAdmSec(day, k) {
   const SS = S.hb.s, items = SS.decks[day][k] || []; if (!items.length) return '';
-  const order = hbAdmOrder(day, k), saved = hbAdmSaved(day, k), dirty = JSON.stringify(order) !== JSON.stringify(saved || []);
+  const order = hbAdmOrder(day, k), saved = hbAdmSaved(day, k), ties = hbAdmTies(day, k), svT = ((SS.ord.saved[day] && SS.ord.saved[day][k + 't']) || []).map(String);
+  const dirty = JSON.stringify(order) !== JSON.stringify(saved || []) || JSON.stringify([...ties].sort()) !== JSON.stringify([...svT].sort());
+  const G = hbAdmGroups(day, k, order, ties);
   const b = SS.board[day], vals = b && b.sec && b.sec[k] && b.sec[k].vals;
   const rows = order.map((id, i) => {
     const it = items.find(x => String(hbItemId(k, x)) === String(id)); if (!it) return '';
-    return hbItemRow(k, it, i, order.length, { lock: false, val: vals ? (vals[id] || 0) : null }).replace(`data-drag="${k}"`, `data-drag="${k}" data-adm="1"`);
+    const tied = i > 0 && (G.auto[i] || ties.includes(String(id)));
+    const tb = i === 0 ? '<div style="flex:none;width:44px"></div>' : `<button class="bt ${tied ? 'on' : ''}" ${G.auto[i] ? 'disabled' : ''} data-act="hsot" data-k="${k}" data-id="${esc(String(id))}" aria-label="متعادل مع اللي فوقه" style="flex:none;width:44px;height:46px;font-size:20px;padding:0">=</button>`;
+    return hbItemRow(k, it, i, order.length, { lock: false, val: vals ? (vals[id] || 0) : null }).replace(`<div data-drag="${k}"`, tb + `<div data-adm="1" data-drag="${k}"`);
   }).join('');
   return `<div class="k" style="padding:12px"><div class="r j"><b>${HB_SEC[k].t}</b><span class="m">${saved && !dirty ? 'محفوظ ✓' : dirty ? 'فيه تعديل مش محفوظ' : 'لسه ما اتحفظش'}</span></div>
-    <div class="m" style="margin-bottom:8px">${HB_SEC[k].q} · اسحب ⠿ وغيّر المكان${vals ? ' · الرقم جنب كل واحد هو الحقيقي' : ''}</div>
+    <div class="m" style="margin-bottom:8px">${HB_SEC[k].q} · اسحب ⠿ وغيّر المكان · زرار = معناه متعادل مع اللي فوقه (بيتفعّل لوحده لو القيمة الحقيقية واحدة)${vals ? ' · الرقم جنب كل واحد هو الحقيقي' : ''}</div>
     <div data-list="${k}" style="display:flex;flex-direction:column;gap:6px">${rows}</div>
     <div class="r" style="gap:8px;margin-top:8px"><button class="bt ${dirty || !saved ? 'on' : ''}" style="height:46px;flex:1" data-act="hsos" data-k="${k}">${saved && !dirty ? 'اتحفظ ✓' : 'حفظ الترتيب'}</button>${vals ? `<button class="bt" style="height:46px" data-act="hsor" data-k="${k}">↺ الحقيقي</button>` : ''}${saved ? `<button class="bt" style="height:46px" data-act="hsoc" data-k="${k}">مسح</button>` : ''}</div></div>`;
 }
 function hbAdmHtml(day, deck, list) {
   const secs = ['a', 'b', 'c'].filter(k => hbAdmSaved(day, k));
+  const GR = {}; secs.forEach(k => { GR[k] = hbAdmGroups(day, k, hbAdmSaved(day, k), ((S.hb.s.ord.saved[day] && S.hb.s.ord.saved[day][k + 't']) || [])); });
   const rows = list.map(x => {
     let tot = 0, perf = 0; const s = {};
     secs.forEach(k => {
       const M = hbAdmSaved(day, k), o = (x.o[k] || []).map(v => k === 'c' ? String(v) : Number(v));
       if (o.length !== M.length) { s[k] = null; return; }   // ما رتبش القسم ده قبل القفل
-      let c = 0; M.forEach((id, i) => { if (String(o[i]) === String(id)) c++; });
+      const gs = GR[k], gm = {}; M.forEach((id, i) => { gm[String(id)] = gs.g[i]; });
+      let c = 0; o.forEach((id, i) => { if (gm[String(id)] === gs.g[i]) c++; });   // المتعادلين بياخدوا نفس المكان
       const p = hbSortPts(k, c, M.length); s[k] = [p, c]; tot += p; if (c === M.length) perf++;
     });
     return { u: x.u, s, tot, perf };
   }).sort((a, b) => b.tot - a.tot || b.perf - a.perf || byName(nm(a.u), nm(b.u)));
   const res = !secs.length
     ? '<div class="k ctr m">احفظ ترتيب قسم واحد على الأقل وهيظهر هنا كل واحد هياخد كام نقطة.</div>'
-    : `<div class="m">النقط بحسب ترتيبك المحفوظ (${secs.map(k => HB_SHORT[k]).join(' + ')}) وبنفس جدول صنفلي · عرض بس ومش بيغيّر النقط الرسمية</div>` + rows.map((r, i) => `<button class="k r" data-act="hu" data-u="${esc(r.u)}" style="padding:10px;gap:10px"><span class="d" style="width:22px;font-size:16px;color:var(--mu)">${N(i + 1)}</span>${avatarL('p', r.u, nm(r.u))}<div class="g"><div class="nm">${decoName('p', r.u, nm(r.u))}</div><div class="sub">${secs.map(k => HB_SHORT[k] + ': ' + (r.s[k] ? N(r.s[k][1]) + ' صح · ' + sN(r.s[k][0]) : 'ما رتبش')).join(' — ')}</div></div><span class="d" style="font-size:20px;color:${r.tot > 0 ? 'var(--ac)' : r.tot < 0 ? 'var(--neg)' : 'var(--tx)'}">${sN(r.tot)}</span></button>`).join('');
+    : `<div class="m">النقط بحسب ترتيبك المحفوظ (${secs.map(k => HB_SHORT[k]).join(' + ')}) وبنفس جدول صنفلي · المتعادلين بياخدوا نفس المكان · عرض بس ومش بيغيّر النقط الرسمية</div>` + rows.map((r, i) => `<button class="k r" data-act="hu" data-u="${esc(r.u)}" style="padding:10px;gap:10px"><span class="d" style="width:22px;font-size:16px;color:var(--mu)">${N(i + 1)}</span>${avatarL('p', r.u, nm(r.u))}<div class="g"><div class="nm">${decoName('p', r.u, nm(r.u))}</div><div class="sub">${secs.map(k => HB_SHORT[k] + ': ' + (r.s[k] ? N(r.s[k][1]) + ' صح · ' + sN(r.s[k][0]) : 'ما رتبش')).join(' — ')}</div></div><span class="d" style="font-size:20px;color:${r.tot > 0 ? 'var(--ac)' : r.tot < 0 ? 'var(--neg)' : 'var(--tx)'}">${sN(r.tot)}</span></button>`).join('');
   return `<div class="m">رتّب أي قسم بمزاجك وادوس حفظ، وتحت هتلاقي نقط كل واحد على أساس الترتيب ده (متاح بعد قفل اليوم).</div>${['a', 'b', 'c'].map(k => hbAdmSec(day, k)).join('')}<div class="k" style="padding:12px;display:flex;flex-direction:column;gap:6px"><b>نقط الناس</b>${res}</div>`;
 }
 
@@ -4116,22 +4137,29 @@ Object.assign(ACTIONS, {
   async hsos(el) {   // حفظ ترتيب الأدمن لقسم
     if (!S.admin) return;
     const SS = S.hb.s, day = SS.day, k = el.dataset.k, deck = SS.decks[day]; if (!deck) return;
-    const ord = hbAdmOrder(day, k).map(v => k === 'c' ? String(v) : Number(v));
+    const ord = hbAdmOrder(day, k).map(v => k === 'c' ? String(v) : Number(v)), tset = new Set(ord.map(String)), ties = hbAdmTies(day, k).filter(id => tset.has(id));
     try {
-      await setDoc(doc(db, 'sorder', day), { day, gw: deck.gw, [k]: ord, updatedAt: serverTimestamp() }, { merge: true });
-      (SS.ord.saved[day] = SS.ord.saved[day] || { day, gw: deck.gw })[k] = ord;
+      await setDoc(doc(db, 'sorder', day), { day, gw: deck.gw, [k]: ord, [k + 't']: ties, updatedAt: serverTimestamp() }, { merge: true });
+      const sv = (SS.ord.saved[day] = SS.ord.saved[day] || { day, gw: deck.gw }); sv[k] = ord; sv[k + 't'] = ties;
       if (SS.ord.work[day]) delete SS.ord.work[day][k];
+      if (SS.ord.wt[day]) delete SS.ord.wt[day][k];
       toast('اتحفظ الترتيب ✓'); render();
     } catch (e) { console.error(e); toast(e.code === 'permission-denied' ? 'الحفظ مرفوض: ارفع firestore.rules الجديد واعمل Publish' : 'مقدرتش أحفظ، تأكد من النت'); }
   },
-  hsor(el) { const SS = S.hb.s, day = SS.day, k = el.dataset.k; (SS.ord.work[day] = SS.ord.work[day] || {})[k] = hbAdmReal(day, k); render(); },   // رجّع الترتيب الحقيقي (من القيم)
+  hsor(el) { const SS = S.hb.s, day = SS.day, k = el.dataset.k; (SS.ord.work[day] = SS.ord.work[day] || {})[k] = hbAdmReal(day, k); (SS.ord.wt[day] = SS.ord.wt[day] || {})[k] = []; render(); },
+  hsot(el) {   // تعادل يدوي مع اللي فوقه
+    const SS = S.hb.s, day = SS.day, k = el.dataset.k, id = String(el.dataset.id), cur = new Set(hbAdmTies(day, k));
+    cur.has(id) ? cur.delete(id) : cur.add(id);
+    (SS.ord.wt[day] = SS.ord.wt[day] || {})[k] = [...cur]; render();
+  },   // رجّع الترتيب الحقيقي (من القيم)
   async hsoc(el) {   // مسح الترتيب المحفوظ للقسم
     if (!S.admin) return;
     const SS = S.hb.s, day = SS.day, k = el.dataset.k, deck = SS.decks[day]; if (!deck) return;
     try {
-      await setDoc(doc(db, 'sorder', day), { day, gw: deck.gw, [k]: [], updatedAt: serverTimestamp() }, { merge: true });
-      if (SS.ord.saved[day]) SS.ord.saved[day][k] = [];
+      await setDoc(doc(db, 'sorder', day), { day, gw: deck.gw, [k]: [], [k + 't']: [], updatedAt: serverTimestamp() }, { merge: true });
+      if (SS.ord.saved[day]) { SS.ord.saved[day][k] = []; SS.ord.saved[day][k + 't'] = []; }
       if (SS.ord.work[day]) delete SS.ord.work[day][k];
+      if (SS.ord.wt[day]) delete SS.ord.wt[day][k];
       toast('اتمسح'); render();
     } catch (e) { console.error(e); toast('مقدرتش أمسح، تأكد من النت'); }
   },
@@ -4506,15 +4534,16 @@ function pCmpHtml() {
     const pa = ra ? ra[0] : 0, pb = rb ? rb[0] : 0; ta += pa; tb += pb;
     const eq = a && b && a.h === b.h && a.a === b.a; if (eq) same++;
     const act = x ? (x.st === 'live' ? 'مباشر' : 'انتهى') : '';
-    const side = (p, r, u, w) => `<div class="ctr g">${p ? scoreHtml(p.h, p.a) : '<span class="m">ما توقعش</span>'}${p && p.boost ? ' <span class="pl" style="background:#f5b301;color:#1a1300">×٢</span>' : ''}${p && p.it ? '<div style="margin-top:3px">' + itemPill('p', p.it.c) + '</div>' : ''}<button class="lnk" style="text-decoration:none;display:block;margin:2px auto 0;font-weight:800;font-size:20px;${pa === pb ? '' : w ? 'color:var(--ac)' : ''}" data-act="pcdet" data-fid="${f.id}" data-u="${esc(u)}" aria-label="تفاصيل النقط">${r ? sN(r[0]) : '٠'} <span style="font-size:11px;font-weight:500">تفاصيل ‹</span></button></div>`;
+    const side = (p, r, u, w, lb) => `<div class="ctr g" style="min-width:0"><div class="m" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(lb)}</div><div style="font-size:26px;font-weight:700;line-height:1.25">${p ? scoreHtml(p.h, p.a) : '<span class="m" style="font-size:13px">ما توقعش</span>'}</div>${p && p.boost ? '<span class="pl" style="background:#f5b301;color:#1a1300">×٢</span> ' : ''}${p && p.it ? itemPill('p', p.it.c) + ' ' : ''}${p && p.it && p.it.x2 ? '<span class="pl">التاني ' + p.it.x2[0] + '-' + p.it.x2[1] + '</span> ' : ''}<button class="lnk" style="text-decoration:none;display:inline-block;margin-top:4px;padding:2px 10px;border-radius:999px;font-weight:700;font-size:13px;background:${r && r[0] > 0 && w ? 'rgba(95,227,154,.18)' : 'rgba(var(--fg),.1)'};${r && r[0] > 0 && w ? 'color:var(--ac)' : ''}" data-act="pcdet" data-fid="${f.id}" data-u="${esc(u)}" aria-label="تفاصيل النقط">${r ? sN(r[0]) : '٠'} ‹</button></div>`;
     const qk = (x && x.q) || pub.q || [];
     const qrows = qk.map((k, i) => {
       const ca = a && a.ans && a.ans[k] != null ? esc(pqAnsLabel(k, a.ans[k], d)) : '<span class="m">—</span>', cb = b && b.ans && b.ans[k] != null ? esc(pqAnsLabel(k, b.ans[k], d)) : '<span class="m">—</span>';
       const same2 = a && b && a.ans && b.ans && a.ans[k] != null && a.ans[k] === b.ans[k];
-      return `<div class="cmpq" style="${same2 ? 'background:rgba(245,179,1,.12)' : ''}"><div style="min-width:0"><div style="font-size:13px">${ca}</div>${qPts(ra, i)}</div><span>${esc(PQ[k] ? PQ[k].s : k)}</span><div style="min-width:0;text-align:end"><div style="font-size:13px">${cb}</div>${qPts(rb, i)}</div></div>`;
+      const mk = (row, i) => { if (!row) return ''; const pe = row[9 + i] || 0, v = row[6 + i]; return pe || v === 0 ? ' <b style="color:var(--neg)">✗</b>' : v > 0 ? ' <b style="color:var(--ac)">✓</b>' : ''; };
+      return `<div class="cmpq" style="${same2 ? 'background:rgba(245,179,1,.12)' : ''}"><div style="min-width:0;text-align:center"><div style="font-size:13px">${ca}${mk(ra, i)}</div>${qPts(ra, i)}</div><span>${esc(PQ[k] ? PQ[k].s : k)}</span><div style="min-width:0;text-align:center"><div style="font-size:13px">${cb}${mk(rb, i)}</div>${qPts(rb, i)}</div></div>`;
     }).join('');
-    return `<div class="k" style="${eq ? 'background:rgba(245,179,1,.16);border-color:rgba(245,179,1,.5)' : ''}"><div class="r j"><b style="font-size:13px">${esc(fxTitle(f))}</b><span class="m">${x ? scoreHtml(x.r[0], x.r[1]) + ' · ' + act : ''}</span></div>
-      <div class="r j mt">${side(a, ra, me, pa > pb)}<span class="m">${eq ? 'نفس التوقع' : 'ضد'}</span>${side(b, rb, opp, pb > pa)}</div>${qrows ? `<div class="mt">${qrows}</div>` : ''}</div>`;
+    return `<div class="k" style="display:flex;flex-direction:column;gap:10px;${eq ? 'border-color:#f5b301' : ''}"><div class="r j"><b style="font-size:14px">${esc(fxTitle(f))}</b><span class="pl">${x ? (x.st === 'live' ? 'مباشر ' : 'انتهى ') + x.r[0] + '-' + x.r[1] : ''}</span></div>
+      <div style="display:grid;grid-template-columns:minmax(0,1fr) 54px minmax(0,1fr);gap:8px;align-items:center">${side(a, ra, me, pa > pb, 'توقعك')}<span class="m ctr" style="${eq ? 'color:#f5b301' : ''}">${eq ? 'نفس التوقع' : 'ضد'}</span>${side(b, rb, opp, pb > pa, nm(opp))}</div>${qrows ? `<div>${qrows}</div>` : ''}</div>`;
   }).join('');
   return chips + `<div class="f"><div class="k r j stk"><div class="r">${avatar(photoOf(me), nm(me))}<div><b>أنت</b><div class="d" style="font-size:18px${ta > tb ? ';color:var(--ac)' : ''}">${sN(ta)}</div></div></div><button class="lnk" data-act="pcopp0">تغيير</button><div class="r"><div style="text-align:end"><b>${esc(nm(opp))}</b><div class="d" style="font-size:18px${tb > ta ? ';color:var(--ac)' : ''}">${sN(tb)}</div></div>${avatar(photoOf(opp), nm(opp))}</div></div>
     <div class="m ctr">${N(same)} توقع متطابق · دوس على رقم النقط في أي ماتش تشوف التفاصيل</div>
